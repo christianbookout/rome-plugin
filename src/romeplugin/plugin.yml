@@ -1,0 +1,12 @@
+name: romeplugin
+author: gose
+version: 1.0
+main: romeplugin.RomePlugin
+api-version: 1.16
+commands:
+  checktitle:
+    description: "SycPrsFacNem"
+    usage: "/checktitle <player>"
+  settitle:
+    description: "MekSumPrsHavSumFacNem"
+    usage: "/settitle <player> <title>"

@@ -5,17 +5,26 @@
  */
 package romeplugin;
 
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
+import org.bukkit.plugin.java.JavaPlugin;
+
 /**
  *
  * @author chris
  */
-public class RomePlugin {
-
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String[] args) {
-        // TODO code application logic here
+public class RomePlugin extends JavaPlugin {
+    //runs when the plugin is enabled on the server startup 
+    @Override
+    public void onEnable() {
+        //registering the eventlistener 
+        getServer().getPluginManager().registerEvents(new EventListener(), this);
+        
     }
     
+   //true/false if it worked or didnt work
+   @Override
+    public boolean onCommand(CommandSender sender, Command command, String label, String[] arguments) {
+        return false;
+    }
 }

@@ -1,2 +1,4 @@
 ## YAML Template.
----
+name: "RomePlugin"
+version: "1.0"
+main: "romeplugin.RomePlugin"

@@ -7,4 +7,6 @@ commands:
   checktitle:
     description: "SycPrsFacNem"
     usage: "/checktitle <player>"
-    
+  settitle:
+    description: "MekSumPrsHavSumFacNem"
+    usage: "/settitle <player> <title>"

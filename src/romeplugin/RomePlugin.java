@@ -8,6 +8,7 @@ package romeplugin;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
+import romeplugin.title.CheckTitleCommand;
 
 /**
  *
@@ -17,7 +18,8 @@ public class RomePlugin extends JavaPlugin {
     //runs when the plugin is enabled on the server startup 
     @Override
     public void onEnable() {
-        //registering the eventlistener 
+        //registering the eventlistener
+        getCommand("checktitle").setExecutor(new CheckTitleCommand());
         getServer().getPluginManager().registerEvents(new EventListener(), this);
         
     }

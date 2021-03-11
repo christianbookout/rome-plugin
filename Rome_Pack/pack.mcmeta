@@ -1,0 +1,7 @@
+ "comment": "Use pack_format 7 for newest version, but 6 for 1.16 ",
+{
+  "pack": {
+    "pack_format": 6,
+    "description": "Rome Resource Pack"
+  }
+}

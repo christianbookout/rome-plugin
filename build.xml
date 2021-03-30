@@ -7,9 +7,39 @@
 <!-- the Compile on Save feature is turned off for the project. -->
 <!-- You can turn off the Compile on Save (or Deploy on Save) setting -->
 <!-- in the project's Project Properties dialog box.-->
-<project name="RomePlugin" default="default" basedir=".">
+<project name="RomePlugin" default="jar" basedir=".">
     <description>Builds, tests, and runs the project RomePlugin.</description>
-    <import file="nbproject/build-impl.xml"/>
+    <!-- <import file="nbproject/build-impl.xml"/> NET BEANS-->
+    <property name="src" location="src"/>
+    <property name="dst" location="out"/>
+    <property name="spigotJar" location="out/spigotapi.jar"/>
+
+    <target name="init">
+        <mkdir dir="${dst}/"/>
+        <mkdir dir="${dst}/compile/"/>
+        <mkdir dir="${dst}/jar/"/>
+    </target>
+
+    <target name="findSpigotJar" depends="init">
+        <available property="spigot_found" file="${spigotJar}"/>
+    </target>
+
+    <target name="compile" depends="findSpigotJar">
+        <javac srcdir="${src}" destdir="${dst}/compile">
+            <classpath>
+                <pathelement location="${spigotJar}"/>
+            </classpath>
+        </javac>
+    </target>
+
+    <target name="jar" depends="compile">
+        <copy file="${src}/plugin.yml" todir="${dst}/compile"/>
+        <zip destfile="${dst}/jar/RomePlugin.jar" basedir="${dst}/compile/"/>
+    </target>
+
+    <target name="clean">
+        <delete dir="${dst}"/>
+    </target>
     <!--
 
     There exist several targets which are by default empty and which can be 

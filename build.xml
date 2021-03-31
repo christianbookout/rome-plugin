@@ -24,7 +24,12 @@
         <available property="spigot_found" file="${spigotJar}"/>
     </target>
 
-    <target name="compile" depends="findSpigotJar">
+    <target name="downloadSpigotJar" unless="spigot_found">
+        <get src="https://hub.spigotmc.org/nexus/content/repositories/snapshots/org/spigotmc/spigot-api/1.16.5-R0.1-SNAPSHOT/spigot-api-1.16.5-R0.1-20210316.205741-32.jar"
+             dest="${spigotJar}"/>
+    </target>
+
+    <target name="compile" depends="findSpigotJar, downloadSpigotJar">
         <javac srcdir="${src}" destdir="${dst}/compile">
             <classpath>
                 <pathelement location="${spigotJar}"/>

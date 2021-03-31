@@ -34,7 +34,6 @@ public class RomePlugin extends JavaPlugin {
         getCommand("checktitle").setExecutor(new CheckTitleCommand(titles));
         getCommand("settitle").setExecutor(new SetTitleCommand(titles));
         getServer().getPluginManager().registerEvents(new EventListener(), this);
-        
     }
 
     @Override
@@ -47,7 +46,7 @@ public class RomePlugin extends JavaPlugin {
     }
 
     //true/false if it worked or didnt work
-   @Override
+    @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] arguments) {
         return false;
     }

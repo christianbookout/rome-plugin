@@ -12,7 +12,6 @@ public class SetTitleCommand implements CommandExecutor {
         this.titles = titles;
     }
 
-
     @Override
     public boolean onCommand(CommandSender commandSender, Command command, String s, String[] params) {
         if (params.length > 1) {

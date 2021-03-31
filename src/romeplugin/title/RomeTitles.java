@@ -38,8 +38,8 @@ public class RomeTitles {
         playerTitles.put(uuid, getKnownTitle(title));
     }
 
-    private void saveData(DataOutputStream stream) {
-        // save playerdata to stream
+    public void saveData(DataOutputStream stream) {
+        // save player data to stream
         playerTitles.forEach((id,title)-> {
             try {
                 stream.writeLong(id.getMostSignificantBits());
@@ -51,9 +51,9 @@ public class RomeTitles {
         });
     }
 
-    private void loadData(DataInputStream stream) {
+    public void loadData(DataInputStream stream) {
         try {
-            while (true) {
+            while (stream.available() > 0) {
                 UUID id = new UUID(stream.readLong(), stream.readLong());
                 String titleName = stream.readUTF();
                 playerTitles.put(id, getKnownTitle(titleName));

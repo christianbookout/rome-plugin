@@ -55,7 +55,7 @@ public class RomePlugin extends JavaPlugin {
 
         getCommand("checktitle").setExecutor(new CheckTitleCommand(titles));
         getCommand("settitle").setExecutor(new SetTitleCommand(titles));
-        getServer().getPluginManager().registerEvents(new EventListener(), this);
+        getServer().getPluginManager().registerEvents(new EventListener(titles), this);
     }
 
     @Override

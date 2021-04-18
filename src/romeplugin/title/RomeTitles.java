@@ -1,5 +1,7 @@
 package romeplugin.title;
 
+import org.bukkit.ChatColor;
+
 import java.io.*;
 import java.util.HashMap;
 import java.util.UUID;
@@ -11,7 +13,7 @@ public class RomeTitles {
     public RomeTitles() {
         playerTitles = new HashMap<>();
         knownTitles = new HashMap<>();
-        addTitle("Praetor");
+        addTitle("Praetor", ChatColor.RED);
         addTitle("Tribune of the Plebs");
     }
 
@@ -20,7 +22,11 @@ public class RomeTitles {
     }
 
     public void addTitle(String title) {
-        knownTitles.put(title, new Title(title));
+        addTitle(title, ChatColor.WHITE);
+    }
+
+    public void addTitle(String title, ChatColor color) {
+        knownTitles.put(title, new Title(title, color));
     }
 
     public Title getKnownTitle(String title) {
@@ -36,7 +42,6 @@ public class RomeTitles {
     }
 
     public void saveData(DataOutputStream stream) {
-        // save player data to stream
         playerTitles.forEach((id,title)-> {
             try {
                 stream.writeLong(id.getMostSignificantBits());

@@ -14,8 +14,6 @@ public class RomeTitles {
     public RomeTitles() {
         playerTitles = new HashMap<>();
         knownTitles = new HashMap<>();
-        addTitle("Praetor", ChatColor.RED);
-        addTitle("Tribune of the Plebs");
     }
 
     public boolean isTitle(String title) {

@@ -13,10 +13,7 @@ import romeplugin.title.CheckTitleCommand;
 import romeplugin.title.ListTitlesCommand;
 import romeplugin.title.RomeTitles;
 import romeplugin.title.SetTitleCommand;
-import romeplugin.votgilconfig.VotgilB0jBag;
-import romeplugin.votgilconfig.VotgilB0jKup;
-import romeplugin.votgilconfig.VotgilB0jSic;
-import romeplugin.votgilconfig.VotgilConfig;
+import romeplugin.votgilconfig.*;
 
 import java.io.*;
 
@@ -46,8 +43,12 @@ public class RomePlugin extends JavaPlugin {
                 names.forEach((votgilB0j -> {
                     VotgilB0jBag bag = (VotgilB0jBag) votgilB0j;
                     VotgilB0jSic name = (VotgilB0jSic) bag.getV0tPer("NemVunNem");
-                    VotgilB0jSic color = (VotgilB0jSic) bag.getV0tPer("Kul");
-                    titles.addTitle(name.toString(), ChatColor.valueOf(color.toString()));
+                    VotgilB0j color = bag.getV0tPer("Kul");
+                    if (color == null) {
+                        titles.addTitle(name.toString());
+                    } else {
+                        titles.addTitle(name.toString(), ChatColor.valueOf(color.toString()));
+                    }
                 }));
             } catch (IOException e) {
                 e.printStackTrace();

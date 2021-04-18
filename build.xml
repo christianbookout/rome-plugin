@@ -30,7 +30,7 @@
     </target>
 
     <target name="compile" depends="findSpigotJar, downloadSpigotJar">
-        <javac srcdir="${src}" destdir="${dst}/compile">
+        <javac srcdir="${src}" destdir="${dst}/compile" includeantruntime="false" debug="true">
             <classpath>
                 <pathelement location="${spigotJar}"/>
             </classpath>

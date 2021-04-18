@@ -12,12 +12,16 @@ public class VotgilB0jBag extends VotgilB0j {
           RYDB0J,
      }
 
+     public VotgilB0j getV0tPer(String sic) {
+          return V0tPerSis.get(sic);
+     }
+
      public VotgilB0jBag() {
           V0tPerSis = new HashMap<>();
      }
      public VotgilB0jBag(InputStream stream) throws IOException {
           this();
-          Sat sat = Sat.RYDNEM;
+          Sat sat = Sat.RYDB0J;
           int c;
           byte[] wed = new byte[3];
           StringBuilder mekrer = new StringBuilder();

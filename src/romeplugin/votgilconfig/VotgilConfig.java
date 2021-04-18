@@ -5,6 +5,10 @@ import java.io.*;
 public class VotgilConfig {
     private final VotgilB0jBag Per;
 
+    public VotgilB0jBag getPer() {
+        return Per;
+    }
+
     public VotgilConfig(File file) throws IOException {
         this(new FileInputStream(file));
     }

@@ -3,12 +3,22 @@ package romeplugin.votgilconfig;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.function.Consumer;
 
 public class VotgilB0jKup extends VotgilB0j {
-    ArrayList<VotgilB0j> KorRey;
+    ArrayList<VotgilB0j> KorReySis;
+
+    public VotgilB0j getKorRey(int i) {
+        return KorReySis.get(i);
+    }
+
+    public void forEach(Consumer<VotgilB0j> action) {
+        KorReySis.forEach(action);
+    }
 
     VotgilB0jKup(InputStream stream) throws IOException {
         // Ryd9isKup
+        KorReySis = new ArrayList<>();
         byte[] wed = new byte[3];
         while(true) {
             if (stream.read(wed, 0, 3) < 3) {
@@ -19,7 +29,7 @@ public class VotgilB0jKup extends VotgilB0j {
             if (hash == VotgilYwlNif.DunKit) {
                 break;
             }
-            KorRey.add(VotgilYwlNif.rydB0j(hash, stream));
+            KorReySis.add(VotgilYwlNif.rydB0j(hash, stream));
         }
     }
 }

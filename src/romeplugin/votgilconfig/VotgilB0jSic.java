@@ -20,7 +20,7 @@ public class VotgilB0jSic extends VotgilB0j {
         sic = builder.toString();
     }
 
-    String get() {
+    public String toString() {
         return sic;
     }
 }

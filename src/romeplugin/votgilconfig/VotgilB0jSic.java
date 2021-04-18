@@ -6,13 +6,6 @@ import java.io.InputStream;
 public class VotgilB0jSic extends VotgilB0j {
     private String sic;
 
-    public VotgilB0jSic() {
-
-    }
-
-    public VotgilB0jSic(String sic) {
-        this.sic = sic;
-    }
     public VotgilB0jSic(InputStream stream) throws IOException {
         if (stream.read() != '"') throw new IOException("V0tGwdSic!");
         StringBuilder builder = new StringBuilder();
@@ -21,7 +14,7 @@ public class VotgilB0jSic extends VotgilB0j {
             if (c == '"') {
                 break;
             } else {
-                builder.append(c);
+                builder.append((char)c);
             }
         }
         sic = builder.toString();

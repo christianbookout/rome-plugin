@@ -26,7 +26,7 @@ public class VotgilB0jBag extends VotgilB0j {
                     if (c == '"') {
                          sat = Sat.RYDB0J;
                     } else {
-                         mekrer.append(c);
+                         mekrer.append((char)c);
                     }
                     continue;
                } else {

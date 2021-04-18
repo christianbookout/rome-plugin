@@ -10,3 +10,6 @@ commands:
   settitle:
     description: "MekSumPrsHavSumFacNem"
     usage: "/settitle <player> <title>"
+  listtitles:
+    description: "List current titles"
+    usage: "/listtitles"

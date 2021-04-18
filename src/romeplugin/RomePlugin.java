@@ -10,6 +10,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
 import romeplugin.title.CheckTitleCommand;
+import romeplugin.title.ListTitlesCommand;
 import romeplugin.title.RomeTitles;
 import romeplugin.title.SetTitleCommand;
 import romeplugin.votgilconfig.VotgilB0jBag;
@@ -55,6 +56,7 @@ public class RomePlugin extends JavaPlugin {
 
         getCommand("checktitle").setExecutor(new CheckTitleCommand(titles));
         getCommand("settitle").setExecutor(new SetTitleCommand(titles));
+        getCommand("listtitles").setExecutor(new ListTitlesCommand(titles));
         getServer().getPluginManager().registerEvents(new EventListener(titles), this);
     }
 

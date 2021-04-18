@@ -3,6 +3,7 @@ package romeplugin.title;
 import org.bukkit.ChatColor;
 
 import java.io.*;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.UUID;
 
@@ -32,6 +33,7 @@ public class RomeTitles {
     public Title getKnownTitle(String title) {
         return knownTitles.get(title);
     }
+    public Collection<Title> getAllKnownTitles() { return knownTitles.values(); }
 
     public Title getPlayerTitle(UUID uuid) {
         return playerTitles.get(uuid);

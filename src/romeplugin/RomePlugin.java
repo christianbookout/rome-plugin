@@ -5,12 +5,17 @@
  */
 package romeplugin;
 
+import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
 import romeplugin.title.CheckTitleCommand;
 import romeplugin.title.RomeTitles;
 import romeplugin.title.SetTitleCommand;
+import romeplugin.votgilconfig.VotgilB0jBag;
+import romeplugin.votgilconfig.VotgilB0jKup;
+import romeplugin.votgilconfig.VotgilB0jSic;
+import romeplugin.votgilconfig.VotgilConfig;
 
 import java.io.*;
 
@@ -29,6 +34,23 @@ public class RomePlugin extends JavaPlugin {
             titles.loadData(new DataInputStream(new FileInputStream(titlesFilename)));
         } catch (FileNotFoundException e) {
             getLogger().fine("could not find " + titlesFilename);
+        }
+
+        File f = new File("rome_config.vot");
+        if (f.canRead()) {
+            try {
+                VotgilConfig config = new VotgilConfig(f);
+                VotgilB0jKup names = (VotgilB0jKup) config.getPer().getV0tPer("FacNem");
+                getLogger().info("loading " + names.size() + " titles...");
+                names.forEach((votgilB0j -> {
+                    VotgilB0jBag bag = (VotgilB0jBag) votgilB0j;
+                    VotgilB0jSic name = (VotgilB0jSic) bag.getV0tPer("NemVunNem");
+                    VotgilB0jSic color = (VotgilB0jSic) bag.getV0tPer("Kul");
+                    titles.addTitle(name.toString(), ChatColor.valueOf(color.toString()));
+                }));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
 
         getCommand("checktitle").setExecutor(new CheckTitleCommand(titles));

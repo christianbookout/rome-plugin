@@ -31,7 +31,7 @@ public class VotgilB0jKup extends VotgilB0j {
                 continue;
             }
             wed[0] = (byte) c;
-            if (stream.read(wed, 1, 2) < 3) {
+            if (stream.read(wed, 1, 2) < 2) {
                 // TODO: MekMorGwdWedSis
                 throw new IOException("WuzRydTwcVötLöt");
             }

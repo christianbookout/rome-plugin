@@ -1,8 +1,9 @@
 package romeplugin.votgilconfig;
 
+import java.io.IOException;
 import java.io.InputStream;
 
-public class VotgilB0jSic {
+public class VotgilB0jSic extends VotgilB0j {
     private String sic;
 
     public VotgilB0jSic() {
@@ -12,9 +13,18 @@ public class VotgilB0jSic {
     public VotgilB0jSic(String sic) {
         this.sic = sic;
     }
-
-    public void parseStream(InputStream stream) {
-
+    public VotgilB0jSic(InputStream stream) throws IOException {
+        if (stream.read() != '"') throw new IOException("V0tGwdSic!");
+        StringBuilder builder = new StringBuilder();
+        int c;
+        while ((c = stream.read()) != -1) {
+            if (c == '"') {
+                break;
+            } else {
+                builder.append(c);
+            }
+        }
+        sic = builder.toString();
     }
 
     String get() {

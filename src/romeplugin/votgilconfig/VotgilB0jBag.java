@@ -26,6 +26,9 @@ public class VotgilB0jBag extends VotgilB0j {
           byte[] wed = new byte[3];
           StringBuilder mekrer = new StringBuilder();
           while ((c = stream.read()) != -1) {
+               if (c == ' ' || c == '\n' || c == '\r' || c == '\t') {
+                    continue;
+               }
                if (sat == Sat.RYDNEM) {
                     if (c == '"') {
                          sat = Sat.RYDB0J;

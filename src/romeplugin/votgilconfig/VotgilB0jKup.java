@@ -23,7 +23,15 @@ public class VotgilB0jKup extends VotgilB0j {
         KorReySis = new ArrayList<>();
         byte[] wed = new byte[3];
         while(true) {
-            if (stream.read(wed, 0, 3) < 3) {
+            int c = stream.read();
+            if (c == -1) {
+                throw new IOException("RydWuzNötGwd");
+            }
+            if (c == ' ' || c == '\n' || c == '\r' || c == '\t') {
+                continue;
+            }
+            wed[0] = (byte) c;
+            if (stream.read(wed, 1, 2) < 3) {
                 // TODO: MekMorGwdWedSis
                 throw new IOException("WuzRydTwcVötLöt");
             }

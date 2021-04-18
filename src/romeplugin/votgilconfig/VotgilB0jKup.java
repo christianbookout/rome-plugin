@@ -12,6 +12,8 @@ public class VotgilB0jKup extends VotgilB0j {
         return KorReySis.get(i);
     }
 
+    public int size() { return KorReySis.size(); }
+
     public void forEach(Consumer<VotgilB0j> action) {
         KorReySis.forEach(action);
     }

@@ -18,7 +18,7 @@ public class VotgilB0jKup extends VotgilB0j {
         KorReySis.forEach(action);
     }
 
-    VotgilB0jKup(InputStream stream) throws IOException {
+    public VotgilB0jKup(InputStream stream) throws IOException {
         // Ryd9isKup
         KorReySis = new ArrayList<>();
         byte[] wed = new byte[3];

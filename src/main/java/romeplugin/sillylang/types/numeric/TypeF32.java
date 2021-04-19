@@ -19,6 +19,11 @@ public class TypeF32 implements TypeNumeric {
         return SillyType.Type.F32;
     }
 
+    @Override
+    public Object getValue() {
+        return f32;
+    }
+
 
     @Override
     public boolean isFloat() {

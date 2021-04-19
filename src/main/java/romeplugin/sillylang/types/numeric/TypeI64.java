@@ -43,4 +43,9 @@ public class TypeI64 extends TypeInteger {
     public Type getType() {
         return Type.I64;
     }
+
+    @Override
+    public Object getValue() {
+        return i64;
+    }
 }

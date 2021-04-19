@@ -43,4 +43,16 @@ public class TypeI32 extends TypeInteger {
     public Type getType() {
         return Type.I32;
     }
+
+    @Override
+    public Object getValue() {
+        return i32;
+    }
+
+    @Override
+    public String toString() {
+        return "TypeI32{" +
+                "i32=" + i32 +
+                '}';
+    }
 }

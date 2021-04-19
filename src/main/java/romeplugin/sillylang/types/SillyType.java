@@ -13,4 +13,5 @@ public interface SillyType {
     }
     SillyType copy();
     Type getType();
+    Object getValue();
 }

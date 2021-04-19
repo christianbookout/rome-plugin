@@ -20,6 +20,11 @@ public class TypeI8 extends TypeInteger {
     }
 
     @Override
+    public Object getValue() {
+        return i8;
+    }
+
+    @Override
     public byte asByte() {
         return i8;
     }

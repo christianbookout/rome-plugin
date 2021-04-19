@@ -10,6 +10,11 @@
 <project name="RomePlugin" default="jar" basedir=".">
     <description>Builds, tests, and runs the project RomePlugin.</description>
     <!-- <import file="nbproject/build-impl.xml"/> NET BEANS-->
+    <!-- DO NOT USE !! -->
+    <target name="jar">
+        <fail description="deprecated"/>
+    </target>
+    <!--
     <property name="src" location="src"/>
     <property name="dst" location="out"/>
     <property name="spigotJar" location="out/spigotapi.jar"/>
@@ -45,6 +50,7 @@
     <target name="clean">
         <delete dir="${dst}"/>
     </target>
+    -->
     <!--
 
     There exist several targets which are by default empty and which can be 

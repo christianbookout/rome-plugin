@@ -13,6 +13,6 @@ public class BuiltinPrint extends Builtin {
 
     @Override
     public void execute(Deque<SillyType> stack) {
-        System.out.println(stack.pop());
+        System.out.println(stack.pop().getValue());
     }
 }

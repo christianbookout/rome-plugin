@@ -1,9 +1,6 @@
 package romeplugin.sillylang;
 
-import romeplugin.sillylang.builtin.BuiltinAdd;
-import romeplugin.sillylang.builtin.Builtin;
-import romeplugin.sillylang.builtin.BuiltinDuplicate;
-import romeplugin.sillylang.builtin.BuiltinPrint;
+import romeplugin.sillylang.builtin.*;
 import romeplugin.sillylang.types.SillyType;
 import romeplugin.sillylang.types.TypeU16Array;
 import romeplugin.sillylang.types.numeric.*;
@@ -23,9 +20,15 @@ public class Interpreter {
     public Interpreter() {
         stack = new ArrayDeque<>();
         builtins = new HashMap<>();
-        new BuiltinDuplicate(builtins);
-        new BuiltinAdd(builtins);
-        new BuiltinPrint(builtins);
+        new BuiltinAdd().register(builtins);
+        new BuiltinClass().register(builtins);
+        new BuiltinDelete().register(builtins);
+        new BuiltinDuplicate().register(builtins);
+        new BuiltinPrint().register(builtins);
+        new BuiltinMethod().register(builtins);
+        new BuiltinExecute().register(builtins);
+        new BuiltinField().register(builtins);
+        new BuiltinFieldGet().register(builtins);
     }
 
     private enum LexerState {
@@ -89,6 +92,7 @@ public class Interpreter {
                         if (Character.isWhitespace(c)) {
                             String identifier = new String(buffer, 0, buffer_size);
                             state = LexerState.SEEK_ANY;
+                            buffer_size = 0;
 
                             if (identifier.startsWith("__")) {
                                 System.out.println(identifier);
@@ -110,6 +114,7 @@ public class Interpreter {
                         if (Character.isWhitespace(c)) {
                             state = LexerState.SEEK_ANY;
                             String num = new String(buffer, 0, buffer_size);
+                            buffer_size = 0;
                             switch (type) {
                                 case I8:
                                     stack.push(new TypeI8(Byte.parseByte(num)));

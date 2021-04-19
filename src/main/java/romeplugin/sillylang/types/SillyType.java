@@ -10,6 +10,11 @@ public interface SillyType {
         F64,
         U16,
         U16ARRAY,
+        NULL,
+        CLASS,
+        METHOD,
+        FIELD,
+        JAVA
     }
     SillyType copy();
     Type getType();

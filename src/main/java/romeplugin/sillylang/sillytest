@@ -1,0 +1,3 @@
+
+run -> { "help me" "println" "out" "System" __class __get_member __method __duplicate u16$4 __swap __execute __execute }
+func.spigot_event.TabCompleteEvent -> { "setCancelled" __swap __method true __execute }

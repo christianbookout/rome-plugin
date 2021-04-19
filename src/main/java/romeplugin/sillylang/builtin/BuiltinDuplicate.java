@@ -7,10 +7,6 @@ import java.util.Map;
 
 public class BuiltinDuplicate extends Builtin {
 
-    public BuiltinDuplicate(Map<String, Builtin> builtins) {
-        super(builtins);
-    }
-
     @Override
     protected String getId() {
         return "__duplicate";

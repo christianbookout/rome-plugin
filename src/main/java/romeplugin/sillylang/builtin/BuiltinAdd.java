@@ -7,10 +7,6 @@ import java.util.Deque;
 import java.util.Map;
 
 public class BuiltinAdd extends Builtin {
-    public BuiltinAdd(Map<String, Builtin> builtins) {
-        super(builtins);
-    }
-
     @Override
     protected String getId() {
         return "__add";

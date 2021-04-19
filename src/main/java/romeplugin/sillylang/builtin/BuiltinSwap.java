@@ -6,9 +6,6 @@ import java.util.Deque;
 import java.util.Map;
 
 public class BuiltinSwap extends Builtin {
-    public BuiltinSwap(Map<String, Builtin> builtins) {
-        super(builtins);
-    }
 
     @Override
     protected String getId() {

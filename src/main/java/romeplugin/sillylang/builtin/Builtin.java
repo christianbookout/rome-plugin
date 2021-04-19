@@ -6,7 +6,7 @@ import java.util.Deque;
 import java.util.Map;
 
 abstract public class Builtin {
-    public Builtin(Map<String, Builtin> builtins) {
+    public void register(Map<String, Builtin> builtins) {
         builtins.put(getId(), this);
     }
     protected abstract String getId();

@@ -2,6 +2,7 @@ package romeplugin.sillylang;
 
 import romeplugin.sillylang.builtin.*;
 import romeplugin.sillylang.types.SillyType;
+import romeplugin.sillylang.types.TypeJava;
 import romeplugin.sillylang.types.TypeU16Array;
 import romeplugin.sillylang.types.numeric.*;
 
@@ -39,6 +40,18 @@ public class Interpreter {
     }
 
     private final int BUFFER_SIZE = 1024;
+
+    public void clear() {
+        stack.clear();
+    }
+
+    public SillyType pop() {
+        return stack.pop();
+    }
+
+    public void push(Object o) {
+        stack.push(new TypeJava(o));
+    }
 
     public void interpret(InputStream stream) {
 

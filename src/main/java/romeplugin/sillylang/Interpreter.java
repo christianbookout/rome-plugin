@@ -128,6 +128,8 @@ public class Interpreter {
                                 case I64:
                                     stack.push(new TypeI64(Long.parseLong(num)));
                                     break;
+                                case U1:
+                                    stack.push(new TypeU1(Byte.parseByte(num) != 0));
                                 case F32:
                                     stack.push(new TypeF32(Float.parseFloat(num)));
                                     break;

@@ -8,6 +8,7 @@ public interface SillyType {
         I64,
         F32,
         F64,
+        U1,
         U16,
         U16ARRAY,
         NULL,

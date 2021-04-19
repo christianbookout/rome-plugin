@@ -61,10 +61,13 @@ public class Interpreter {
             byte[] buffer = new byte[BUFFER_SIZE];
             int buffer_size = 0;
             int c;
-            while ((c = stream.read()) != -1) {
+            while (true) {
+                c = stream.read();
                 switch (state) {
                     case SEEK_ANY:
-                        if (Character.isWhitespace(c)) {
+                        if (c == -1) {
+                            return;
+                        } else if (Character.isWhitespace(c)) {
                             break;
                         } else if (c == '"') {
                             state = LexerState.READ_STRING;
@@ -102,7 +105,7 @@ public class Interpreter {
                         }
                         break;
                     case READ_TYPE:
-                        if (Character.isWhitespace(c)) {
+                        if (c == -1 || Character.isWhitespace(c)) {
                             String identifier = new String(buffer, 0, buffer_size);
                             state = LexerState.SEEK_ANY;
                             buffer_size = 0;
@@ -113,6 +116,8 @@ public class Interpreter {
                             } else {
                                 System.out.println("this is not real");
                             }
+
+                            if (c == -1) return;
                         } else if (c == '$') {
                             String typename = new String(buffer, 0, buffer_size);
                             // FIXME: this is excessively clobbered together
@@ -124,7 +129,7 @@ public class Interpreter {
                         }
                         break;
                     case READ_NUM_LITERAL:
-                        if (Character.isWhitespace(c)) {
+                        if (c == -1 || Character.isWhitespace(c)) {
                             state = LexerState.SEEK_ANY;
                             String num = new String(buffer, 0, buffer_size);
                             buffer_size = 0;
@@ -149,6 +154,7 @@ public class Interpreter {
                                 default:
                                     throw new IOException("unexpected type " + type.name());
                             }
+                            if (c == -1) return;
                         } else {
                             buffer[buffer_size++] = (byte) c;
                         }

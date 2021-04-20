@@ -14,27 +14,27 @@ public class SillyLangTests {
     }
 
     @Test
-    public void testI32() {
+    public void testI32() throws IOException {
         interpreter.interpret(sToIs("i32$10"));
         assertEquals(10, interpreter.pop().getValue());
     }
 
     @Test
-    public void testBuiltinClass() {
+    public void testBuiltinClass() throws IOException {
         interpreter.interpret(sToIs("\"java.lang.System\" __class __duplicate __print"));
         assertEquals(System.class, interpreter.pop().getValue());
         interpreter.interpret(sToIs("\"hi world\" i32$0 \"out\" \"java.lang.System\" __class __field __field_get \"java.lang.String\" __class i8$1 \"println\" \"java.io.PrintStream\" __class __method __execute"));
     }
 
     @Test
-    public void testPrint() {
+    public void testPrint() throws IOException {
         interpreter.interpret(sToIs("\"yo vivo\" __print"));
         interpreter.interpret(sToIs("\"yo vivo\" __duplicate __print __print"));
     }
 
 
     @Test
-    public void testSwap() {
+    public void testSwap() throws IOException {
         interpreter.clear();
         interpreter.interpret(sToIs("i32$1 i32$20 __swap"));
         assertEquals(1, interpreter.pop().getValue());

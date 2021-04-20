@@ -4,7 +4,6 @@ import romeplugin.sillylang.types.SillyType;
 import romeplugin.sillylang.types.numeric.*;
 
 import java.util.Deque;
-import java.util.Map;
 
 public class BuiltinAdd extends Builtin {
     @Override
@@ -34,7 +33,7 @@ public class BuiltinAdd extends Builtin {
                 stack.push(new TypeF32(second.asFloat() + first.asFloat()));
                 break;
             case F64:
-                // TODO: f64
+                stack.push(new TypeF64(second.asDouble() + first.asDouble()));
                 break;
         }
     }

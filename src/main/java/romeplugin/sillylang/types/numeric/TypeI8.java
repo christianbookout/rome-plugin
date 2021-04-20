@@ -48,4 +48,9 @@ public class TypeI8 extends TypeInteger {
     public float asFloat() {
         return i8;
     }
+
+    @Override
+    public double asDouble() {
+        return i8;
+    }
 }

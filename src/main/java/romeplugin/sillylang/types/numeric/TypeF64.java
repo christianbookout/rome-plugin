@@ -2,62 +2,65 @@ package romeplugin.sillylang.types.numeric;
 
 import romeplugin.sillylang.types.SillyType;
 
-public class TypeI32 extends TypeInteger {
-    public int i32;
+public class TypeF64 implements TypeNumeric {
+    double f64;
 
-    public TypeI32(int val) {
-        i32 = val;
+    public TypeF64(double val) {
+        f64 = val;
+    }
+
+    @Override
+    public boolean isFloat() {
+        return true;
+    }
+
+    @Override
+    public boolean isInteger() {
+        return false;
     }
 
     @Override
     public byte asByte() {
-        return (byte) i32;
+        return (byte) f64;
     }
 
     @Override
     public short asShort() {
-        return (short) i32;
+        return (short) f64;
     }
 
     @Override
     public int asInt() {
-        return i32;
+        return (int) f64;
     }
 
     @Override
     public long asLong() {
-        return i32;
+        return (long) f64;
     }
 
     @Override
     public float asFloat() {
-        return i32;
+        return (float) f64;
     }
 
     @Override
     public double asDouble() {
-        return i32;
+        return f64;
     }
 
     @Override
     public SillyType copy() {
-        return new TypeI32(i32);
+        return new TypeF64(f64);
     }
 
     @Override
     public Type getType() {
-        return Type.I32;
+        return Type.F64;
     }
 
     @Override
     public Object getValue() {
-        return i32;
-    }
-
-    @Override
-    public String toString() {
-        return "TypeI32{" +
-                "i32=" + i32 +
-                '}';
+        return f64;
     }
 }

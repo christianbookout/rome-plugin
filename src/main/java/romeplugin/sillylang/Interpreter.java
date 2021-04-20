@@ -155,6 +155,9 @@ public class Interpreter {
                             case F32:
                                 stack.push(new TypeF32(Float.parseFloat(num)));
                                 break;
+                            case F64:
+                                stack.push(new TypeF64(Double.parseDouble(num)));
+                                break;
                             default:
                                 throw new IOException("unexpected type " + type.name());
                         }

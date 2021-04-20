@@ -59,4 +59,9 @@ public class TypeF32 implements TypeNumeric {
     public float asFloat() {
         return f32;
     }
+
+    @Override
+    public double asDouble() {
+        return f32;
+    }
 }

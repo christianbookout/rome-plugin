@@ -48,4 +48,9 @@ public class TypeI16 extends TypeInteger {
     public float asFloat() {
         return i16;
     }
+
+    @Override
+    public double asDouble() {
+        return i16;
+    }
 }

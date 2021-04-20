@@ -12,4 +12,5 @@ public interface TypeNumeric extends SillyType {
     long asLong();
 
     float asFloat();
+    double asDouble();
 }

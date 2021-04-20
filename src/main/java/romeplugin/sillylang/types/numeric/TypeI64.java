@@ -35,6 +35,11 @@ public class TypeI64 extends TypeInteger {
     }
 
     @Override
+    public double asDouble() {
+        return i64;
+    }
+
+    @Override
     public SillyType copy() {
         return new TypeI64(i64);
     }

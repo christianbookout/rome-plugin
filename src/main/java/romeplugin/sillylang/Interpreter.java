@@ -3,6 +3,7 @@ package romeplugin.sillylang;
 import romeplugin.sillylang.builtin.*;
 import romeplugin.sillylang.types.SillyType;
 import romeplugin.sillylang.types.TypeJava;
+import romeplugin.sillylang.types.TypeNull;
 import romeplugin.sillylang.types.TypeU16Array;
 import romeplugin.sillylang.types.numeric.*;
 
@@ -30,6 +31,7 @@ public class Interpreter {
         new BuiltinExecute().register(builtins);
         new BuiltinField().register(builtins);
         new BuiltinFieldGet().register(builtins);
+        new BuiltinSwap().register(builtins);
     }
 
     private enum LexerState {
@@ -50,11 +52,13 @@ public class Interpreter {
     }
 
     public void push(Object o) {
+        if (o == null) {
+            o = new TypeNull();
+        }
         stack.push(new TypeJava(o));
     }
 
     public void interpret(InputStream stream) {
-
         try {
             LexerState state = LexerState.SEEK_ANY;
             SillyType.Type type = null;
@@ -101,7 +105,7 @@ public class Interpreter {
                             if (buffer_size == BUFFER_SIZE) {
                                 throw new BufferOverflowException();
                             }
-                            buffer[buffer_size++] = (byte)c;
+                            buffer[buffer_size++] = (byte) c;
                         }
                         break;
                     case READ_TYPE:
@@ -125,7 +129,7 @@ public class Interpreter {
                             buffer_size = 0;
                             state = LexerState.READ_NUM_LITERAL;
                         } else {
-                            buffer[buffer_size++] = (byte)c;
+                            buffer[buffer_size++] = (byte) c;
                         }
                         break;
                     case READ_NUM_LITERAL:

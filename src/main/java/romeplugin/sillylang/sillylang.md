@@ -50,3 +50,5 @@ provided for support :)
 `(u16[]) (class) __field -> (field)`
 
 `(...) (any) (method) __execute -> (java)`
+
+`(any) (field) __field_get -> (java)`

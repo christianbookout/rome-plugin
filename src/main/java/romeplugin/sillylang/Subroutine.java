@@ -6,8 +6,8 @@ import romeplugin.sillylang.builtin.BuiltinPushType;
 import romeplugin.sillylang.types.SillyType;
 
 import java.util.ArrayDeque;
-import java.util.ArrayList;
 import java.util.Deque;
+import java.util.HashMap;
 
 public class Subroutine {
     public static final byte FLAG_NONE = 0;
@@ -33,9 +33,9 @@ public class Subroutine {
         instructions.add(new BuiltinPushType(type));
     }
 
-    public void execute(Deque<SillyType> stack) {
+    public void execute(Deque<SillyType> stack, HashMap<String, SillyType> values) {
         for (Builtin instr : instructions) {
-            instr.execute(stack);
+            instr.execute(stack, values);
         }
     }
 

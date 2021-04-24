@@ -15,7 +15,7 @@ import java.util.*;
 public class Interpreter {
     private final Deque<SillyType> stack;
     private final Map<String, Builtin> builtins;
-    private final ArrayList<SillyType> values;
+    private final HashMap<String, SillyType> values;
     private final byte[] buffer;
 
     public Interpreter() {
@@ -32,7 +32,7 @@ public class Interpreter {
         new BuiltinFieldGet().register(builtins);
         new BuiltinSwap().register(builtins);
         buffer = new byte[BUFFER_SIZE];
-        values = new ArrayList<>();
+        values = new HashMap<>();
     }
 
     enum LexerState {
@@ -115,7 +115,7 @@ public class Interpreter {
 
                         if (identifier.startsWith("__")) {
                             // System.out.println(identifier);
-                            builtins.get(identifier).execute(stack);
+                            builtins.get(identifier).execute(stack, values);
                         } else {
                             System.out.println("this is not real");
                         }

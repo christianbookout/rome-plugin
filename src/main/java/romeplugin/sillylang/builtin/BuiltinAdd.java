@@ -4,6 +4,7 @@ import romeplugin.sillylang.types.SillyType;
 import romeplugin.sillylang.types.numeric.*;
 
 import java.util.Deque;
+import java.util.HashMap;
 
 public class BuiltinAdd extends Builtin {
     @Override
@@ -12,7 +13,7 @@ public class BuiltinAdd extends Builtin {
     }
 
     @Override
-    public void execute(Deque<SillyType> stack) {
+    public void execute(Deque<SillyType> stack, HashMap<String, SillyType> values) {
         // TODO: addition
         TypeNumeric first = (TypeNumeric) stack.pop();
         TypeNumeric second = (TypeNumeric) stack.pop();

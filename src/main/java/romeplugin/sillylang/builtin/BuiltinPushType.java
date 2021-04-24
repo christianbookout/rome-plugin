@@ -3,6 +3,7 @@ package romeplugin.sillylang.builtin;
 import romeplugin.sillylang.types.SillyType;
 
 import java.util.Deque;
+import java.util.HashMap;
 
 public class BuiltinPushType extends Builtin {
     private final SillyType obj;
@@ -17,7 +18,7 @@ public class BuiltinPushType extends Builtin {
     }
 
     @Override
-    public void execute(Deque<SillyType> stack) {
+    public void execute(Deque<SillyType> stack, HashMap<String, SillyType> values) {
         stack.push(obj);
     }
 }

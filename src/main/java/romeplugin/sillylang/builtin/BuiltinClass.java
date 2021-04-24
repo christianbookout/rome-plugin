@@ -5,6 +5,7 @@ import romeplugin.sillylang.types.TypeClass;
 import romeplugin.sillylang.types.TypeU16Array;
 
 import java.util.Deque;
+import java.util.HashMap;
 
 public class BuiltinClass extends Builtin {
     @Override
@@ -13,7 +14,7 @@ public class BuiltinClass extends Builtin {
     }
 
     @Override
-    public void execute(Deque<SillyType> stack) {
+    public void execute(Deque<SillyType> stack, HashMap<String, SillyType> values) {
         try {
             stack.push(new TypeClass((TypeU16Array) stack.pop()));
         } catch (ClassNotFoundException e) {

@@ -4,6 +4,7 @@ import romeplugin.sillylang.types.*;
 import romeplugin.sillylang.types.numeric.TypeInteger;
 
 import java.util.Deque;
+import java.util.HashMap;
 
 public class BuiltinMethod extends Builtin {
     @Override
@@ -12,7 +13,7 @@ public class BuiltinMethod extends Builtin {
     }
 
     @Override
-    public void execute(Deque<SillyType> stack) {
+    public void execute(Deque<SillyType> stack, HashMap<String, SillyType> values) {
         try {
             TypeClass typeClass = (TypeClass) stack.pop();
             TypeU16Array name = (TypeU16Array) stack.pop();

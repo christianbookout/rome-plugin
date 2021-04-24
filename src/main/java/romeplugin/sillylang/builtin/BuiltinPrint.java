@@ -3,6 +3,7 @@ package romeplugin.sillylang.builtin;
 import romeplugin.sillylang.types.SillyType;
 
 import java.util.Deque;
+import java.util.HashMap;
 
 public class BuiltinPrint extends Builtin {
 
@@ -12,7 +13,7 @@ public class BuiltinPrint extends Builtin {
     }
 
     @Override
-    public void execute(Deque<SillyType> stack) {
+    public void execute(Deque<SillyType> stack, HashMap<String, SillyType> values) {
         System.out.println(stack.pop().getValue());
     }
 }

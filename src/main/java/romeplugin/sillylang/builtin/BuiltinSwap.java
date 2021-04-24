@@ -3,7 +3,7 @@ package romeplugin.sillylang.builtin;
 import romeplugin.sillylang.types.SillyType;
 
 import java.util.Deque;
-import java.util.Map;
+import java.util.HashMap;
 
 public class BuiltinSwap extends Builtin {
 
@@ -13,7 +13,7 @@ public class BuiltinSwap extends Builtin {
     }
 
     @Override
-    public void execute(Deque<SillyType> stack) {
+    public void execute(Deque<SillyType> stack, HashMap<String, SillyType> values) {
         SillyType top = stack.pop();
         SillyType bottom = stack.pop();
         stack.push(top);

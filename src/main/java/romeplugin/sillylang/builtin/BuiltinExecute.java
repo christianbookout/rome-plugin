@@ -4,10 +4,10 @@ import romeplugin.sillylang.types.SillyType;
 import romeplugin.sillylang.types.TypeJava;
 import romeplugin.sillylang.types.TypeMethod;
 import romeplugin.sillylang.types.TypeNull;
-import romeplugin.sillylang.types.numeric.TypeInteger;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Deque;
+import java.util.HashMap;
 
 public class BuiltinExecute extends Builtin {
     @Override
@@ -16,7 +16,7 @@ public class BuiltinExecute extends Builtin {
     }
 
     @Override
-    public void execute(Deque<SillyType> stack) {
+    public void execute(Deque<SillyType> stack, HashMap<String, SillyType> values) {
         TypeMethod method = (TypeMethod) stack.pop();
         SillyType object = stack.pop();
         Object[] args = new Object[method.parameterCount()];

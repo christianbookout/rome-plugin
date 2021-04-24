@@ -18,6 +18,7 @@ import java.util.Map;
 public class Interpreter {
     private final Deque<SillyType> stack;
     private final Map<String, Builtin> builtins;
+    private final byte[] buffer;
 
     public Interpreter() {
         stack = new ArrayDeque<>();
@@ -32,9 +33,10 @@ public class Interpreter {
         new BuiltinField().register(builtins);
         new BuiltinFieldGet().register(builtins);
         new BuiltinSwap().register(builtins);
+        buffer = new byte[BUFFER_SIZE];
     }
 
-    private enum LexerState {
+    enum LexerState {
         SEEK_ANY,
         READ_STRING,
         READ_TYPE,
@@ -61,7 +63,6 @@ public class Interpreter {
     public void interpret(InputStream stream) throws IOException {
         LexerState state = LexerState.SEEK_ANY;
         SillyType.Type type = null;
-        byte[] buffer = new byte[BUFFER_SIZE];
         int buffer_size = 0;
         int c;
         while (true) {
@@ -114,7 +115,7 @@ public class Interpreter {
                         buffer_size = 0;
 
                         if (identifier.startsWith("__")) {
-                            System.out.println(identifier);
+                            // System.out.println(identifier);
                             builtins.get(identifier).execute(stack);
                         } else {
                             System.out.println("this is not real");
@@ -169,4 +170,162 @@ public class Interpreter {
             }
         }
     }
+
+    public Subroutine parseSubroutine(InputStream stream) throws IOException {
+        Subroutine subroutine = new Subroutine();
+        LexerState state = LexerState.SEEK_ANY;
+        SillyType.Type type = null;
+        byte[] buffer = new byte[BUFFER_SIZE];
+        int buffer_size = 0;
+        int c;
+        while (true) {
+            c = stream.read();
+            if (c == '}') {
+                // hacky way to signal that } ends the subroutine
+                c = -1;
+            }
+            switch (state) {
+                case SEEK_ANY:
+                    if (c == -1) {
+                        return subroutine;
+                    } else if (Character.isWhitespace(c)) {
+                        break;
+                    } else if (c == '"') {
+                        state = LexerState.READ_STRING;
+                    } else {
+                        buffer_size = 0;
+                        buffer[buffer_size++] = (byte) c;
+                        state = LexerState.READ_TYPE;
+                    }
+                    break;
+                case READ_STRING:
+                    if (c == '"') {
+                        state = LexerState.SEEK_ANY;
+                        subroutine.addType(new TypeU16Array(new String(buffer, 0, buffer_size)));
+                        buffer_size = 0;
+                    } else if (c == '\\') {
+                        // TODO: handle escape characters
+                        switch (stream.read()) {
+                            case -1:
+                                throw new IOException();
+                            case '"':
+                                buffer[buffer_size++] = '"';
+                                break;
+                            case 'n':
+                                buffer[buffer_size++] = '\n';
+                                break;
+                            default:
+                                System.err.println("DIDN'T IMPLEMENT THIS!");
+                                break;
+                        }
+                    } else {
+                        if (buffer_size == BUFFER_SIZE) {
+                            throw new BufferOverflowException();
+                        }
+                        buffer[buffer_size++] = (byte) c;
+                    }
+                    break;
+                case READ_TYPE:
+                    if (c == -1 || Character.isWhitespace(c)) {
+                        String identifier = new String(buffer, 0, buffer_size);
+                        state = LexerState.SEEK_ANY;
+                        buffer_size = 0;
+
+                        if (identifier.startsWith("__")) {
+                            // System.out.println(identifier);
+                            subroutine.add(builtins.get(identifier));
+                        } else {
+                            System.out.println("this is not real");
+                        }
+
+                        if (c == -1) return subroutine;
+                    } else if (c == '$') {
+                        String typename = new String(buffer, 0, buffer_size);
+                        // FIXME: this is excessively clobbered together
+                        type = SillyType.Type.valueOf(typename.toUpperCase());
+                        buffer_size = 0;
+                        state = LexerState.READ_NUM_LITERAL;
+                    } else {
+                        buffer[buffer_size++] = (byte) c;
+                    }
+                    break;
+                case READ_NUM_LITERAL:
+                    if (c == -1 || Character.isWhitespace(c)) {
+                        state = LexerState.SEEK_ANY;
+                        String num = new String(buffer, 0, buffer_size);
+                        buffer_size = 0;
+                        switch (type) {
+                            case I8:
+                                subroutine.addType(new TypeI8(Byte.parseByte(num)));
+                                break;
+                            case I16:
+                                subroutine.addType(new TypeI16(Short.parseShort(num)));
+                                break;
+                            case I32:
+                                subroutine.addType(new TypeI32(Integer.parseInt(num)));
+                                break;
+                            case I64:
+                                subroutine.addType(new TypeI64(Long.parseLong(num)));
+                                break;
+                            case U1:
+                                subroutine.addType(new TypeU1(Byte.parseByte(num) != 0));
+                                break;
+                            case F32:
+                                subroutine.addType(new TypeF32(Float.parseFloat(num)));
+                                break;
+                            case F64:
+                                subroutine.addType(new TypeF64(Double.parseDouble(num)));
+                                break;
+                            default:
+                                throw new IOException("unexpected type " + type.name());
+                        }
+                        if (c == -1) return subroutine;
+                    } else {
+                        buffer[buffer_size++] = (byte) c;
+                    }
+                    break;
+            }
+        }
+    }
+
+    private enum ProgramLexerState {
+        READ_IDENTIFIER, SEEK_SUBROUTINE, CHECK_ARROW,
+    }
+
+    public SillyProgram parseProgram(InputStream stream) throws IOException {
+        ProgramLexerState state = ProgramLexerState.READ_IDENTIFIER;
+        SillyProgram prog = new SillyProgram();
+        String subroutineName = null;
+        int buffer_size = 0;
+        int c;
+        while (true) {
+            c = stream.read();
+            if (c == -1) return prog;
+            switch (state) {
+                case READ_IDENTIFIER:
+                    if (Character.isWhitespace(c)) {
+                        subroutineName = new String(buffer, 0, buffer_size);
+                        state = ProgramLexerState.CHECK_ARROW;
+                    } else {
+                        buffer[buffer_size++] = (byte) c;
+                    }
+                    break;
+                case SEEK_SUBROUTINE:
+                    if (c == '{') {
+                        prog.addRoutine(subroutineName, parseSubroutine(stream));
+                        state = ProgramLexerState.READ_IDENTIFIER;
+                    }
+                    break;
+                case CHECK_ARROW:
+                    if (c == '-' && stream.read() == '>') {
+                        state = ProgramLexerState.SEEK_SUBROUTINE;
+                    } else {
+                        throw new IOException("no arrow found >:(");
+                    }
+                    break;
+            }
+        }
+    }
+
+
 }

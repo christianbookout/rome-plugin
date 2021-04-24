@@ -35,6 +35,11 @@ public class TypeU1 extends TypeInteger {
     }
 
     @Override
+    public double asDouble() {
+        return u1 ? 0 : 1;
+    }
+
+    @Override
     public SillyType copy() {
         return new TypeU1(u1);
     }

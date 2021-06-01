@@ -5,6 +5,10 @@
  */
 package romeplugin;
 
+import blockchain.BalanceCommand;
+import blockchain.BlockchainEventListener;
+import blockchain.PayCommand;
+import blockchain.Ledger;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -24,6 +28,8 @@ import java.io.*;
 public class RomePlugin extends JavaPlugin {
     private final RomeTitles titles = new RomeTitles();
     private final String titlesFilename = "rome_titles";
+    // TODO: make the ledger persistent
+    private final Ledger ledger = new Ledger();
     //runs when the plugin is enabled on the server startup 
     @Override
     public void onEnable() {
@@ -58,7 +64,10 @@ public class RomePlugin extends JavaPlugin {
         getCommand("checktitle").setExecutor(new CheckTitleCommand(titles));
         getCommand("settitle").setExecutor(new SetTitleCommand(titles));
         getCommand("listtitles").setExecutor(new ListTitlesCommand(titles));
+        getCommand("pay").setExecutor(new PayCommand(ledger));
+        getCommand("bal").setExecutor(new BalanceCommand(ledger));
         getServer().getPluginManager().registerEvents(new EventListener(titles), this);
+        getServer().getPluginManager().registerEvents(new BlockchainEventListener(this, ledger), this);
     }
 
     @Override

@@ -17,7 +17,7 @@ public class Block {
     private final UUID miner;
     private final ArrayList<Transaction> transactions;
     private int nonce;
-    private static final String PREFIX = "00";
+    private static final String PREFIX = "0";
 
     //what is a constructor?
     public Block(String lastHash, long timeStamp, String data, UUID miner, ArrayList<Transaction> transactions) {
@@ -40,7 +40,7 @@ public class Block {
         try {
             digest = MessageDigest.getInstance("SHA3-256");
         
-            StringBuilder toHash = new StringBuilder(lastHash + data + timeStamp + nonce);
+            StringBuilder toHash = new StringBuilder(lastHash + data + miner + timeStamp + nonce);
             for (Transaction transaction : transactions) {
                 toHash.append(transaction.toString());
             }

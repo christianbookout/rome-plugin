@@ -38,10 +38,6 @@ public class Ledger {
         balance.put(t.receiver, balance.get(t.receiver) + t.amount);
     }
 
-    public String getPrevHash() {
-        return prevBlockHash;
-    }
-
     public Block getMineTarget(UUID miner) {
         return new Block(prevBlockHash, Instant.now().getEpochSecond(), "", miner, pendingTransactions);
     }
@@ -54,5 +50,11 @@ public class Ledger {
             handleTransaction(transaction);
         }
         this.pendingTransactions.clear();
+    }
+
+    public void addPlayer(UUID target) {
+        if (!balance.containsKey(target)) {
+            balance.put(target, 0f);
+        }
     }
 }

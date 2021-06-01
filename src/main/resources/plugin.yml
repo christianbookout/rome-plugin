@@ -13,3 +13,9 @@ commands:
   listtitles:
     description: "List current titles"
     usage: "/listtitles"
+  pay:
+    description: "pay someone"
+    usage: "/pay <who>"
+  bal:
+    description: "get balance"
+    usage: "/bal"

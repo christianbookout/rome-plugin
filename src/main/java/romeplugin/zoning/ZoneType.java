@@ -8,8 +8,8 @@ import java.util.Arrays;
 public enum ZoneType {
     GOVERNMENT(CONSOLE, MAYOR, BUILDER), CITY(MAYOR, BUILDER), SUBURB(), WILDERNESS();
 
-    private Title[] titles;
-    private ZoneType(Title... titles) {
+    private final Title[] titles;
+    ZoneType(Title... titles) {
         this.titles = titles;
     }
 
@@ -19,6 +19,6 @@ public enum ZoneType {
 
     public boolean canBuild(Title title) {
         if (this == WILDERNESS) return true;
-        return Arrays.stream(this.titles).anyMatch(title::equals);
+        return Arrays.asList(this.titles).contains(title);
     }
 }

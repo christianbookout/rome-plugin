@@ -1,32 +1,28 @@
 package romeplugin.zoning;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.Optional;
-import java.util.UUID;
-
 import org.bukkit.entity.Player;
-
 import romeplugin.RomePlugin;
-import romeplugin.database.SQLConn;
-import romeplugin.newtitle.Title;
 
 import static romeplugin.zoning.ZoneType.*;
 
 public class LandControl {
 
-    private Square[] rings;
+    private CityArea[] areas;
     private int cityX, cityY;
     private int initialSize;
+    private final int cityMult;
+    private final int suburbsMult;
 
     public LandControl(int cityX, int cityY, int initialSize, int cityMult, int suburbsMult) {
-        this.cityX= cityX;
+        this.cityX = cityX;
         this.cityY = cityY;
         this.initialSize = initialSize;
-        this.rings = new Square[] {
-            new Square(initialSize, GOVERNMENT),
-            new Square(initialSize*cityMult, CITY),
-            new Square(initialSize*suburbsMult, SUBURB)
+        this.cityMult = cityMult;
+        this.suburbsMult = suburbsMult;
+        this.areas = new CityArea[]{
+                new CityArea(initialSize, GOVERNMENT),
+                new CityArea(initialSize * cityMult, CITY),
+                new CityArea(initialSize * suburbsMult, SUBURB)
         };
     }
 
@@ -35,14 +31,20 @@ public class LandControl {
         this.cityY = y;
     }
 
-    /*public void setCitySize(int citySize) {
+    public void setCitySize(int citySize) {
         this.initialSize = citySize;
-        //TODOLATER :)
-    }*/
+        this.areas = new CityArea[]{
+                new CityArea(initialSize, GOVERNMENT),
+                new CityArea(initialSize * cityMult, CITY),
+                new CityArea(initialSize * suburbsMult, SUBURB)
+        };
+    }
 
-    public Square getRing(int x, int y) {
-        for (Square square : rings) {
-            if (x <= square.getSize() + cityX && y <= square.getSize() + cityY) return square;
+    public CityArea getRing(int x, int y) {
+        for (CityArea area : areas) {
+            if (x <= area.getSize() + cityX && y <= area.getSize() + cityY) {
+                return area;
+            }
         }
         return null;
     }
@@ -53,9 +55,19 @@ public class LandControl {
         return Math.sqrt(x_dist * x_dist + y_dist * y_dist);
     }*/
 
+    private boolean inCity(int x, int y) {
+        var extents = initialSize * suburbsMult;
+        return Math.abs(x - cityX) <= extents && Math.abs(y - cityY) <= extents;
+    }
+
     public boolean canBreak(Player player, int x, int y) { //TODO implement a player cache
-        Title title;
-        if ((title = RomePlugin.onlinePlayers.get(player)) == null) return false;
+        if (!inCity(x, y)) {
+            return true;
+        }
+        var title = RomePlugin.onlinePlayers.get(player);
+        if (title == null) {
+            return false;
+        }
         return getRing(x, y).getType().canBuild(title);
     }
 }

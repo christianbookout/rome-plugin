@@ -1,10 +1,10 @@
 package romeplugin.zoning;
 
-public class Square {
+public class CityArea {
     private final int size;
     private final ZoneType type;
 
-    public Square(int size, ZoneType type) {
+    public CityArea(int size, ZoneType type) {
         this.size = size;
         this.type = type;
     }

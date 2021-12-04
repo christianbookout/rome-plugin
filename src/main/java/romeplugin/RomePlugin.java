@@ -23,6 +23,8 @@ import romeplugin.newtitle.TitleEventListener;
 import romeplugin.zoning.LandControl;
 import romeplugin.zoning.LandEventListener;
 
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.HashMap;
 
 /**
@@ -61,6 +63,15 @@ public class RomePlugin extends JavaPlugin {
         dataSource.setPassword(config.getString("database.password"));
 
         SQLConn.setSource(dataSource);
+
+        try (Connection conn = SQLConn.getConnection()) {
+            var stmt = conn.prepareStatement("CREATE TABLE IF NOT EXISTS players (" +
+                    "uuid CHAR(36) NOT NULL PRIMARY KEY," +
+                    "title ENUM('TRIBUNE', 'SENATOR', 'MAYOR', 'JUDGE', 'CONSOLE', 'SENSOR', 'POPE', 'BUILDER', 'CITIZEN') NOT NULL);");
+            stmt.execute();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
 
         getCommand("settitle").setExecutor(new SetTitleCommand());
         getCommand("pay").setExecutor(new PayCommand(ledger));

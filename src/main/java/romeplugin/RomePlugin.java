@@ -22,14 +22,12 @@ import romeplugin.title.CheckTitleCommand;
 import romeplugin.title.ListTitlesCommand;
 import romeplugin.title.RomeTitles;
 import romeplugin.title.SetTitleCommand;
-import romeplugin.votgilconfig.*;
-import romeplugin.zoning.*;
+import romeplugin.zoning.LandControl;
+import romeplugin.zoning.LandEventListener;
 
-import java.sql.SQLException;
 import java.util.HashMap;
 
 /**
- *
  * @author chris
  */
 public class RomePlugin extends JavaPlugin {
@@ -41,15 +39,17 @@ public class RomePlugin extends JavaPlugin {
     //private final String titlesFilename = "rome_titles";
     // TODO: make the ledger persistent
     private final Ledger ledger = new Ledger();
+    private final LandControl landControl = new LandControl(0, 0, 0, 5, 10);
+
     //private SQLConn connection;
     //runs when the plugin is enabled on the server startup 
     @Override
     public void onEnable() {
         //registering the eventlistener
         //try {
-            //titles.loadData(new DataInputStream(new FileInputStream(titlesFilename)));
+        //titles.loadData(new DataInputStream(new FileInputStream(titlesFilename)));
         //} catch (FileNotFoundException e) {
-            //getLogger().fine("could not find " + titlesFilename);
+        //getLogger().fine("could not find " + titlesFilename);
         //}
 
         this.saveDefaultConfig();
@@ -70,9 +70,9 @@ public class RomePlugin extends JavaPlugin {
         getCommand("listtitles").setExecutor(new ListTitlesCommand(titles));
         getCommand("pay").setExecutor(new PayCommand(ledger));
         getCommand("bal").setExecutor(new BalanceCommand(ledger));
-        getServer().getPluginManager().registerEvents(new EventListener(titles), this);
+        getServer().getPluginManager().registerEvents(new EventListener(), this);
         getServer().getPluginManager().registerEvents(new BlockchainEventListener(this, ledger), this);
-        getServer().getPluginManager().registerEvents(new LandEventListener(new LandControl()), this);
+        getServer().getPluginManager().registerEvents(new LandEventListener(landControl), this);
     }
 
     @Override

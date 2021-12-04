@@ -60,7 +60,7 @@ public class LandControl {
         return Math.abs(x - cityX) <= extents && Math.abs(y - cityY) <= extents;
     }
 
-    public boolean canBreak(Player player, int x, int y) { //TODO implement a player cache
+    public boolean canBreak(Player player, int x, int y) {
         if (!inCity(x, y)) {
             return true;
         }

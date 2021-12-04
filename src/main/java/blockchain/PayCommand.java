@@ -20,6 +20,7 @@ public class PayCommand implements CommandExecutor {
         }
         Player receiver = commandSender.getServer().getPlayer(args[0]);
         if (receiver == null) {
+            commandSender.sendMessage("player cannot be found");
             return false;
         }
         if (!currentLedger.enqueueTransaction(new Transaction(sender.getUniqueId(), receiver.getUniqueId(), Float.parseFloat(args[1])))) {

@@ -15,7 +15,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
-
+import org.bukkit.event.player.PlayerQuitEvent;
 import romeplugin.database.SQLConn;
 import romeplugin.title.RomeTitles;
 import romeplugin.newtitle.Title;
@@ -43,20 +43,15 @@ public class EventListener implements Listener {
 
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
-        String sQLString = "SELECT * FROM players WHERE uuid = " + event.getPlayer().getUniqueId().toString();
-        try (ResultSet results = SQLConn.read(sQLString)) {
-            if (results == null) {
-                //TODO store player in database
-            }
-
-            String title = results.getString("title");
-            if (title == null) {
-                System.err.println("can't create or find " + event.getPlayer().getName() + "'s title in the database :(");
-            }
-
-            RomePlugin.onlinePlayers.put(event.getPlayer(), Title.getTitle(title));
-        } catch (SQLException e) {
-            e.printStackTrace();
+        var title = SQLConn.getTitle(event.getPlayer().getUniqueId());
+        if (title == null) {
+            return;
         }
+        RomePlugin.onlinePlayers.put(event.getPlayer(), title.t);
+    }
+
+    @EventHandler
+    public void onPlayerQuit(PlayerQuitEvent event) {
+        RomePlugin.onlinePlayers.remove(event.getPlayer());
     }
 }

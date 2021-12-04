@@ -27,8 +27,21 @@ public class SQLConn {
             return null;
         }
     }
- 
 
-
-
+    public static TitleEntry getTitle(UUID who) {
+        try {
+            var res = read("SELECT * FROM players WHERE uuid = " + who.toString());
+            if (res == null) {
+                return null;
+            }
+            var titleName = res.getString("title");
+            if (titleName == null) {
+                return null;
+            }
+            return new TitleEntry(Title.getTitle(titleName), who);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 }

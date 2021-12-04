@@ -18,10 +18,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import romeplugin.database.SQLConn;
 import romeplugin.newtitle.Title;
-import romeplugin.title.CheckTitleCommand;
-import romeplugin.title.ListTitlesCommand;
-import romeplugin.title.RomeTitles;
-import romeplugin.title.SetTitleCommand;
 import romeplugin.zoning.LandControl;
 import romeplugin.zoning.LandEventListener;
 
@@ -31,7 +27,6 @@ import java.util.HashMap;
  * @author chris
  */
 public class RomePlugin extends JavaPlugin {
-    private final RomeTitles titles = new RomeTitles();
     public static final HashMap<Player, Title> onlinePlayers = new HashMap<>();
     //Hashmap of players who joined the server and don't exist in the database
     //TODO: store these players when the server closes (and/or over a timed interval)
@@ -65,19 +60,11 @@ public class RomePlugin extends JavaPlugin {
 
         SQLConn.setSource(dataSource);
 
-        getCommand("checktitle").setExecutor(new CheckTitleCommand(titles));
-        getCommand("settitle").setExecutor(new SetTitleCommand(titles));
-        getCommand("listtitles").setExecutor(new ListTitlesCommand(titles));
         getCommand("pay").setExecutor(new PayCommand(ledger));
         getCommand("bal").setExecutor(new BalanceCommand(ledger));
         getServer().getPluginManager().registerEvents(new EventListener(), this);
         getServer().getPluginManager().registerEvents(new BlockchainEventListener(this, ledger), this);
         getServer().getPluginManager().registerEvents(new LandEventListener(landControl), this);
-    }
-
-    @Override
-    public void onDisable() {
-        titles.saveData();
     }
 
     //true/false if it worked or didnt work

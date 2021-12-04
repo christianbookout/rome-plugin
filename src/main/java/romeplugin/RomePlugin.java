@@ -17,6 +17,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import romeplugin.database.SQLConn;
+import romeplugin.newtitle.SetTitleCommand;
 import romeplugin.newtitle.Title;
 import romeplugin.newtitle.TitleEventListener;
 import romeplugin.zoning.LandControl;
@@ -61,6 +62,7 @@ public class RomePlugin extends JavaPlugin {
 
         SQLConn.setSource(dataSource);
 
+        getCommand("settitle").setExecutor(new SetTitleCommand());
         getCommand("pay").setExecutor(new PayCommand(ledger));
         getCommand("bal").setExecutor(new BalanceCommand(ledger));
         getServer().getPluginManager().registerEvents(new TitleEventListener(), this);

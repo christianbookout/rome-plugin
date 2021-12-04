@@ -18,6 +18,13 @@ public class SetTitleCommand implements CommandExecutor {
             if (!titles.isTitle(params[1])) { return false; }
             Player target = commandSender.getServer().getPlayer(params[0]);
             if (target == null) { return false; }
+            /*
+            try(Connection conn = SQLConn.getConnection()) {
+                PreparedStatement statement = conn.prepareStatement("INSERT INTO players (title, uuid) values (? ?)");
+                statement.setString(1, params[1]);
+                statement.setString(2, target.getUniqueId());
+            } catch (SQLException e) {}
+            */
             titles.setPlayerTitle(target.getUniqueId(), params[1]);
             return true;
         }

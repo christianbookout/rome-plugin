@@ -2,10 +2,16 @@ package romeplugin.title;
 
 import org.bukkit.ChatColor;
 
-import java.io.*;
+import romeplugin.database.SQLConn;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.UUID;
+import java.util.Map.Entry;
 
 public class RomeTitles {
     private final HashMap<UUID, Title> playerTitles;
@@ -41,27 +47,27 @@ public class RomeTitles {
         playerTitles.put(uuid, getKnownTitle(title));
     }
 
-    public void saveData(DataOutputStream stream) {
-        playerTitles.forEach((id,title)-> {
-            try {
-                stream.writeLong(id.getMostSignificantBits());
-                stream.writeLong(id.getLeastSignificantBits());
-                stream.writeUTF(title.name);
-            } catch (IOException e) {
+    public void saveData(SQLConn conn) throws SQLException {
+        for (Entry<UUID, Title> entry : playerTitles.entrySet()) {
+            try (Connection connection = conn.getConnection()) {
+                String SQL = "INSERT INTO playertitles (title, mostSig, leastSig) values (? ? ?)";
+                PreparedStatement statement = connection.prepareStatement(SQL);
+                statement.setString(1, entry.getValue().name);
+                statement.setLong(2, entry.getKey().getMostSignificantBits());
+                statement.setLong(3, entry.getKey().getLeastSignificantBits());
+            } catch (SQLException e) {
                 e.printStackTrace();
             }
-        });
+        }
     }
 
-    public void loadData(DataInputStream stream) {
-        try {
-            while (stream.available() > 0) {
-                UUID id = new UUID(stream.readLong(), stream.readLong());
-                String titleName = stream.readUTF();
-                playerTitles.put(id, getKnownTitle(titleName));
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
+    public void loadData(SQLConn conn) throws SQLException {
+        String SQL = "SELECT * FROM playertitles";
+        ResultSet results = conn.read(SQL);
+        while (results.next()) {
+            UUID id = new UUID(results.getLong("mostSig"), results.getLong("leastSig"));
+            String titleName = results.getString("title");
+            playerTitles.put(id, getKnownTitle(titleName));
         }
     }
 }

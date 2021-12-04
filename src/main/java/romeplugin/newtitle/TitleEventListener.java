@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package romeplugin;
+package romeplugin.newtitle;
 
 import org.bukkit.ChatColor;
 import org.bukkit.event.EventHandler;
@@ -11,16 +11,16 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import romeplugin.RomePlugin;
 import romeplugin.database.SQLConn;
-import romeplugin.newtitle.Title;
 
 /**
  * @author chris
  */
-public class EventListener implements Listener {
+public class TitleEventListener implements Listener {
     @EventHandler
     public void handlePlayerChat(AsyncPlayerChatEvent event) {
-        Title playerTitle = RomePlugin.onlinePlayers.get(event.getPlayer());
+        Title playerTitle = RomePlugin.onlinePlayerTitles.get(event.getPlayer());
         if (playerTitle != null) {
             // intercept chat message here
             event.setFormat("[" + playerTitle.toString() + ChatColor.WHITE + "] " + event.getFormat());
@@ -33,11 +33,11 @@ public class EventListener implements Listener {
         if (title == null) {
             return;
         }
-        RomePlugin.onlinePlayers.put(event.getPlayer(), title.t);
+        RomePlugin.onlinePlayerTitles.put(event.getPlayer(), title.t);
     }
 
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
-        RomePlugin.onlinePlayers.remove(event.getPlayer());
+        RomePlugin.onlinePlayerTitles.remove(event.getPlayer());
     }
 }

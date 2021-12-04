@@ -64,7 +64,7 @@ public class LandControl {
         if (!inCity(x, y)) {
             return true;
         }
-        var title = RomePlugin.onlinePlayers.get(player);
+        var title = RomePlugin.onlinePlayerTitles.get(player);
         if (title == null) {
             return false;
         }

@@ -18,6 +18,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import romeplugin.database.SQLConn;
 import romeplugin.newtitle.Title;
+import romeplugin.newtitle.TitleEventListener;
 import romeplugin.zoning.LandControl;
 import romeplugin.zoning.LandEventListener;
 
@@ -27,7 +28,7 @@ import java.util.HashMap;
  * @author chris
  */
 public class RomePlugin extends JavaPlugin {
-    public static final HashMap<Player, Title> onlinePlayers = new HashMap<>();
+    public static final HashMap<Player, Title> onlinePlayerTitles = new HashMap<>();
     //Hashmap of players who joined the server and don't exist in the database
     //TODO: store these players when the server closes (and/or over a timed interval)
     public static final HashMap<Player, Title> toStore = new HashMap<>();
@@ -62,7 +63,7 @@ public class RomePlugin extends JavaPlugin {
 
         getCommand("pay").setExecutor(new PayCommand(ledger));
         getCommand("bal").setExecutor(new BalanceCommand(ledger));
-        getServer().getPluginManager().registerEvents(new EventListener(), this);
+        getServer().getPluginManager().registerEvents(new TitleEventListener(), this);
         getServer().getPluginManager().registerEvents(new BlockchainEventListener(this, ledger), this);
         getServer().getPluginManager().registerEvents(new LandEventListener(landControl), this);
     }

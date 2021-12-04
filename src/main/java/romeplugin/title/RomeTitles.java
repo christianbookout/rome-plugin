@@ -47,9 +47,9 @@ public class RomeTitles {
         playerTitles.put(uuid, getKnownTitle(title));
     }
 
-    public void saveData(SQLConn conn) throws SQLException {
+    public void saveData() {
         for (Entry<UUID, Title> entry : playerTitles.entrySet()) {
-            try (Connection connection = conn.getConnection()) {
+            try (Connection connection = SQLConn.getConnection()) {
                 String SQL = "INSERT INTO playertitles (title, mostSig, leastSig) values (? ? ?)";
                 PreparedStatement statement = connection.prepareStatement(SQL);
                 statement.setString(1, entry.getValue().name);
@@ -61,9 +61,9 @@ public class RomeTitles {
         }
     }
 
-    public void loadData(SQLConn conn) throws SQLException {
+    public void loadData() throws SQLException {
         String SQL = "SELECT * FROM playertitles";
-        ResultSet results = conn.read(SQL);
+        ResultSet results = SQLConn.read(SQL);
         while (results.next()) {
             UUID id = new UUID(results.getLong("mostSig"), results.getLong("leastSig"));
             String titleName = results.getString("title");

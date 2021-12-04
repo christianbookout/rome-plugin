@@ -7,15 +7,15 @@ package romeplugin;
 
 import blockchain.BalanceCommand;
 import blockchain.BlockchainEventListener;
-import blockchain.PayCommand;
 import blockchain.Ledger;
-import org.bukkit.ChatColor;
+import blockchain.PayCommand;
+import com.mysql.cj.jdbc.MysqlConnectionPoolDataSource;
+import com.mysql.cj.jdbc.MysqlDataSource;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
-
 import romeplugin.database.SQLConn;
 import romeplugin.newtitle.Title;
 import romeplugin.title.CheckTitleCommand;
@@ -25,14 +25,8 @@ import romeplugin.title.SetTitleCommand;
 import romeplugin.votgilconfig.*;
 import romeplugin.zoning.*;
 
-import java.io.*;
-import java.util.HashMap;
-import java.util.UUID;
 import java.sql.SQLException;
-import java.sql.SQLTimeoutException;
-
-import com.mysql.cj.jdbc.MysqlConnectionPoolDataSource;
-import com.mysql.cj.jdbc.MysqlDataSource;
+import java.util.HashMap;
 
 /**
  *
@@ -57,45 +51,19 @@ public class RomePlugin extends JavaPlugin {
         //} catch (FileNotFoundException e) {
             //getLogger().fine("could not find " + titlesFilename);
         //}
-        
+
+        this.saveDefaultConfig();
         FileConfiguration config = this.getConfig();
-        config.createSection("database");
-        config.addDefault("sql_username", "username");
-        config.addDefault("sql_password", "password");
 
-        MysqlDataSource dataSource = new MysqlConnectionPoolDataSource(); //TODO make all connections come from datasource
-
-        
-        //Database database = config.getDatabase();
+        MysqlDataSource dataSource = new MysqlConnectionPoolDataSource();
         // we set our credentials
-        dataSource.setServerName(database.getHost());
-        dataSource.setPortNumber(database.getPort());
-        dataSource.setDatabaseName(database.getDatabase());
-        dataSource.setUser(database.getUser());
-        dataSource.setPassword(database.getPassword());
+        dataSource.setServerName(config.getString("database.host"));
+        dataSource.setPortNumber(config.getInt("database.port"));
+        dataSource.setDatabaseName(config.getString("database.database"));
+        dataSource.setUser(config.getString("database.username"));
+        dataSource.setPassword(config.getString("database.password"));
 
-        SQLConn.setStuff(url, username, password);
-
-        File f = new File("rome_config.vot");
-        if (f.canRead()) {
-            try {
-                VotgilConfig config = new VotgilConfig(f);
-                VotgilB0jKup names = (VotgilB0jKup) config.getPer().getV0tPer("FacNem");
-                getLogger().info("loading " + names.size() + " titles...");
-                names.forEach((votgilB0j -> {
-                    VotgilB0jBag bag = (VotgilB0jBag) votgilB0j;
-                    VotgilB0jSic name = (VotgilB0jSic) bag.getV0tPer("NemVunNem");
-                    VotgilB0j color = bag.getV0tPer("Kul");
-                    if (color == null) {
-                        titles.addTitle(name.toString());
-                    } else {
-                        titles.addTitle(name.toString(), ChatColor.valueOf(color.toString()));
-                    }
-                }));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
+        SQLConn.setSource(dataSource);
 
         getCommand("checktitle").setExecutor(new CheckTitleCommand(titles));
         getCommand("settitle").setExecutor(new SetTitleCommand(titles));
@@ -109,11 +77,7 @@ public class RomePlugin extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        try {
-            titles.saveData(connection);
-        } catch (SQLException e) {
-            getLogger().fine("could not save to database");
-        }
+        titles.saveData();
     }
 
     //true/false if it worked or didnt work

@@ -4,6 +4,8 @@ import org.bukkit.entity.Player;
 import romeplugin.RomePlugin;
 import romeplugin.database.SQLConn;
 
+import java.sql.SQLException;
+
 import static romeplugin.zoning.ZoneType.*;
 
 public class LandControl {
@@ -26,6 +28,7 @@ public class LandControl {
     public void setCenter(int x, int y) {
         this.cityX = x;
         this.cityY = y;
+        updateDB();
     }
 
     public void setGovernmentSize(int governmentSize) {
@@ -35,15 +38,29 @@ public class LandControl {
                 new CityArea(this.governmentSize * cityMult, CITY),
                 new CityArea(this.governmentSize * suburbsMult, SUBURB)
         };
+        updateDB();
     }
 
     public CityArea getRing(int x, int y) {
         for (CityArea area : areas) {
             if (Math.abs(x) <= area.getSize() + cityX && Math.abs(y) <= area.getSize() + cityY) {
+                System.out.println("where: " + area.getType());
                 return area;
             }
         }
         return null;
+    }
+
+    public void updateDB() {
+        try {
+            var stmt = SQLConn.getConnection()
+                    .prepareStatement("REPLACE INTO cityInfo (size, x, y) VALUE (?, ?, ?);");
+            stmt.setInt(1, governmentSize);
+            stmt.setInt(2, cityX);
+            stmt.setInt(3, cityY);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     /*public double distToCity(int x, int y) {
@@ -66,6 +83,10 @@ public class LandControl {
             return true;
         }
         var claim = SQLConn.getClaim(x, y);
+        if (claim != null) {
+            System.out.println("claim (" + claim.x0 + "," + claim.y0 + ") ("
+                    + claim.x1 + ", " + claim.y1 + ") uuid" + claim.owner);
+        }
         return claim != null && claim.owner == player.getUniqueId();
     }
 }

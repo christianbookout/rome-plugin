@@ -79,6 +79,17 @@ public class RomePlugin extends JavaPlugin {
                     "x1 INT NOT NULL," +
                     "y1 INT NOT NULL," +
                     "owner_uuid CHAR(36) NOT NULL);").execute();
+            // overkill
+            conn.prepareStatement("CREATE TABLE IF NOT EXISTS cityInfo (" +
+                    "size INT NOT NULL," +
+                    "x INT NOT NULL," +
+                    "y INT NOT NULL);").execute();
+            var res = conn.prepareStatement("SELECT * FROM cityInfo").executeQuery();
+            if (res.next()) {
+                res.previous();
+                landControl.setGovernmentSize(res.getInt("size"));
+                landControl.setCenter(res.getInt("x"), res.getInt("y"));
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }

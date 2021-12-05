@@ -22,6 +22,7 @@ public class SetTitleCommand implements CommandExecutor {
         try {
             title = Title.getTitle(params[1]);
         } catch (IllegalArgumentException e) {
+            commandSender.sendMessage("invalid title :)");
             return false;
         }
         Player target = commandSender.getServer().getPlayer(params[0]);
@@ -33,13 +34,14 @@ public class SetTitleCommand implements CommandExecutor {
             PreparedStatement statement = conn.prepareStatement(
                     "REPLACE INTO players (uuid, title) values (?, ?);");
             statement.setString(1, target.getUniqueId().toString());
-            statement.setString(2, params[1]);
+            statement.setString(2, title.toString());
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
         }
 
-        RomePlugin.onlinePlayerTitles.replace(target, title);
+        RomePlugin.onlinePlayerTitles.put(target, title);
+        commandSender.sendMessage(target.getDisplayName() + "'s title is now " + title.toString());
         return true;
     }
 }

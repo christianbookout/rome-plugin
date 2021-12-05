@@ -19,7 +19,7 @@ public class FoundCityCommand implements CommandExecutor {
             return false;
         }
         var loc = p.getLocation();
-        control.setCenter(loc.getBlockX(), loc.getBlockY());
+        control.setCenter(loc.getBlockX(), loc.getBlockZ());
         control.setGovernmentSize(50);
         return true;
     }

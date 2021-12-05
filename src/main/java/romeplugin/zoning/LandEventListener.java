@@ -15,7 +15,7 @@ public class LandEventListener implements Listener {
     @EventHandler
     public void onBlockBreak(BlockBreakEvent event) {
         var block = event.getBlock();
-        if (controller.canBreak(event.getPlayer(), block.getX(), block.getY())) 
+        if (controller.canBreak(event.getPlayer(), block.getX(), block.getZ()))
             return;
 
         event.getPlayer().sendMessage("you can't break that, dumbass");
@@ -25,7 +25,7 @@ public class LandEventListener implements Listener {
     @EventHandler
     public void onBlockPlace(BlockPlaceEvent event) {
         var block = event.getBlock();
-        if (controller.canBreak(event.getPlayer(), block.getX(), block.getY()))
+        if (controller.canBreak(event.getPlayer(), block.getX(), block.getZ()))
             return;
         event.getPlayer().sendMessage("no :)");
         event.setCancelled(true);

@@ -9,21 +9,17 @@ public class LandControl {
 
     private CityArea[] areas;
     private int cityX, cityY;
-    private int initialSize;
+    private int governmentSize;
     private final int cityMult;
     private final int suburbsMult;
 
-    public LandControl(int cityX, int cityY, int initialSize, int cityMult, int suburbsMult) {
+    public LandControl(int cityX, int cityY, int governmentSize, int cityMult, int suburbsMult) {
         this.cityX = cityX;
         this.cityY = cityY;
-        this.initialSize = initialSize;
+        this.governmentSize = governmentSize;
         this.cityMult = cityMult;
         this.suburbsMult = suburbsMult;
-        this.areas = new CityArea[]{
-                new CityArea(initialSize, GOVERNMENT),
-                new CityArea(initialSize * cityMult, CITY),
-                new CityArea(initialSize * suburbsMult, SUBURB)
-        };
+        setGovernmentSize(governmentSize);
     }
 
     public void setCenter(int x, int y) {
@@ -31,18 +27,18 @@ public class LandControl {
         this.cityY = y;
     }
 
-    public void setCitySize(int citySize) {
-        this.initialSize = citySize;
+    public void setGovernmentSize(int governmentSize) {
+        this.governmentSize = governmentSize;
         this.areas = new CityArea[]{
-                new CityArea(initialSize, GOVERNMENT),
-                new CityArea(initialSize * cityMult, CITY),
-                new CityArea(initialSize * suburbsMult, SUBURB)
+                new CityArea(this.governmentSize, GOVERNMENT),
+                new CityArea(this.governmentSize * cityMult, CITY),
+                new CityArea(this.governmentSize * suburbsMult, SUBURB)
         };
     }
 
     public CityArea getRing(int x, int y) {
         for (CityArea area : areas) {
-            if (x <= area.getSize() + cityX && y <= area.getSize() + cityY) {
+            if (Math.abs(x) <= area.getSize() + cityX && Math.abs(y) <= area.getSize() + cityY) {
                 return area;
             }
         }
@@ -56,7 +52,7 @@ public class LandControl {
     }*/
 
     private boolean inCity(int x, int y) {
-        var extents = initialSize * suburbsMult;
+        var extents = governmentSize * suburbsMult;
         return Math.abs(x - cityX) <= extents && Math.abs(y - cityY) <= extents;
     }
 

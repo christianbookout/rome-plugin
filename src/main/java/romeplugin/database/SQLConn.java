@@ -33,7 +33,7 @@ public class SQLConn {
             var stmt = getConnection().prepareStatement("SELECT * FROM players WHERE uuid = ?;");
             stmt.setString(1, who.toString());
             var res = stmt.executeQuery();
-            if (res == null) {
+            if (!res.isBeforeFirst()) {
                 return null;
             }
             var titleName = res.getString("title");
@@ -60,6 +60,9 @@ public class SQLConn {
             stmt.setInt(3, y1);
             stmt.setInt(4, y0);
             var res = stmt.executeQuery();
+            if (!res.isBeforeFirst()) {
+                return null;
+            }
             return new ClaimEntry(
                     res.getInt("x0"),
                     res.getInt("y0"),

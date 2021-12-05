@@ -7,9 +7,14 @@ commands:
   checktitle:
     description: "SycPrsFacNem"
     usage: "/checktitle <player>"
+  removetitle:
+    description: "remove a title from someone :)"
+    usage: "/removetitle <player>"
+    permission: op
   settitle:
     description: "MekSumPrsHavSumFacNem"
     usage: "/settitle <player> <title>"
+    permission: op
   listtitles:
     description: "List current titles"
     usage: "/listtitles"

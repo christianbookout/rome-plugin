@@ -31,6 +31,7 @@ public class ClaimLandCommand implements CommandExecutor {
             return false;
         }
         SQLConn.addClaim(x0, y0, x1, y1, p.getUniqueId());
+        sender.sendMessage("successfully claimed " + (x1 - x0) * (y1 - y0) + " blocks.");
         return true;
     }
 }

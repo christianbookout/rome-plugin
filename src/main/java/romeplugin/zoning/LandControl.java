@@ -2,6 +2,7 @@ package romeplugin.zoning;
 
 import org.bukkit.entity.Player;
 import romeplugin.RomePlugin;
+import romeplugin.database.SQLConn;
 
 import static romeplugin.zoning.ZoneType.*;
 
@@ -61,9 +62,10 @@ public class LandControl {
             return true;
         }
         var title = RomePlugin.onlinePlayerTitles.get(player);
-        if (title == null) {
-            return false;
+        if (getRing(x, y).getType().canBuild(title)) {
+            return true;
         }
-        return getRing(x, y).getType().canBuild(title);
+        var claim = SQLConn.getClaim(x, y);
+        return claim != null && claim.owner == player.getUniqueId();
     }
 }

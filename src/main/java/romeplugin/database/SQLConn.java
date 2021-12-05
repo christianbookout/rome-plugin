@@ -44,4 +44,24 @@ public class SQLConn {
             return null;
         }
     }
+
+    public static ClaimEntry getClaim(int x, int y) {
+        try {
+            var stmt = getConnection().prepareStatement("SELECT * FROM cityClaims WHERE x0 <= ? AND x1 >= ? AND y0 >= ? AND y1 <= ?;");
+            stmt.setInt(1, x);
+            stmt.setInt(2, x);
+            stmt.setInt(3, y);
+            stmt.setInt(4, y);
+            var res = stmt.executeQuery();
+            return new ClaimEntry(
+                    res.getInt("x0"),
+                    res.getInt("y0"),
+                    res.getInt("x1"),
+                    res.getInt("y1"),
+                    UUID.fromString(res.getString("owner_uuid")));
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 }

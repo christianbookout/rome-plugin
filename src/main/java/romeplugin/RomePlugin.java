@@ -66,10 +66,17 @@ public class RomePlugin extends JavaPlugin {
         SQLConn.setSource(dataSource);
 
         try (Connection conn = SQLConn.getConnection()) {
-            var stmt = conn.prepareStatement("CREATE TABLE IF NOT EXISTS players (" +
+            conn.prepareStatement("CREATE TABLE IF NOT EXISTS players (" +
                     "uuid CHAR(36) NOT NULL PRIMARY KEY," +
-                    "title ENUM('TRIBUNE', 'SENATOR', 'MAYOR', 'JUDGE', 'CONSOLE', 'SENSOR', 'POPE', 'BUILDER', 'CITIZEN') NOT NULL);");
-            stmt.execute();
+                    "title ENUM('TRIBUNE', 'SENATOR', 'MAYOR', 'JUDGE', 'CONSOLE', 'SENSOR', 'POPE', 'BUILDER', 'CITIZEN') NOT NULL);")
+                    .execute();
+            // (x0, y0) must be the top-left point and (x1, y1) must be the bottom-right point
+            conn.prepareStatement("CREATE TABLE IF NOT EXISTS cityClaims (" +
+                    "x0 INT NOT NULL," +
+                    "y0 INT NOT NULL," +
+                    "x1 INT NOT NULL," +
+                    "y1 INT NOT NULL," +
+                    "owner_uuid CHAR(36) NOT NULL);").execute();
         } catch (SQLException e) {
             e.printStackTrace();
         }

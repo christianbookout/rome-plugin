@@ -18,6 +18,10 @@ commands:
   listtitles:
     description: "List current titles"
     usage: "/listtitles"
+  foundrome:
+    description: "it was made in a day :)"
+    usage: "/foundrome"
+    permission: op
   pay:
     description: "pay someone"
     usage: "/pay <who>"

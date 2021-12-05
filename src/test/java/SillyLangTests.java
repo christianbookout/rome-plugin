@@ -88,7 +88,7 @@ public class SillyLangTests {
     public void testSubroutineParse() throws IOException {
         Subroutine routine = lexer.parseSubroutine(new ByteArrayInputStream("f64$10.5 f64$22.5 __add".getBytes()));
         ArrayDeque<SillyType> funny = new ArrayDeque<>();
-        routine.execute(funny);
+        routine.execute(funny, new HashMap<>());
         assertEquals(33.D, funny.pop().getValue());
     }
 
@@ -96,7 +96,7 @@ public class SillyLangTests {
     public void testProg() throws IOException {
         SillyProgram program = lexer.parseProgram(new ByteArrayInputStream("run -> { i64$0 i64$921 __add }".getBytes()));
         Deque<SillyType> stack = new ArrayDeque<>();
-        program.getRoutine("run").execute(stack);
+        program.getRoutine("run").execute(stack, new HashMap<>());
         assertEquals(921L, stack.pop().getValue());
     }
 }

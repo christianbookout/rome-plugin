@@ -30,4 +30,4 @@ commands:
     usage: "/bal"
   claim:
     description: "claim land in the city :)"
-    usage: "/claim x0 y0 x1 y1"
+    usage: "/claim radius <r> | /claim <x0> <y0> <x1> <y1>"

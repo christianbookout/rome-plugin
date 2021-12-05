@@ -30,7 +30,9 @@ public class SQLConn {
 
     public static TitleEntry getTitle(UUID who) {
         try {
-            var res = read("SELECT * FROM players WHERE uuid = " + who.toString() + ";");
+            var stmt = getConnection().prepareStatement("SELECT * FROM players WHERE uuid = ?;");
+            stmt.setString(1, who.toString());
+            var res = stmt.executeQuery();
             if (res == null) {
                 return null;
             }

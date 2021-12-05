@@ -28,3 +28,6 @@ commands:
   bal:
     description: "get balance"
     usage: "/bal"
+  claim:
+    description: "claim land in the city :)"
+    usage: "/claim x0 y0 x1 y1"

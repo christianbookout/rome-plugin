@@ -48,12 +48,17 @@ public class SQLConn {
     }
 
     public static ClaimEntry getClaim(int x, int y) {
+        return getClaimRect(x, y, x, y);
+    }
+
+    public static ClaimEntry getClaimRect(int x0, int y0, int x1, int y1) {
         try {
-            var stmt = getConnection().prepareStatement("SELECT * FROM cityClaims WHERE x0 <= ? AND x1 >= ? AND y0 >= ? AND y1 <= ?;");
-            stmt.setInt(1, x);
-            stmt.setInt(2, x);
-            stmt.setInt(3, y);
-            stmt.setInt(4, y);
+            var stmt = getConnection().prepareStatement("SELECT * FROM cityClaims WHERE " +
+                    "x0 <= ? AND x1 >= ? AND y0 >= ? AND y1 <= ?;");
+            stmt.setInt(1, x1);
+            stmt.setInt(2, x0);
+            stmt.setInt(3, y1);
+            stmt.setInt(4, y0);
             var res = stmt.executeQuery();
             return new ClaimEntry(
                     res.getInt("x0"),
@@ -64,6 +69,21 @@ public class SQLConn {
         } catch (SQLException e) {
             e.printStackTrace();
             return null;
+        }
+    }
+
+    // does not verify the new claim doesn't overlap an existing claim!
+    public static void addClaim(int x0, int y0, int x1, int y1, UUID uniqueId) {
+        try {
+            var stmt = getConnection().prepareStatement("INSERT INTO cityClaims VALUES (?, ?, ?, ?, ?);");
+            stmt.setInt(1, x0);
+            stmt.setInt(2, y0);
+            stmt.setInt(3, x1);
+            stmt.setInt(4, y1);
+            stmt.setString(5, uniqueId.toString());
+            stmt.execute();
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 }

@@ -21,6 +21,7 @@ import romeplugin.newtitle.RemoveTitleCommand;
 import romeplugin.newtitle.SetTitleCommand;
 import romeplugin.newtitle.Title;
 import romeplugin.newtitle.TitleEventListener;
+import romeplugin.zoning.ClaimLandCommand;
 import romeplugin.zoning.FoundCityCommand;
 import romeplugin.zoning.LandControl;
 import romeplugin.zoning.LandEventListener;
@@ -82,6 +83,7 @@ public class RomePlugin extends JavaPlugin {
             e.printStackTrace();
         }
 
+        getCommand("claim").setExecutor(new ClaimLandCommand());
         getCommand("removetitle").setExecutor(new RemoveTitleCommand());
         getCommand("foundrome").setExecutor(new FoundCityCommand(landControl));
         getCommand("settitle").setExecutor(new SetTitleCommand());

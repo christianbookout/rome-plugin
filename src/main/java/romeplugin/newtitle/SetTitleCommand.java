@@ -31,7 +31,7 @@ public class SetTitleCommand implements CommandExecutor {
 
         try (Connection conn = SQLConn.getConnection()) {
             PreparedStatement statement = conn.prepareStatement(
-                    "REPLACE INTO players (uuid, title) values (? ?)");
+                    "REPLACE INTO players (uuid, title) values (? ?);");
             statement.setString(1, target.getUniqueId().toString());
             statement.setString(2, params[1]);
         } catch (SQLException e) {

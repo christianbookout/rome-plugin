@@ -28,7 +28,6 @@ public class LandControl {
     public void setCenter(int x, int y) {
         this.cityX = x;
         this.cityY = y;
-        updateDB();
     }
 
     public void setGovernmentSize(int governmentSize) {
@@ -38,7 +37,6 @@ public class LandControl {
                 new CityArea(this.governmentSize * cityMult, CITY),
                 new CityArea(this.governmentSize * suburbsMult, SUBURB)
         };
-        updateDB();
     }
 
     public CityArea getRing(int x, int y) {
@@ -87,7 +85,8 @@ public class LandControl {
         if (claim != null) {
             System.out.println("claim (" + claim.x0 + "," + claim.y0 + ") ("
                     + claim.x1 + ", " + claim.y1 + ") uuid" + claim.owner);
+            System.out.println(player.getUniqueId().equals(claim.owner));
         }
-        return claim != null && claim.owner == player.getUniqueId();
+        return claim != null && claim.owner.equals(player.getUniqueId());
     }
 }

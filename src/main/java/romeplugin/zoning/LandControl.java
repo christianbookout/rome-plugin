@@ -58,6 +58,7 @@ public class LandControl {
             stmt.setInt(1, governmentSize);
             stmt.setInt(2, cityX);
             stmt.setInt(3, cityY);
+            stmt.execute();
         } catch (SQLException e) {
             e.printStackTrace();
         }

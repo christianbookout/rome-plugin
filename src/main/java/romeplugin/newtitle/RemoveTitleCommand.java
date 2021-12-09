@@ -25,6 +25,7 @@ public class RemoveTitleCommand implements CommandExecutor {
             PreparedStatement statement = conn.prepareStatement(
                     "DELETE FROM players WHERE uuid = ?;");
             statement.setString(1, target.getUniqueId().toString());
+            statement.execute();
         } catch (SQLException e) {
             e.printStackTrace();
             return false;

@@ -21,6 +21,7 @@ public class FoundCityCommand implements CommandExecutor {
         var loc = p.getLocation();
         control.setCenter(loc.getBlockX(), loc.getBlockZ());
         control.setGovernmentSize(50);
+        control.updateDB();
         return true;
     }
 }

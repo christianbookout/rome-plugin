@@ -29,7 +29,7 @@ public class ClaimLandCommand implements CommandExecutor {
                 return false;
             }
             SQLConn.addClaim(x0, y0, x1, y1, player.getUniqueId());
-            sender.sendMessage("successfully claimed " + (x1 - x0) * (y1 - y0) + " blocks.");
+            sender.sendMessage("successfully claimed " + (x1 - x0) * (y0 - y1) + " blocks.");
             return true;
         }
         if (args.length < 4) {
@@ -54,7 +54,7 @@ public class ClaimLandCommand implements CommandExecutor {
             return false;
         }
         SQLConn.addClaim(x0, y0, x1, y1, p.getUniqueId());
-        sender.sendMessage("successfully claimed " + (x1 - x0) * (y1 - y0) + " blocks.");
+        sender.sendMessage("successfully claimed " + (x1 - x0) * (y0 - y1) + " blocks.");
         return true;
     }
 }

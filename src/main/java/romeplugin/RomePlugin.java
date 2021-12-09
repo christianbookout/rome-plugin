@@ -41,9 +41,9 @@ public class RomePlugin extends JavaPlugin {
     //private final String titlesFilename = "rome_titles";
     // TODO: make the ledger persistent
     private final Ledger ledger = new Ledger();
+    // TODO: un-hardcode the multipliers for sizes
     private final LandControl landControl = new LandControl(0, 0, 0, 5, 10);
 
-    //private SQLConn connection;
     //runs when the plugin is enabled on the server startup 
     @Override
     public void onEnable() {
@@ -84,9 +84,8 @@ public class RomePlugin extends JavaPlugin {
                     "size INT NOT NULL," +
                     "x INT NOT NULL," +
                     "y INT NOT NULL);").execute();
-            var res = conn.prepareStatement("SELECT * FROM cityInfo").executeQuery();
+            var res = conn.prepareStatement("SELECT * FROM cityInfo;").executeQuery();
             if (res.next()) {
-                res.previous();
                 landControl.setGovernmentSize(res.getInt("size"));
                 landControl.setCenter(res.getInt("x"), res.getInt("y"));
             }

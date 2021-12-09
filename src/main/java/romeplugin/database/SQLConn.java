@@ -33,7 +33,7 @@ public class SQLConn {
             var stmt = getConnection().prepareStatement("SELECT * FROM players WHERE uuid = ?;");
             stmt.setString(1, who.toString());
             var res = stmt.executeQuery();
-            if (!res.isBeforeFirst()) {
+            if (!res.next()) {
                 return null;
             }
             var titleName = res.getString("title");
@@ -53,14 +53,13 @@ public class SQLConn {
 
     public static ClaimEntry getClaimRect(int x0, int y0, int x1, int y1) {
         try {
-            var stmt = getConnection().prepareStatement("SELECT * FROM cityClaims WHERE " +
-                    "x0 <= ? AND x1 >= ? AND y0 >= ? AND y1 <= ?;");
+            var stmt = getConnection().prepareStatement("SELECT * FROM cityClaims WHERE x0 <= ? AND x1 >= ? AND y0 >= ? AND y1 <= ?;");
             stmt.setInt(1, x1);
             stmt.setInt(2, x0);
             stmt.setInt(3, y1);
             stmt.setInt(4, y0);
             var res = stmt.executeQuery();
-            if (!res.isBeforeFirst()) {
+            if (!res.next()) {
                 return null;
             }
             return new ClaimEntry(

@@ -46,6 +46,7 @@ public class LandControl {
                 return area;
             }
         }
+        
         return null;
     }
 
@@ -78,7 +79,7 @@ public class LandControl {
             return true;
         }
         var title = RomePlugin.onlinePlayerTitles.get(player);
-        if (getRing(x, y).getType().canBuild(title)) {
+        if (getArea(x, y).getType().canBuild(title)) {
             return true;
         }
         var claim = SQLConn.getClaim(x, y);

@@ -39,9 +39,9 @@ public class LandControl {
         };
     }
 
-    public CityArea getRing(int x, int y) {
+    public CityArea getArea(int x, int y) {
         for (CityArea area : areas) {
-            if (Math.abs(x) <= area.getSize() + cityX && Math.abs(y) <= area.getSize() + cityY) {
+            if (Math.abs(x) <= area.getSize()/2 + Math.abs(cityX) && Math.abs(y) <= area.getSize()/2 + Math.abs(cityY)) {
                 System.out.println("where: " + area.getType());
                 return area;
             }

@@ -41,7 +41,7 @@ public class LandControl {
 
     public CityArea getArea(int x, int y) {
         for (CityArea area : areas) {
-            if (Math.abs(x) <= area.getSize()/2 + Math.abs(cityX) && Math.abs(y) <= area.getSize()/2 + Math.abs(cityY)) {
+            if (Math.abs(x - cityX) <= area.getSize() && Math.abs(y - cityY) <= area.getSize()) {
                 System.out.println("where: " + area.getType());
                 return area;
             }

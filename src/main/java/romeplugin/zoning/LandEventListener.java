@@ -52,15 +52,19 @@ public class LandEventListener implements Listener {
 
     @EventHandler
     public void claimClicky(PlayerInteractEvent e) {
+        if (e.getClickedBlock() == null) {
+            return;
+        }
         //if player is clicking on a locked chest/door then don't let em
         if (e.getAction() != Action.RIGHT_CLICK_BLOCK && (e.getClickedBlock().getType().equals(Material.CHEST) || e.getClickedBlock().getState() instanceof Door)) {
             if (controller.canBreak(e.getPlayer(), e.getClickedBlock().getLocation().getBlockX(), e.getClickedBlock().getLocation().getBlockY())) {
                 String formatting = ChatColor.RED.toString() + ChatColor.UNDERLINE.toString() + ChatColor.BOLD.toString();
                 e.getPlayer().sendMessage( formatting + " woah " + ChatColor.RESET.toString() + " that is locked by " + e.getPlayer().getDisplayName());
+                e.setCancelled(true);
             } 
         }   
         //if a player right clicks w/ the claim material then maybe claim some stuff!!
-        else if (e.getPlayer().getInventory().getItemInMainHand().getType().equals(claimMaterial) && e.getAction() == Action.RIGHT_CLICK_BLOCK) {
+        else if (e.getPlayer().getInventory().getItemInMainHand() != null && e.getPlayer().getInventory().getItemInMainHand().getType().equals(claimMaterial) && e.getAction() == Action.RIGHT_CLICK_BLOCK) {
             if (players.containsKey(e.getPlayer())) {
                 Location lastLoc = players.get(e.getPlayer());
                 Location newLoc = e.getClickedBlock().getLocation();
@@ -78,20 +82,21 @@ public class LandEventListener implements Listener {
             }
         }
     }
+        //funny
+    class PlayerUnclaimTimer extends TimerTask {
+        private final Player toRemove;
+        private final HashMap<Player, Location> map;
+        PlayerUnclaimTimer(HashMap<Player, Location> map, Player toRemove) {
+            this.toRemove = toRemove;
+            this.map = map;
+        }
+        @Override
+        public void run() {
+            map.remove(toRemove);
+            toRemove.sendMessage("claim timed out");
+        }
+        
+    }
 }
 
-//funny
-class PlayerUnclaimTimer extends TimerTask {
-    private final Player toRemove;
-    private final HashMap<Player, Location> map;
-    PlayerUnclaimTimer(HashMap<Player, Location> map, Player toRemove) {
-        this.toRemove = toRemove;
-        this.map = map;
-    }
-    @Override
-    public void run() {
-        map.remove(toRemove);
-        toRemove.sendMessage("claim timed out");
-    }
-    
-}
+

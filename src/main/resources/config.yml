@@ -4,3 +4,7 @@ database:
   database: rome # name of database
   username: user
   password: pass
+
+claims:
+  claimMaterial: BRICK # material to set claims with
+  claimTimeoutMS: 20000 # set to 0 for none

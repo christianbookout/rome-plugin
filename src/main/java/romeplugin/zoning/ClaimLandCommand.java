@@ -23,14 +23,7 @@ public class ClaimLandCommand implements CommandExecutor {
             var y0 = loc.getBlockZ() + r;
             var x1 = loc.getBlockX() + r;
             var y1 = loc.getBlockZ() - r;
-            var claim = SQLConn.getClaimRect(x0, y0, x1, y1);
-            if (claim != null) {
-                sender.sendMessage("land already claimed >:(");
-                return false;
-            }
-            SQLConn.addClaim(x0, y0, x1, y1, player.getUniqueId());
-            sender.sendMessage("successfully claimed " + (x1 - x0) * (y0 - y1) + " blocks.");
-            return true;
+            return claimLand(player, x0, y0, x1, y1);
         }
         if (args.length < 4) {
             return false;
@@ -48,13 +41,17 @@ public class ClaimLandCommand implements CommandExecutor {
         var y0 = Math.max(ya, yb);
         var x1 = Math.max(xa, xb);
         var y1 = Math.min(ya, yb);
+        return claimLand(p, x0, y0, x1, y1);
+    }
+
+    public static boolean claimLand(Player player, int x0, int y0, int x1, int y1) {
         var claim = SQLConn.getClaimRect(x0, y0, x1, y1);
         if (claim != null) {
-            sender.sendMessage("land already claimed >:(");
+            player.sendMessage("land already claimed >:(");
             return false;
         }
-        SQLConn.addClaim(x0, y0, x1, y1, p.getUniqueId());
-        sender.sendMessage("successfully claimed " + (x1 - x0) * (y0 - y1) + " blocks.");
+        SQLConn.addClaim(x0, y0, x1, y1, player.getUniqueId());
+        player.sendMessage("successfully claimed " + Math.abs((x1 - x0) * (y0 - y1)) + " blocks.");
         return true;
     }
 }

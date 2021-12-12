@@ -11,6 +11,8 @@ import blockchain.Ledger;
 import blockchain.PayCommand;
 import com.mysql.cj.jdbc.MysqlConnectionPoolDataSource;
 import com.mysql.cj.jdbc.MysqlDataSource;
+
+import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -29,6 +31,7 @@ import romeplugin.zoning.LandEventListener;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.logging.Level;
 
 /**
  * @author chris
@@ -65,6 +68,12 @@ public class RomePlugin extends JavaPlugin {
         dataSource.setUser(config.getString("database.username"));
         dataSource.setPassword(config.getString("database.password"));
 
+        LandEventListener.claimTimeoutMS = config.getLong("claims.claimTimeoutMS");
+        try { 
+            LandEventListener.claimMaterial = Material.valueOf(config.getString("claims.claimMaterial").toUpperCase().strip());
+        } catch (IllegalArgumentException e) {
+            this.getLogger().log(Level.WARNING, "set you's claim material in the config file fam, using " + LandEventListener.claimMaterial.toString() + " instead!!!");
+        }
         SQLConn.setSource(dataSource);
 
         try (Connection conn = SQLConn.getConnection()) {

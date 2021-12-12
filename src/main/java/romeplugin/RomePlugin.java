@@ -100,6 +100,7 @@ public class RomePlugin extends JavaPlugin {
         }
 
         getCommand("claim").setExecutor(new ClaimLandCommand());
+        getCommand("claiminfo").setExecutor(new ClaimInfoCommand());
         getCommand("killclaim").setExecutor(new RemoveClaimCommand());
         getCommand("removetitle").setExecutor(new RemoveTitleCommand());
         getCommand("foundrome").setExecutor(new FoundCityCommand(landControl));

@@ -18,9 +18,18 @@ public class FoundCityCommand implements CommandExecutor {
         if (p == null) {
             return false;
         }
+        var size = 10;
+        if (params.length > 0) {
+            try {
+                size = Integer.parseInt(params[0]);
+            } catch (NumberFormatException e) {
+                commandSender.sendMessage("invalid size");
+                return false;
+            }
+        }
         var loc = p.getLocation();
         control.setCenter(loc.getBlockX(), loc.getBlockZ());
-        control.setGovernmentSize(50);
+        control.setGovernmentSize(size);
         control.updateDB();
         return true;
     }

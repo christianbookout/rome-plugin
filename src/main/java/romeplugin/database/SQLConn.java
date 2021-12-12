@@ -88,4 +88,20 @@ public class SQLConn {
             e.printStackTrace();
         }
     }
+
+    public static boolean removeClaim(ClaimEntry claim) {
+        try {
+            var stmt = getConnection().prepareStatement("DELETE FROM cityClaims WHERE x0 = ? AND y0 = ? AND x1 = ? AND y1 = ? AND owner_uuid = ?;");
+            stmt.setInt(1, claim.x0);
+            stmt.setInt(2, claim.y0);
+            stmt.setInt(3, claim.x1);
+            stmt.setInt(4, claim.y1);
+            stmt.setString(5, claim.owner.toString());
+            stmt.execute();
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 }

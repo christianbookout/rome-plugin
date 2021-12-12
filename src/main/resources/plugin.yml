@@ -31,3 +31,7 @@ commands:
   claim:
     description: "claim land in the city :)"
     usage: "/claim radius <r> | /claim <x0> <y0> <x1> <y1>"
+  killclaim:
+    description: "remove a claim at your location"
+    usage: "/killclaim"
+    permission: op

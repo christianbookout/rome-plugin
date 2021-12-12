@@ -23,10 +23,7 @@ import romeplugin.newtitle.RemoveTitleCommand;
 import romeplugin.newtitle.SetTitleCommand;
 import romeplugin.newtitle.Title;
 import romeplugin.newtitle.TitleEventListener;
-import romeplugin.zoning.ClaimLandCommand;
-import romeplugin.zoning.FoundCityCommand;
-import romeplugin.zoning.LandControl;
-import romeplugin.zoning.LandEventListener;
+import romeplugin.zoning.*;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -103,6 +100,7 @@ public class RomePlugin extends JavaPlugin {
         }
 
         getCommand("claim").setExecutor(new ClaimLandCommand());
+        getCommand("killclaim").setExecutor(new RemoveClaimCommand());
         getCommand("removetitle").setExecutor(new RemoveTitleCommand());
         getCommand("foundrome").setExecutor(new FoundCityCommand(landControl));
         getCommand("settitle").setExecutor(new SetTitleCommand());

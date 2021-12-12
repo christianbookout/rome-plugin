@@ -36,22 +36,23 @@ public class ClaimLandCommand implements CommandExecutor {
         var ya = Integer.parseInt(args[1]);
         var xb = Integer.parseInt(args[2]);
         var yb = Integer.parseInt(args[3]);
-        // ensure x0, y0 is the top left point and x1, y1 is the bottom right point
-        var x0 = Math.min(xa, xb);
-        var y0 = Math.max(ya, yb);
-        var x1 = Math.max(xa, xb);
-        var y1 = Math.min(ya, yb);
-        return claimLand(p, x0, y0, x1, y1);
+        return claimLand(p, xa, ya, xb, yb);
     }
 
     public static boolean claimLand(Player player, int x0, int y0, int x1, int y1) {
-        var claim = SQLConn.getClaimRect(x0, y0, x1, y1);
+        // ensure x0, y0 is the top left point and x1, y1 is the bottom right point
+        var x00 = Math.min(x0, x1);
+        var y00 = Math.max(y0, y1);
+        var x01 = Math.max(x0, x1);
+        var y01 = Math.min(y0, y1);
+
+        var claim = SQLConn.getClaimRect(x00, y00, x01, y01);
         if (claim != null) {
             player.sendMessage("land already claimed >:(");
             return false;
         }
         SQLConn.addClaim(x0, y0, x1, y1, player.getUniqueId());
-        player.sendMessage("successfully claimed " + Math.abs((x1 - x0) * (y0 - y1)) + " blocks.");
+        player.sendMessage("successfully claimed " + ((x01 - x00) == 0 ? 1 : x01 - x00) * ((y00 - y01)  == 0 ? 1 : y00 - y01) + " blocks.");
         return true;
     }
 }

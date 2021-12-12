@@ -23,7 +23,7 @@ public class TitleEventListener implements Listener {
         Title playerTitle = RomePlugin.onlinePlayerTitles.get(event.getPlayer());
         if (playerTitle != null) {
             // intercept chat message here
-            event.setFormat("[" + playerTitle.toString() + ChatColor.WHITE + "] " + event.getFormat());
+            event.setFormat("[" + playerTitle.color + playerTitle.fancyName + ChatColor.RESET + "] " + event.getFormat());
         }
     }
 

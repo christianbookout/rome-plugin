@@ -3,6 +3,10 @@ author: gose
 version: 1.0
 main: romeplugin.RomePlugin
 api-version: 1.16
+permissions:
+  romeplugin.aedile:
+    description: "aedile :)"
+    default: op
 commands:
   checktitle:
     description: "SycPrsFacNem"

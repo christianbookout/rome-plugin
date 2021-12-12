@@ -14,7 +14,7 @@ import java.sql.SQLException;
 public class RemoveTitleCommand implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender commandSender, Command command, String s, String[] params) {
-        if (params.length < 2) {
+        if (params.length < 1) {
             return false;
         }
         Player target = commandSender.getServer().getPlayer(params[0]);

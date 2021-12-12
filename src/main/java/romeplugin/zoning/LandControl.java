@@ -45,7 +45,6 @@ public class LandControl {
                 return area;
             }
         }
-        
         return null;
     }
 
@@ -78,7 +77,15 @@ public class LandControl {
             return true;
         }
         var title = RomePlugin.onlinePlayerTitles.get(player);
-        if (getArea(x, y).getType().canBuild(title)) {
+        var area = getArea(x, y);
+        if (area.getType() == SUBURB) {
+            var claim = SQLConn.getClaim(x, y);
+            if (claim == null) {
+                return true;
+            }
+            return claim.owner.equals(player.getUniqueId());
+        }
+        if (area.getType().canBuild(title)) {
             return true;
         }
         var claim = SQLConn.getClaim(x, y);

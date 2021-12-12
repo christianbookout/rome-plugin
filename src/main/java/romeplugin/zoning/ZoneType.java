@@ -18,7 +18,6 @@ public enum ZoneType {
     }
 
     public boolean canBuild(Title title) {
-        if (this == WILDERNESS) return true;
         return Arrays.asList(this.titles).contains(title);
     }
 }

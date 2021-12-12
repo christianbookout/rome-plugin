@@ -42,7 +42,6 @@ public class LandControl {
     public CityArea getArea(int x, int y) {
         for (CityArea area : areas) {
             if (Math.abs(x - cityX) <= area.getSize() && Math.abs(y - cityY) <= area.getSize()) {
-                System.out.println("where: " + area.getType());
                 return area;
             }
         }
@@ -83,11 +82,6 @@ public class LandControl {
             return true;
         }
         var claim = SQLConn.getClaim(x, y);
-        if (claim != null) {
-            System.out.println("claim (" + claim.x0 + "," + claim.y0 + ") ("
-                    + claim.x1 + ", " + claim.y1 + ") uuid" + claim.owner);
-            System.out.println(player.getUniqueId().equals(claim.owner));
-        }
         return claim != null && claim.owner.equals(player.getUniqueId());
     }
 }

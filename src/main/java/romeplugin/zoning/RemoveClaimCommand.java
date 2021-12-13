@@ -19,6 +19,10 @@ public class RemoveClaimCommand implements CommandExecutor {
             sender.sendMessage("no claim here");
             return false;
         }
+        if (!entity.isOp() || claim.owner != entity.getUniqueId()) {
+            sender.sendMessage("insufficient permissions");
+            return false;
+        }
         if (!SQLConn.removeClaim(claim)) {
             sender.sendMessage("database error!");
             return false;

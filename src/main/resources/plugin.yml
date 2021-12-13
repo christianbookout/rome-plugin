@@ -41,4 +41,3 @@ commands:
   killclaim:
     description: "remove a claim at your location"
     usage: "/killclaim"
-    permission: op

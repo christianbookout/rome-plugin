@@ -30,6 +30,7 @@ public class TitleEventListener implements Listener {
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         var title = SQLConn.getTitle(event.getPlayer().getUniqueId());
+        SQLConn.setUsername(event.getPlayer().getUniqueId(), event.getPlayer().getName());
         if (title == null) {
             return;
         }

@@ -1,9 +1,6 @@
 package romeplugin.zoning;
 
-import java.util.HashMap;
-import java.util.Timer;
-import java.util.TimerTask;
-
+import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.data.type.Door;
@@ -16,7 +13,9 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
 
-import net.md_5.bungee.api.ChatColor;
+import java.util.HashMap;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class LandEventListener implements Listener {
     private final LandControl controller;
@@ -63,12 +62,12 @@ public class LandEventListener implements Listener {
         if (e.getAction() != Action.RIGHT_CLICK_BLOCK && (e.getClickedBlock().getType().equals(Material.CHEST) || e.getClickedBlock().getState() instanceof Door)) {
             if (controller.canBreak(e.getPlayer(), e.getClickedBlock().getLocation().getBlockX(), e.getClickedBlock().getLocation().getBlockY())) {
                 String formatting = ChatColor.RED.toString() + ChatColor.UNDERLINE.toString() + ChatColor.BOLD.toString();
-                e.getPlayer().sendMessage( formatting + " woah " + ChatColor.RESET.toString() + " that is locked by " + e.getPlayer().getDisplayName());
+                e.getPlayer().sendMessage(formatting + " woah " + ChatColor.RESET.toString() + " that is locked by " + e.getPlayer().getDisplayName());
                 e.setCancelled(true);
-            } 
-        }   
+            }
+        }
         //if a player right clicks w/ the claim material then maybe claim some stuff!!
-        else if (e.getPlayer().getInventory().getItemInMainHand() != null && e.getPlayer().getInventory().getItemInMainHand().getType().equals(claimMaterial) && e.getAction() == Action.RIGHT_CLICK_BLOCK) {
+        else if (e.getPlayer().getInventory().getItemInMainHand().getType().equals(claimMaterial) && e.getAction() == Action.RIGHT_CLICK_BLOCK) {
             Location newLoc = e.getClickedBlock().getLocation();
             if (players.containsKey(e.getPlayer())) {
                 Location lastLoc = players.get(e.getPlayer());
@@ -80,8 +79,7 @@ public class LandEventListener implements Listener {
                 } else { //TODO: check if claim is greater than max claim size . . .
                     ClaimLandCommand.claimLand(e.getPlayer(), lastLoc.getBlockX(), lastLoc.getBlockZ(), newLoc.getBlockX(), newLoc.getBlockZ());
                     players.remove(e.getPlayer());
-                    return;
-                }
+                } 
             } else {
                 players.put(e.getPlayer(), e.getClickedBlock().getLocation());
                 e.getPlayer().sendMessage("claim started @ (" + newLoc.getBlockX() + ", " + newLoc.getBlockZ() + ").");
@@ -99,6 +97,7 @@ public class LandEventListener implements Listener {
             this.removePlayer = removePlayer;
             this.removeLocation = removeLocation;
         }
+
         @Override
         public void run() {
             if (!players.get(removePlayer).equals(removeLocation)) 
@@ -106,7 +105,6 @@ public class LandEventListener implements Listener {
             players.remove(removePlayer);
             removePlayer.sendMessage(ChatColor.RED.toString() + "claim @ ("+ removeLocation.getBlockX() + ", " + removeLocation.getBlockZ() + ") timed out");
         }
-        
     }
 }
 

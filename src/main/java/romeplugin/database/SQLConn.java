@@ -1,5 +1,6 @@
 package romeplugin.database;
 
+import org.bukkit.Location;
 import romeplugin.newtitle.Title;
 
 import javax.sql.DataSource;
@@ -51,6 +52,10 @@ public class SQLConn {
         return getClaimRect(x, y, x, y);
     }
 
+    public static ClaimEntry getClaim(Location loc) {
+        return getClaim(loc.getBlockX(), loc.getBlockZ());
+    }
+
     public static ClaimEntry getClaimRect(int x0, int y0, int x1, int y1) {
         try {
             var stmt = getConnection().prepareStatement("SELECT * FROM cityClaims WHERE x0 <= ? AND x1 >= ? AND y0 >= ? AND y1 <= ?;");
@@ -97,6 +102,64 @@ public class SQLConn {
             stmt.setInt(3, claim.x1);
             stmt.setInt(4, claim.y1);
             stmt.setString(5, claim.owner.toString());
+            stmt.execute();
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public static String getUsername(UUID uuid) {
+        try {
+            var stmt = getConnection().prepareStatement("SELECT username FROM usernames WHERE uuid = ?;");
+            stmt.setString(1, uuid.toString());
+            var res = stmt.executeQuery();
+            if (!res.next()) {
+                return null;
+            }
+            return res.getString("username");
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public static void setUsername(UUID uuid, String name) {
+        try {
+            var stmt = getConnection().prepareStatement("REPLACE INTO usernames VALUES (?, ?);");
+            stmt.setString(1, uuid.toString());
+            stmt.setString(2, name);
+            stmt.execute();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static UUID getUUIDFromUsername(String target) {
+        try {
+            var stmt = getConnection().prepareStatement("SELECT uuid FROM usernames WHERE username = ?;");
+            stmt.setString(1, target);
+            var res = stmt.executeQuery();
+            if (!res.next()) {
+                return null;
+            }
+            return UUID.fromString(res.getString("uuid"));
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public static boolean updateClaimOwner(ClaimEntry entry, UUID newOwner) {
+        try {
+            var stmt = getConnection().prepareStatement("UPDATE cityClaims SET owner_uuid = ?" +
+                    "WHERE x0 = ? AND y0 = ? AND x1 = ? AND y1 = ?;");
+            stmt.setString(1, newOwner.toString());
+            stmt.setInt(2, entry.x0);
+            stmt.setInt(3, entry.y0);
+            stmt.setInt(4, entry.x1);
+            stmt.setInt(5, entry.y1);
             stmt.execute();
             return true;
         } catch (SQLException e) {

@@ -51,7 +51,7 @@ public class ClaimLandCommand implements CommandExecutor {
             player.sendMessage("land already claimed >:(");
             return false;
         }
-        SQLConn.addClaim(x0, y0, x1, y1, player.getUniqueId());
+        SQLConn.addClaim(x00, y00, x01, y01, player.getUniqueId());
         player.sendMessage("successfully claimed " + (x01 - x00 + 1) * (y00 - y01 + 1) + " blocks.");
         return true;
     }

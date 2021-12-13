@@ -19,7 +19,7 @@ public class RemoveClaimCommand implements CommandExecutor {
             sender.sendMessage("no claim here");
             return false;
         }
-        if (!entity.isOp() || claim.owner != entity.getUniqueId()) {
+        if (!entity.isOp() && claim.owner != entity.getUniqueId()) {
             sender.sendMessage("insufficient permissions");
             return false;
         }

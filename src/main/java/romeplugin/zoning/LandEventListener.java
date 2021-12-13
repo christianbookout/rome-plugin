@@ -24,7 +24,7 @@ public class LandEventListener implements Listener {
     public static Material claimMaterial = Material.BRICK;
     public static long claimTimeoutMS = 20000;
 
-    private Timer claimTimer = new Timer();
+    //private Timer claimTimer = new Timer();
 
     public LandEventListener(LandControl controller) {
         this.controller = controller;
@@ -70,19 +70,20 @@ public class LandEventListener implements Listener {
                 Location lastLoc = players.get(e.getPlayer());
                 Location newLoc = e.getClickedBlock().getLocation();
                 //you can't claim the block you already clicked, silly
-                if (newLoc.getBlockX() == lastLoc.getBlockX() && newLoc.getBlockY() == lastLoc.getBlockY() && newLoc.getBlockZ() == lastLoc.getBlockZ()) {
+                if (newLoc.getBlockX() == lastLoc.getBlockX() && newLoc.getBlockZ() == lastLoc.getBlockZ()) {
                     e.getPlayer().sendMessage("try claiming more than 1 block");
                     players.remove(e.getPlayer());
                     return;
                 } else { //TODO: check if claim is greater than max claim size . . .
-                    ClaimLandCommand.claimLand(e.getPlayer(), lastLoc.getBlockX(), lastLoc.getBlockY(), newLoc.getBlockX(), newLoc.getBlockY());
+                    ClaimLandCommand.claimLand(e.getPlayer(), lastLoc.getBlockX(), lastLoc.getBlockZ(), newLoc.getBlockX(), newLoc.getBlockZ());
                     players.remove(e.getPlayer());
                     return;
                 }
             } else {
                 players.put(e.getPlayer(), e.getClickedBlock().getLocation());
-                if (claimTimeoutMS != 0) 
-                    claimTimer.schedule(new PlayerUnclaimTimer(e.getPlayer()), claimTimeoutMS);
+                e.getPlayer().sendMessage("claim started @ (" + e.getClickedBlock().getLocation().getX() + ", " + e.getClickedBlock().getLocation().getZ() + ").");
+                //if (claimTimeoutMS != 0) 
+                //    claimTimer.schedule(new PlayerUnclaimTimer(e.getPlayer()), claimTimeoutMS);
                 return;
             }
         }

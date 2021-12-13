@@ -104,4 +104,30 @@ public class SQLConn {
             return false;
         }
     }
+
+    public static String getUsername(UUID uuid) {
+        try {
+            var stmt = getConnection().prepareStatement("SELECT username FROM usernames WHERE uuid = ?;");
+            stmt.setString(1, uuid.toString());
+            var res = stmt.executeQuery();
+            if (!res.next()) {
+                return null;
+            }
+            return res.getString("username");
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public static void setUsername(UUID uuid, String name) {
+        try {
+            var stmt = getConnection().prepareStatement("REPLACE INTO usernames VALUES (?, ?);");
+            stmt.setString(1, uuid.toString());
+            stmt.setString(2, name);
+            stmt.execute();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 }

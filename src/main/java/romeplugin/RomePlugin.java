@@ -90,6 +90,9 @@ public class RomePlugin extends JavaPlugin {
                     "size INT NOT NULL," +
                     "x INT NOT NULL," +
                     "y INT NOT NULL);").execute();
+            conn.prepareStatement("CREATE TABLE IF NOT EXISTS usernames (" +
+                    "uuid CHAR(36) NOT NULL PRIMARY KEY," +
+                    "username CHAR(32) NOT NULL);").execute();
             var res = conn.prepareStatement("SELECT * FROM cityInfo;").executeQuery();
             if (res.next()) {
                 landControl.setGovernmentSize(res.getInt("size"));

@@ -20,7 +20,11 @@ public class ClaimInfoCommand implements CommandExecutor {
             sender.sendMessage("no claim here!");
             return true;
         }
-        sender.sendMessage("claim owner: " + claim.owner +
+        var owner_username = SQLConn.getUsername(claim.owner);
+        if (owner_username == null) {
+            owner_username = claim.owner.toString();
+        }
+        sender.sendMessage("claim owner: " + owner_username +
                 "\nfrom (" + claim.x0 + ", " + claim.y0 + ") to (" + claim.x1 + ", " + claim.y1 + ")");
         return true;
     }

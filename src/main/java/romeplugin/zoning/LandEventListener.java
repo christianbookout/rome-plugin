@@ -14,6 +14,7 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.EquipmentSlot;
 
 import net.md_5.bungee.api.ChatColor;
 
@@ -52,8 +53,7 @@ public class LandEventListener implements Listener {
 
     @EventHandler
     public void claimClicky(PlayerInteractEvent e) {
-        e.getPlayer().sendMessage("fuck you");
-        if (e.getClickedBlock() == null) {
+        if (e.getClickedBlock() == null || e.getHand() == EquipmentSlot.HAND) {
             return;
         }
         //if player is clicking on a locked chest/door then don't let em
@@ -71,7 +71,7 @@ public class LandEventListener implements Listener {
                 Location newLoc = e.getClickedBlock().getLocation();
                 //you can't claim the block you already clicked, silly
                 if (newLoc.getBlockX() == lastLoc.getBlockX() && newLoc.getBlockY() == lastLoc.getBlockY() && newLoc.getBlockZ() == lastLoc.getBlockZ()) {
-                    e.getPlayer().sendMessage("try claiming more than 1 block " + players.toString());
+                    e.getPlayer().sendMessage("try claiming more than 1 block");
                     players.remove(e.getPlayer());
                     return;
                 } else { //TODO: check if claim is greater than max claim size . . .

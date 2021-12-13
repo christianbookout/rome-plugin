@@ -38,6 +38,7 @@ public class TransferClaimCommand implements CommandExecutor {
             sender.sendMessage("database error!");
             return false;
         }
+        sender.sendMessage("transferred claim to " + target);
         return true;
     }
 }

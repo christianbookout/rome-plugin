@@ -11,6 +11,7 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.EquipmentSlot;
 
 import java.util.HashMap;
@@ -85,6 +86,16 @@ public class LandEventListener implements Listener {
                 }
             }
         }
+    }
+
+    @EventHandler
+    public void onPlayerMove(PlayerMoveEvent event) {
+        var loc = event.getTo();
+        if (loc == null || !controller.inCity(loc.getBlockX(), loc.getBlockZ())) {
+            return;
+        }
+        var area = controller.getArea(loc.getBlockX(), loc.getBlockZ());
+        event.getPlayer().sendMessage(ChatColor.BLUE + "Entering " + ChatColor.RED + area.getType() + ChatColor.RESET + ".");
     }
 
     //funny

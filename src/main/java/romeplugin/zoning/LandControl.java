@@ -67,7 +67,7 @@ public class LandControl {
         return Math.sqrt(x_dist * x_dist + y_dist * y_dist);
     }*/
 
-    private boolean inCity(int x, int y) {
+    public boolean inCity(int x, int y) {
         var extents = governmentSize * suburbsMult;
         return Math.abs(x - cityX) <= extents && Math.abs(y - cityY) <= extents;
     }

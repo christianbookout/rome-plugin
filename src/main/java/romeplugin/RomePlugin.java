@@ -11,7 +11,6 @@ import blockchain.Ledger;
 import blockchain.PayCommand;
 import com.mysql.cj.jdbc.MysqlConnectionPoolDataSource;
 import com.mysql.cj.jdbc.MysqlDataSource;
-
 import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -66,7 +65,7 @@ public class RomePlugin extends JavaPlugin {
         dataSource.setPassword(config.getString("database.password"));
 
         LandEventListener.claimTimeoutMS = config.getLong("claims.claimTimeoutMS");
-        try { 
+        try {
             LandEventListener.claimMaterial = Material.valueOf(config.getString("claims.claimMaterial").toUpperCase().strip());
         } catch (IllegalArgumentException e) {
             this.getLogger().log(Level.WARNING, "set you's claim material in the config file fam, using " + LandEventListener.claimMaterial.toString() + " instead!!!");
@@ -103,6 +102,7 @@ public class RomePlugin extends JavaPlugin {
         }
 
         getCommand("claim").setExecutor(new ClaimLandCommand());
+        getCommand("transferclaim").setExecutor(new TransferClaimCommand());
         getCommand("claiminfo").setExecutor(new ClaimInfoCommand());
         getCommand("killclaim").setExecutor(new RemoveClaimCommand());
         getCommand("removetitle").setExecutor(new RemoveTitleCommand());

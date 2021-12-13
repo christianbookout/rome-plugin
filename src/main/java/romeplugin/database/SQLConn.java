@@ -1,5 +1,6 @@
 package romeplugin.database;
 
+import org.bukkit.Location;
 import romeplugin.newtitle.Title;
 
 import javax.sql.DataSource;
@@ -49,6 +50,10 @@ public class SQLConn {
 
     public static ClaimEntry getClaim(int x, int y) {
         return getClaimRect(x, y, x, y);
+    }
+
+    public static ClaimEntry getClaim(Location loc) {
+        return getClaim(loc.getBlockX(), loc.getBlockZ());
     }
 
     public static ClaimEntry getClaimRect(int x0, int y0, int x1, int y1) {
@@ -128,6 +133,38 @@ public class SQLConn {
             stmt.execute();
         } catch (SQLException e) {
             e.printStackTrace();
+        }
+    }
+
+    public static UUID getUUIDFromUsername(String target) {
+        try {
+            var stmt = getConnection().prepareStatement("SELECT uuid FROM usernames WHERE username = ?;");
+            stmt.setString(1, target);
+            var res = stmt.executeQuery();
+            if (!res.next()) {
+                return null;
+            }
+            return UUID.fromString(res.getString("uuid"));
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public static boolean updateClaimOwner(ClaimEntry entry, UUID newOwner) {
+        try {
+            var stmt = getConnection().prepareStatement("UPDATE cityClaims SET owner_uuid = ?" +
+                    "WHERE x0 = ? AND y0 = ? AND x1 = ? AND y1 = ?;");
+            stmt.setString(1, newOwner.toString());
+            stmt.setInt(2, entry.x0);
+            stmt.setInt(3, entry.y0);
+            stmt.setInt(4, entry.x1);
+            stmt.setInt(5, entry.y1);
+            stmt.execute();
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
         }
     }
 }

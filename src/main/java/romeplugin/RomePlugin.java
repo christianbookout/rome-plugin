@@ -19,6 +19,8 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import romeplugin.database.SQLConn;
+import romeplugin.messageIntercepter.DistanceListener;
+import romeplugin.messageIntercepter.SwearListener;
 import romeplugin.newtitle.RemoveTitleCommand;
 import romeplugin.newtitle.SetTitleCommand;
 import romeplugin.newtitle.Title;
@@ -64,13 +66,15 @@ public class RomePlugin extends JavaPlugin {
         dataSource.setDatabaseName(config.getString("database.database"));
         dataSource.setUser(config.getString("database.username"));
         dataSource.setPassword(config.getString("database.password"));
-
-        LandEventListener.claimTimeoutMS = config.getLong("claims.claimTimeoutMS");
+        Material claimMaterial;
         try { 
-            LandEventListener.claimMaterial = Material.valueOf(config.getString("claims.claimMaterial").toUpperCase().strip());
+            claimMaterial = Material.valueOf(config.getString("claims.claimMaterial").toUpperCase().strip());
         } catch (IllegalArgumentException e) {
-            this.getLogger().log(Level.WARNING, "set you's claim material in the config file fam, using " + LandEventListener.claimMaterial.toString() + " instead!!!");
+            this.getLogger().log(Level.WARNING, "set you's claim material in the config file fam, using " + LandEventListener.DEFAULT_MATERIAL.toString() + " instead!!!");
+            claimMaterial = LandEventListener.DEFAULT_MATERIAL;
         }
+        LandEventListener landListener = new LandEventListener(landControl, claimMaterial, config.getLong("claims.claimTimeoutMS"));
+
         SQLConn.setSource(dataSource);
 
         try (Connection conn = SQLConn.getConnection()) {
@@ -108,8 +112,12 @@ public class RomePlugin extends JavaPlugin {
         getCommand("pay").setExecutor(new PayCommand(ledger));
         getCommand("bal").setExecutor(new BalanceCommand(ledger));
         getServer().getPluginManager().registerEvents(new TitleEventListener(), this);
+        getServer().getPluginManager().registerEvents(new DistanceListener(this.getServer(), config.getInt("messages.messageDistance")), this);
+        //TODO add swear filter
+        //if (config.getBoolean("messages.useSwearFilter"))
+        //    getServer().getPluginManager().registerEvents(new SwearListener(), this);
         getServer().getPluginManager().registerEvents(new BlockchainEventListener(this, ledger), this);
-        getServer().getPluginManager().registerEvents(new LandEventListener(landControl), this);
+        getServer().getPluginManager().registerEvents(landListener, this);
     }
 
     //true/false if it worked or didnt work
@@ -117,4 +125,5 @@ public class RomePlugin extends JavaPlugin {
     public boolean onCommand(CommandSender sender, Command command, String label, String[] arguments) {
         return false;
     }
+    
 }

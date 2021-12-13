@@ -52,6 +52,7 @@ public class LandEventListener implements Listener {
 
     @EventHandler
     public void claimClicky(PlayerInteractEvent e) {
+        e.getPlayer().sendMessage("fuck you");
         if (e.getClickedBlock() == null) {
             return;
         }
@@ -70,7 +71,7 @@ public class LandEventListener implements Listener {
                 Location newLoc = e.getClickedBlock().getLocation();
                 //you can't claim the block you already clicked, silly
                 if (newLoc.getBlockX() == lastLoc.getBlockX() && newLoc.getBlockY() == lastLoc.getBlockY() && newLoc.getBlockZ() == lastLoc.getBlockZ()) {
-                    e.getPlayer().sendMessage("try claiming more than 1 block");
+                    e.getPlayer().sendMessage("try claiming more than 1 block " + players.toString());
                     players.remove(e.getPlayer());
                     return;
                 } else { //TODO: check if claim is greater than max claim size . . .

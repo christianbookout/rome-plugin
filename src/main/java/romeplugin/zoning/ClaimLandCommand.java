@@ -52,7 +52,7 @@ public class ClaimLandCommand implements CommandExecutor {
             return false;
         }
         SQLConn.addClaim(x0, y0, x1, y1, player.getUniqueId());
-        player.sendMessage("successfully claimed " + ((x01 - x00) == 0 ? 1 : x01 - x00) * ((y00 - y01)  == 0 ? 1 : y00 - y01) + " blocks.");
+        player.sendMessage("successfully claimed " + (x01 - x00 + 1) * (y00 - y01 + 1) + " blocks.");
         return true;
     }
 }

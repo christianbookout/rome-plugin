@@ -70,29 +70,31 @@ public class LandEventListener implements Listener {
                 Location newLoc = e.getClickedBlock().getLocation();
                 //you can't claim the block you already clicked, silly
                 if (newLoc.getBlockX() == lastLoc.getBlockX() && newLoc.getBlockY() == lastLoc.getBlockY() && newLoc.getBlockZ() == lastLoc.getBlockZ()) {
-                    e.getPlayer().sendMessage("literally try to claim anywhere that isn't where you just clicked");
+                    e.getPlayer().sendMessage("try claiming more than 1 block");
+                    players.remove(e.getPlayer());
+                    return;
                 } else { //TODO: check if claim is greater than max claim size . . .
                     ClaimLandCommand.claimLand(e.getPlayer(), lastLoc.getBlockX(), lastLoc.getBlockY(), newLoc.getBlockX(), newLoc.getBlockY());
                     players.remove(e.getPlayer());
+                    return;
                 }
             } else {
                 players.put(e.getPlayer(), e.getClickedBlock().getLocation());
                 if (claimTimeoutMS != 0) 
-                    claimTimer.schedule(new PlayerUnclaimTimer(players, e.getPlayer()), claimTimeoutMS);
+                    claimTimer.schedule(new PlayerUnclaimTimer(e.getPlayer()), claimTimeoutMS);
+                return;
             }
         }
     }
         //funny
     class PlayerUnclaimTimer extends TimerTask {
         private final Player toRemove;
-        private final HashMap<Player, Location> map;
-        PlayerUnclaimTimer(HashMap<Player, Location> map, Player toRemove) {
+        PlayerUnclaimTimer(Player toRemove) {
             this.toRemove = toRemove;
-            this.map = map;
         }
         @Override
         public void run() {
-            map.remove(toRemove);
+            players.remove(toRemove);
             toRemove.sendMessage("claim timed out");
         }
         

@@ -1,9 +1,6 @@
 package romeplugin.zoning;
 
-import java.util.HashMap;
-import java.util.Timer;
-import java.util.TimerTask;
-
+import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.data.type.Door;
@@ -16,7 +13,8 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
 
-import net.md_5.bungee.api.ChatColor;
+import java.util.HashMap;
+import java.util.TimerTask;
 
 public class LandEventListener implements Listener {
     private final LandControl controller;
@@ -60,46 +58,48 @@ public class LandEventListener implements Listener {
         if (e.getAction() != Action.RIGHT_CLICK_BLOCK && (e.getClickedBlock().getType().equals(Material.CHEST) || e.getClickedBlock().getState() instanceof Door)) {
             if (controller.canBreak(e.getPlayer(), e.getClickedBlock().getLocation().getBlockX(), e.getClickedBlock().getLocation().getBlockY())) {
                 String formatting = ChatColor.RED.toString() + ChatColor.UNDERLINE.toString() + ChatColor.BOLD.toString();
-                e.getPlayer().sendMessage( formatting + " woah " + ChatColor.RESET.toString() + " that is locked by " + e.getPlayer().getDisplayName());
+                e.getPlayer().sendMessage(formatting + " woah " + ChatColor.RESET.toString() + " that is locked by " + e.getPlayer().getDisplayName());
                 e.setCancelled(true);
-            } 
-        }   
+            }
+        }
         //if a player right clicks w/ the claim material then maybe claim some stuff!!
-        else if (e.getPlayer().getInventory().getItemInMainHand() != null && e.getPlayer().getInventory().getItemInMainHand().getType().equals(claimMaterial) && e.getAction() == Action.RIGHT_CLICK_BLOCK) {
-            if (players.containsKey(e.getPlayer())) {
-                Location lastLoc = players.get(e.getPlayer());
-                Location newLoc = e.getClickedBlock().getLocation();
-                //you can't claim the block you already clicked, silly
-                if (newLoc.getBlockX() == lastLoc.getBlockX() && newLoc.getBlockZ() == lastLoc.getBlockZ()) {
-                    e.getPlayer().sendMessage("try claiming more than 1 block");
+        else {
+            e.getPlayer().getInventory().getItemInMainHand();
+            if (e.getPlayer().getInventory().getItemInMainHand().getType().equals(claimMaterial) && e.getAction() == Action.RIGHT_CLICK_BLOCK) {
+                if (players.containsKey(e.getPlayer())) {
+                    Location lastLoc = players.get(e.getPlayer());
+                    Location newLoc = e.getClickedBlock().getLocation();
+                    //you can't claim the block you already clicked, silly
+                    if (newLoc.getBlockX() == lastLoc.getBlockX() && newLoc.getBlockZ() == lastLoc.getBlockZ()) {
+                        e.getPlayer().sendMessage("try claiming more than 1 block");
+                    } else {
+                        // TODO: check if claim is greater than max claim size . . .
+                        ClaimLandCommand.claimLand(e.getPlayer(), lastLoc.getBlockX(), lastLoc.getBlockZ(), newLoc.getBlockX(), newLoc.getBlockZ());
+                    }
                     players.remove(e.getPlayer());
-                    return;
-                } else { //TODO: check if claim is greater than max claim size . . .
-                    ClaimLandCommand.claimLand(e.getPlayer(), lastLoc.getBlockX(), lastLoc.getBlockZ(), newLoc.getBlockX(), newLoc.getBlockZ());
-                    players.remove(e.getPlayer());
-                    return;
+                } else {
+                    players.put(e.getPlayer(), e.getClickedBlock().getLocation());
+                    e.getPlayer().sendMessage("claim started @ (" + e.getClickedBlock().getLocation().getX() + ", " + e.getClickedBlock().getLocation().getZ() + ").");
+                    //if (claimTimeoutMS != 0)
+                    //    claimTimer.schedule(new PlayerUnclaimTimer(e.getPlayer()), claimTimeoutMS);
                 }
-            } else {
-                players.put(e.getPlayer(), e.getClickedBlock().getLocation());
-                e.getPlayer().sendMessage("claim started @ (" + e.getClickedBlock().getLocation().getX() + ", " + e.getClickedBlock().getLocation().getZ() + ").");
-                //if (claimTimeoutMS != 0) 
-                //    claimTimer.schedule(new PlayerUnclaimTimer(e.getPlayer()), claimTimeoutMS);
-                return;
             }
         }
     }
-        //funny
+
+    //funny
     class PlayerUnclaimTimer extends TimerTask {
         private final Player toRemove;
+
         PlayerUnclaimTimer(Player toRemove) {
             this.toRemove = toRemove;
         }
+
         @Override
         public void run() {
             players.remove(toRemove);
             toRemove.sendMessage("claim timed out");
         }
-        
     }
 }
 

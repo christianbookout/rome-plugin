@@ -36,25 +36,24 @@ import java.util.logging.Level;
  */
 public class RomePlugin extends JavaPlugin {
     public static final HashMap<Player, Title> onlinePlayerTitles = new HashMap<>();
-    // Hashmap of players who joined the server and don't exist in the database
-    // TODO: store these players when the server closes (and/or over a timed
-    // interval)
+    //Hashmap of players who joined the server and don't exist in the database
+    //TODO: store these players when the server closes (and/or over a timed interval)
     public static final HashMap<Player, Title> toStore = new HashMap<>();
-    // private final String titlesFilename = "rome_titles";
+    //private final String titlesFilename = "rome_titles";
     // TODO: make the ledger persistent
     private final Ledger ledger = new Ledger();
     // TODO: un-hardcode the multipliers for sizes
     private final LandControl landControl = new LandControl(0, 0, 0, 5, 10);
 
-    // runs when the plugin is enabled on the server startup
+    //runs when the plugin is enabled on the server startup 
     @Override
     public void onEnable() {
-        // registering the eventlistener
-        // try {
-        // titles.loadData(new DataInputStream(new FileInputStream(titlesFilename)));
-        // } catch (FileNotFoundException e) {
-        // getLogger().fine("could not find " + titlesFilename);
-        // }
+        //registering the eventlistener
+        //try {
+        //titles.loadData(new DataInputStream(new FileInputStream(titlesFilename)));
+        //} catch (FileNotFoundException e) {
+        //getLogger().fine("could not find " + titlesFilename);
+        //}
 
         this.saveDefaultConfig();
         FileConfiguration config = this.getConfig();
@@ -70,12 +69,10 @@ public class RomePlugin extends JavaPlugin {
         try {
             claimMaterial = Material.valueOf(config.getString("claims.claimMaterial").toUpperCase().strip());
         } catch (IllegalArgumentException e) {
-            this.getLogger().log(Level.WARNING, "set you's claim material in the config file fam, using "
-                    + LandEventListener.DEFAULT_MATERIAL.toString() + " instead!!!");
+            this.getLogger().log(Level.WARNING, "set you's claim material in the config file fam, using " + LandEventListener.DEFAULT_MATERIAL.toString() + " instead!!!");
             claimMaterial = LandEventListener.DEFAULT_MATERIAL;
         }
-        LandEventListener landListener = new LandEventListener(landControl, claimMaterial,
-                config.getLong("claims.claimTimeoutMS"));
+        LandEventListener landListener = new LandEventListener(landControl, claimMaterial, config.getLong("claims.claimTimeoutMS"));
 
         SQLConn.setSource(dataSource);
 
@@ -84,8 +81,7 @@ public class RomePlugin extends JavaPlugin {
                     "uuid CHAR(36) NOT NULL PRIMARY KEY," +
                     "title ENUM('TRIBUNE', 'SENATOR', 'MAYOR', 'JUDGE', 'CONSOLE', 'SENSOR', 'POPE', 'BUILDER', 'CITIZEN') NOT NULL);")
                     .execute();
-            // (x0, y0) must be the top-left point and (x1, y1) must be the bottom-right
-            // point
+            // (x0, y0) must be the top-left point and (x1, y1) must be the bottom-right point
             conn.prepareStatement("CREATE TABLE IF NOT EXISTS cityClaims (" +
                     "x0 INT NOT NULL," +
                     "y0 INT NOT NULL," +
@@ -119,19 +115,18 @@ public class RomePlugin extends JavaPlugin {
         getCommand("pay").setExecutor(new PayCommand(ledger));
         getCommand("bal").setExecutor(new BalanceCommand(ledger));
         getServer().getPluginManager().registerEvents(new TitleEventListener(), this);
-        getServer().getPluginManager().registerEvents(
-                new DistanceListener(this.getServer(), config.getInt("messages.messageDistance")), this);
-        // TODO add swear filter
-        // if (config.getBoolean("messages.useSwearFilter"))
-        // getServer().getPluginManager().registerEvents(new SwearListener(), this);
+        getServer().getPluginManager().registerEvents(new DistanceListener(this.getServer(), config.getInt("messages.messageDistance")), this);
+        //TODO add swear filter
+        //if (config.getBoolean("messages.useSwearFilter"))
+        //    getServer().getPluginManager().registerEvents(new SwearListener(), this);
         getServer().getPluginManager().registerEvents(new BlockchainEventListener(this, ledger), this);
         getServer().getPluginManager().registerEvents(landListener, this);
     }
 
-    // true/false if it worked or didnt work
+    //true/false if it worked or didnt work
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] arguments) {
         return false;
     }
-
+    
 }

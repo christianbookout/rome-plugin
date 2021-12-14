@@ -11,22 +11,25 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.EquipmentSlot;
 
 import java.util.HashMap;
+import java.util.Timer;
 import java.util.TimerTask;
 
 public class LandEventListener implements Listener {
     private final LandControl controller;
+    public static final Material DEFAULT_MATERIAL = Material.BRICK;
 
-    public static Material claimMaterial = Material.BRICK;
-    public static long claimTimeoutMS = 20000;
+    private final Material claimMaterial;
+    private final long claimTimeoutMS;
 
-    //private Timer claimTimer = new Timer();
+    private Timer claimTimer = new Timer();
 
-    public LandEventListener(LandControl controller) {
+    public LandEventListener(LandControl controller, Material claimMaterial, long claimTimeoutMS) {
         this.controller = controller;
+        this.claimMaterial = claimMaterial;
+        this.claimTimeoutMS = claimTimeoutMS;
     }
 
     @EventHandler
@@ -64,52 +67,43 @@ public class LandEventListener implements Listener {
             }
         }
         //if a player right clicks w/ the claim material then maybe claim some stuff!!
-        else {
-            e.getPlayer().getInventory().getItemInMainHand();
-            if (e.getPlayer().getInventory().getItemInMainHand().getType().equals(claimMaterial) && e.getAction() == Action.RIGHT_CLICK_BLOCK) {
-                if (players.containsKey(e.getPlayer())) {
-                    Location lastLoc = players.get(e.getPlayer());
-                    Location newLoc = e.getClickedBlock().getLocation();
-                    //you can't claim the block you already clicked, silly
-                    if (newLoc.getBlockX() == lastLoc.getBlockX() && newLoc.getBlockZ() == lastLoc.getBlockZ()) {
-                        e.getPlayer().sendMessage("try claiming more than 1 block");
-                    } else {
-                        // TODO: check if claim is greater than max claim size . . .
-                        ClaimLandCommand.claimLand(e.getPlayer(), lastLoc.getBlockX(), lastLoc.getBlockZ(), newLoc.getBlockX(), newLoc.getBlockZ());
-                    }
+        else if (e.getPlayer().getInventory().getItemInMainHand().getType().equals(claimMaterial) && e.getAction() == Action.RIGHT_CLICK_BLOCK) {
+            Location newLoc = e.getClickedBlock().getLocation();
+            if (players.containsKey(e.getPlayer())) {
+                Location lastLoc = players.get(e.getPlayer());
+                //you can't claim the block you already clicked, silly
+                if (newLoc.getBlockX() == lastLoc.getBlockX() && newLoc.getBlockZ() == lastLoc.getBlockZ()) {
+                    e.getPlayer().sendMessage("try claiming more than 1 block");
                     players.remove(e.getPlayer());
-                } else {
-                    players.put(e.getPlayer(), e.getClickedBlock().getLocation());
-                    e.getPlayer().sendMessage("claim started @ (" + e.getClickedBlock().getLocation().getX() + ", " + e.getClickedBlock().getLocation().getZ() + ").");
-                    //if (claimTimeoutMS != 0)
-                    //    claimTimer.schedule(new PlayerUnclaimTimer(e.getPlayer()), claimTimeoutMS);
-                }
+                    return;
+                } else { //TODO: check if claim is greater than max claim size . . .
+                    ClaimLandCommand.claimLand(e.getPlayer(), lastLoc.getBlockX(), lastLoc.getBlockZ(), newLoc.getBlockX(), newLoc.getBlockZ());
+                    players.remove(e.getPlayer());
+                } 
+            } else {
+                players.put(e.getPlayer(), e.getClickedBlock().getLocation());
+                e.getPlayer().sendMessage("claim started @ (" + newLoc.getBlockX() + ", " + newLoc.getBlockZ() + ").");
+                if (claimTimeoutMS != 0) 
+                    claimTimer.schedule(new PlayerUnclaimTimer(e.getPlayer(), newLoc), claimTimeoutMS);
+                return;
             }
         }
     }
-
-    @EventHandler
-    public void onPlayerMove(PlayerMoveEvent event) {
-        var loc = event.getTo();
-        if (loc == null || !controller.inCity(loc.getBlockX(), loc.getBlockZ())) {
-            return;
-        }
-        var area = controller.getArea(loc.getBlockX(), loc.getBlockZ());
-        event.getPlayer().sendMessage(ChatColor.BLUE + "Entering " + ChatColor.RED + area.getType() + ChatColor.RESET + ".");
-    }
-
     //funny
     class PlayerUnclaimTimer extends TimerTask {
-        private final Player toRemove;
-
-        PlayerUnclaimTimer(Player toRemove) {
-            this.toRemove = toRemove;
+        private final Player removePlayer;
+        private final Location removeLocation;
+        PlayerUnclaimTimer(Player removePlayer, Location removeLocation) {
+            this.removePlayer = removePlayer;
+            this.removeLocation = removeLocation;
         }
 
         @Override
         public void run() {
-            players.remove(toRemove);
-            toRemove.sendMessage("claim timed out");
+            if (!players.get(removePlayer).equals(removeLocation)) 
+                return;
+            players.remove(removePlayer);
+            removePlayer.sendMessage(ChatColor.RED.toString() + "claim @ ("+ removeLocation.getBlockX() + ", " + removeLocation.getBlockZ() + ") timed out");
         }
     }
 }

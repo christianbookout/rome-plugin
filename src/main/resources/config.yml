@@ -8,3 +8,7 @@ database:
 claims:
   claimMaterial: BRICK # material to set claims with
   claimTimeoutMS: 20000 # set to 0 for none
+
+messages:
+  useSwearFilter: true 
+  messageDistance: 0 # distance to broadcast messages locally (0 for infinite distance)

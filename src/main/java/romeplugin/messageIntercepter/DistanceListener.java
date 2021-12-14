@@ -9,11 +9,9 @@ import org.bukkit.event.player.AsyncPlayerChatEvent;
 
 public class DistanceListener implements Listener {
     private final int distance;
-    private final Server server;
     private final boolean doSwearFilter;
 
-    public DistanceListener(Server server, int distance, boolean doSwearFilter) {
-        this.server = server;
+    public DistanceListener(int distance, boolean doSwearFilter) {
         this.distance = distance;
         this.doSwearFilter = doSwearFilter;
     }
@@ -23,17 +21,8 @@ public class DistanceListener implements Listener {
         String message = e.getMessage();
         if (doSwearFilter)
             message = SwearFilter.replaceSwears(message);
-
-        broadcastMessage(e.getPlayer(), message);
-        e.setCancelled(true);
-    }
-
-    public void broadcastMessage(Player sender, final String message) {
-        server.getOnlinePlayers().forEach(
-                p -> {
-                    if (distance == 0 || p.getLocation().distance(sender.getLocation()) <= distance)
-                        p.sendMessage(sender.getUniqueId(), message);
-                }
-        );
+        e.setMessage(message);
+        if (distance == 0)
+            e.getRecipients().removeIf(p -> p.getLocation().distance(e.getPlayer().getLocation()) > distance);
     }
 }

@@ -114,7 +114,7 @@ public class RomePlugin extends JavaPlugin {
         getCommand("pay").setExecutor(new PayCommand(ledger));
         getCommand("bal").setExecutor(new BalanceCommand(ledger));
         getServer().getPluginManager().registerEvents(new TitleEventListener(), this);
-        getServer().getPluginManager().registerEvents(new DistanceListener(this.getServer(), config.getInt("messages.messageDistance"), config.getBoolean("messages.useSwearFilter")), this);
+        getServer().getPluginManager().registerEvents(new DistanceListener(config.getInt("messages.messageDistance"), config.getBoolean("messages.useSwearFilter")), this);
         getServer().getPluginManager().registerEvents(new BlockchainEventListener(this, ledger), this);
         getServer().getPluginManager().registerEvents(landListener, this);
     }

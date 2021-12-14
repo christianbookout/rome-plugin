@@ -24,7 +24,7 @@ public class LandEventListener implements Listener {
     private final Material claimMaterial;
     private final long claimTimeoutMS;
 
-    private Timer claimTimer = new Timer();
+    private final Timer claimTimer = new Timer();
 
     public LandEventListener(LandControl controller, Material claimMaterial, long claimTimeoutMS) {
         this.controller = controller;
@@ -74,25 +74,24 @@ public class LandEventListener implements Listener {
                 //you can't claim the block you already clicked, silly
                 if (newLoc.getBlockX() == lastLoc.getBlockX() && newLoc.getBlockZ() == lastLoc.getBlockZ()) {
                     e.getPlayer().sendMessage("try claiming more than 1 block");
-                    players.remove(e.getPlayer());
-                    return;
                 } else { //TODO: check if claim is greater than max claim size . . .
                     ClaimLandCommand.claimLand(e.getPlayer(), lastLoc.getBlockX(), lastLoc.getBlockZ(), newLoc.getBlockX(), newLoc.getBlockZ());
-                    players.remove(e.getPlayer());
-                } 
+                }
+                players.remove(e.getPlayer());
             } else {
                 players.put(e.getPlayer(), e.getClickedBlock().getLocation());
                 e.getPlayer().sendMessage("claim started @ (" + newLoc.getBlockX() + ", " + newLoc.getBlockZ() + ").");
-                if (claimTimeoutMS != 0) 
+                if (claimTimeoutMS != 0)
                     claimTimer.schedule(new PlayerUnclaimTimer(e.getPlayer(), newLoc), claimTimeoutMS);
-                return;
             }
         }
     }
+
     //funny
     class PlayerUnclaimTimer extends TimerTask {
         private final Player removePlayer;
         private final Location removeLocation;
+
         PlayerUnclaimTimer(Player removePlayer, Location removeLocation) {
             this.removePlayer = removePlayer;
             this.removeLocation = removeLocation;
@@ -100,10 +99,10 @@ public class LandEventListener implements Listener {
 
         @Override
         public void run() {
-            if (!players.get(removePlayer).equals(removeLocation)) 
+            if (!players.get(removePlayer).equals(removeLocation))
                 return;
             players.remove(removePlayer);
-            removePlayer.sendMessage(ChatColor.RED.toString() + "claim @ ("+ removeLocation.getBlockX() + ", " + removeLocation.getBlockZ() + ") timed out");
+            removePlayer.sendMessage(ChatColor.RED.toString() + "claim @ (" + removeLocation.getBlockX() + ", " + removeLocation.getBlockZ() + ") timed out");
         }
     }
 }

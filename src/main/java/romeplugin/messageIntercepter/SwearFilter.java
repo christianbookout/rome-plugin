@@ -1,18 +1,19 @@
 package romeplugin.messageIntercepter;
 
 import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 
 public final class SwearFilter {
 
-    private static final String SWEAR_URL = "./src/main/resources/swears.csv";
+    private static final InputStream SWEAR_STREAM = SwearFilter.class.getResourceAsStream("/swears.csv");
     private static final ArrayList<String> swears = new ArrayList<>();
 
     private static void generateSwears() {
-        try (BufferedReader br = new BufferedReader(new FileReader(SWEAR_URL))) {
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(SWEAR_STREAM))) {
             br.lines().forEach(line -> {
                 String[] values = line.split(", ");
                 swears.addAll(Arrays.asList(values));

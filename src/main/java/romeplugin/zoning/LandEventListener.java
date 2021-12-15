@@ -18,6 +18,7 @@ import org.bukkit.event.hanging.HangingBreakByEntityEvent;
 import org.bukkit.event.hanging.HangingBreakEvent;
 import org.bukkit.event.hanging.HangingBreakEvent.RemoveCause;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
+import org.bukkit.event.player.PlayerBucketEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import romeplugin.database.ClaimEntry;
@@ -141,10 +142,9 @@ public class LandEventListener implements Listener {
     }
 
     @EventHandler
-    public void playerBucketEmptyEvent(PlayerBucketEmptyEvent e) {
+    public void playerBucketEmptyEvent(PlayerBucketEvent e) {
         Player player = e.getPlayer();
-        Location placePosition = e.getBlock().getLocation();
-        player.sendMessage("bucket time");
+        Location placePosition = e.getBlockClicked().getLocation();
         if (!controller.canBreak(player, placePosition)) {
             e.setCancelled(true);
         }
@@ -219,11 +219,8 @@ public class LandEventListener implements Listener {
         Location newLoc = e.getClickedBlock().getLocation();
         //if player is clicking on a locked chest/door then don't let em
         if (e.getAction() == Action.RIGHT_CLICK_BLOCK && (Arrays.asList(nonClickables).contains(e.getClickedBlock().getType()) || e.getClickedBlock().getType() == Material.CHEST || e.getClickedBlock().getState() instanceof Door)) {
-            e.getPlayer().sendMessage("you looky " + Arrays.asList(nonClickables).contains(e.getClickedBlock().getType()));
             if (!controller.canBreak(e.getPlayer(), newLoc)) {
-
-                String formatting = ChatColor.RED.toString() + ChatColor.UNDERLINE.toString() + ChatColor.BOLD.toString();
-                e.getPlayer().sendMessage(formatting + " woah " + ChatColor.RESET.toString() + " that is locked");
+                e.getPlayer().sendMessage(" woah that is locked");
                 e.setCancelled(true);
                 return;
             }
@@ -254,7 +251,7 @@ public class LandEventListener implements Listener {
     }
 
     //funny
-    class PlayerUnclaimTimer extends TimerTask {
+    class PlayerUnclaimTimer extends TimerTask { //timer already cancelled error? what
         private final Player removePlayer;
         private final Location removeLocation;
 
@@ -265,11 +262,15 @@ public class LandEventListener implements Listener {
 
         @Override
         public void run() {
-            Location l = players.get(removePlayer);
-            if (l != null && !l.equals(removeLocation))
-                return;
-            players.remove(removePlayer);
-            removePlayer.sendMessage(ChatColor.RED.toString() + "claim @ (" + removeLocation.getBlockX() + ", " + removeLocation.getBlockZ() + ") timed out");
+            try {
+                Location l = players.get(removePlayer);
+                if (l != null && !l.equals(removeLocation))
+                    return;
+                players.remove(removePlayer);
+                removePlayer.sendMessage(ChatColor.RED.toString() + "claim @ (" + removeLocation.getBlockX() + ", " + removeLocation.getBlockZ() + ") timed out");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 }

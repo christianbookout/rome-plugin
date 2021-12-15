@@ -265,7 +265,8 @@ public class LandEventListener implements Listener {
 
         @Override
         public void run() {
-            if (!players.get(removePlayer).equals(removeLocation))
+            Location l = players.get(removePlayer);
+            if (l != null && !l.equals(removeLocation))
                 return;
             players.remove(removePlayer);
             removePlayer.sendMessage(ChatColor.RED.toString() + "claim @ (" + removeLocation.getBlockX() + ", " + removeLocation.getBlockZ() + ") timed out");

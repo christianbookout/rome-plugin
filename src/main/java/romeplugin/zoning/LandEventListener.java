@@ -5,12 +5,19 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.data.Directional;
 import org.bukkit.block.data.type.Door;
+import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.ItemFrame;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.*;
+import org.bukkit.event.block.Action;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockCanBuildEvent;
+import org.bukkit.event.block.BlockDispenseEvent;
+import org.bukkit.event.block.BlockFromToEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.block.SpongeAbsorbEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.hanging.HangingBreakByEntityEvent;
@@ -93,12 +100,8 @@ public class LandEventListener implements Listener {
 
     @EventHandler
     public void onExplosion(EntityExplodeEvent e) {
-        if (controller.inCity(e.getLocation()))
-            e.blockList().clear();
-
-        else
-            e.blockList().removeIf(block -> controller.inCity(block.getLocation()));
-
+        e.blockList().removeIf(block -> controller.inCity(block.getLocation()));
+        
     }
 
     //prevent item frames/paintings from being broken by entities like skellingtons or boats in the city
@@ -115,10 +118,12 @@ public class LandEventListener implements Listener {
     //don't let players break hanging items w/ a bow or something in a claim/city
     @EventHandler
     public void hangingItemBroken(HangingBreakByEntityEvent e) {
-        if (e.getRemover() == null || !(e.getEntity() instanceof Player))
+        if (!(e.getEntity() instanceof Player)) {
+            e.setCancelled(true);
             return;
-        Player remover = (Player) e.getRemover();
+        }
 
+        Player remover = (Player) e.getRemover();
         if (!controller.canBreak(remover, e.getEntity().getLocation())) {
             remover.sendMessage("don't break the hanging thing");
             e.setCancelled(true);
@@ -145,15 +150,29 @@ public class LandEventListener implements Listener {
     public void playerBucketEmptyEvent(PlayerBucketEmptyEvent e) {
         Player player = e.getPlayer();
         Location placePosition = e.getBlock().getLocation();
+        player.sendMessage("bucket time");
         if (!controller.canBreak(player, placePosition)) {
             e.setCancelled(true);
         }
     }
 
+    @EventHandler
+    public void spongeAbsorbEvent(SpongeAbsorbEvent e) {
+        //TODO
+    }
+
     //don't let players steal items from an item frame in a claim/city
     @EventHandler
     public void frameItemStolen(EntityDamageByEntityEvent e) {
-        if (e.getDamager() instanceof Player && (e.getEntity() instanceof ItemFrame)) {
+        if (!(e.getEntity() instanceof ItemFrame || e.getEntity() instanceof ArmorStand))
+            return;
+
+        if (controller.inCity(e.getEntity().getLocation())) {
+            e.setCancelled(true);
+            return;
+        }
+
+        if (e.getDamager() instanceof Player) {
             Player damager = (Player) e.getDamager();
             if (!controller.canBreak(damager, e.getEntity().getLocation())) {
                 damager.sendMessage("filthy thief");
@@ -205,13 +224,14 @@ public class LandEventListener implements Listener {
         }
         Location newLoc = e.getClickedBlock().getLocation();
         //if player is clicking on a locked chest/door then don't let em
-        if (e.getAction() == Action.RIGHT_CLICK_BLOCK && (Arrays.asList(nonClickables).contains(e.getClickedBlock().getType()) || e.getClickedBlock().getState() instanceof Door)) {
-
+        if (e.getAction() == Action.RIGHT_CLICK_BLOCK && (Arrays.asList(nonClickables).contains(e.getClickedBlock().getType()) || e.getClickedBlock().getType() == Material.CHEST || e.getClickedBlock().getState() instanceof Door)) {
+            e.getPlayer().sendMessage("you looky " + Arrays.asList(nonClickables).contains(e.getClickedBlock().getType()));
             if (!controller.canBreak(e.getPlayer(), newLoc)) {
 
                 String formatting = ChatColor.RED.toString() + ChatColor.UNDERLINE.toString() + ChatColor.BOLD.toString();
-                e.getPlayer().sendMessage(formatting + " woah " + ChatColor.RESET.toString() + " that is locked by " + e.getPlayer().getDisplayName());
+                e.getPlayer().sendMessage(formatting + " woah " + ChatColor.RESET.toString() + " that is locked");
                 e.setCancelled(true);
+                return;
             }
         }
         //if a player right clicks w/ the claim material then maybe claim some stuff!!

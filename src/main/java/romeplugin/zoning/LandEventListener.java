@@ -230,7 +230,7 @@ public class LandEventListener implements Listener {
                     e.getPlayer().sendMessage("try claiming more than 1 block");
 
                 } else { //TODO: check if claim is greater than max claim size . . .
-                    ClaimLandCommand.claimLand(e.getPlayer(), lastLoc.getBlockX(), lastLoc.getBlockZ(), newLoc.getBlockX(), newLoc.getBlockZ());
+                    controller.tryClaimLand(e.getPlayer(), lastLoc.getBlockX(), lastLoc.getBlockZ(), newLoc.getBlockX(), newLoc.getBlockZ());
                 }
 
                 players.remove(e.getPlayer());

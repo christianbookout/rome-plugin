@@ -48,6 +48,7 @@ public class LandControl {
         }
         return null;
     }
+
     public CityArea getArea(Location loc) {
         return getArea(loc.getBlockX(), loc.getBlockZ());
     }
@@ -98,6 +99,36 @@ public class LandControl {
         }
         var claim = SQLConn.getClaim(x, y);
         return claim != null && claim.owner.equals(player.getUniqueId());
+    }
+
+    private static boolean rectIntersects(int x0, int y0, int x1, int y1,
+                                          int x2, int y2, int x3, int y3) {
+        return x0 <= x3 && x1 >= x2 && y0 >= y3 && y1 <= y2;
+    }
+
+    public boolean canClaim(Player player, int x0, int y0, int x1, int y1) {
+        var extents = governmentSize * suburbsMult;
+        return rectIntersects(x0, y0, x1, y1, cityX - extents, cityY + extents, cityX + extents, cityY - extents);
+    }
+
+    public boolean tryClaimLand(Player player, int xa, int ya, int xb, int yb) {
+        // ensure x0, y0 is the top left point and x1, y1 is the bottom right point
+        var x0 = Math.min(xa, xb);
+        var y0 = Math.max(ya, yb);
+        var x1 = Math.max(xa, xb);
+        var y1 = Math.min(ya, yb);
+        if (!canClaim(player, x0, y0, x1, y1)) {
+            player.sendMessage("you cannot claim outside of city limits");
+            return false;
+        }
+        var claim = SQLConn.getClaimRect(x0, y0, x1, y1);
+        if (claim != null) {
+            player.sendMessage("land already claimed >:(");
+            return false;
+        }
+        SQLConn.addClaim(x0, y0, x1, y1, player.getUniqueId());
+        player.sendMessage("successfully claimed " + (x1 - x0 + 1) * (y0 - y1 + 1) + " blocks.");
+        return true;
     }
 
     public boolean canBreak(Player player, Location loc) {

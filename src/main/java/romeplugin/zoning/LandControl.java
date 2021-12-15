@@ -77,12 +77,17 @@ public class LandControl {
         return Math.abs(x - cityX) <= extents && Math.abs(y - cityY) <= extents;
     }
 
+    public boolean inSuburbs(int x, int y) {
+        var extents = governmentSize * suburbsMult;
+        return Math.abs(x - cityX) <= extents && Math.abs(y - cityY) <= extents;
+    }
+
     public boolean inCity(Location loc) {
         return inCity(loc.getBlockX(), loc.getBlockZ());
     }
 
     public boolean canBreak(Player player, int x, int y) {
-        if (!inCity(x, y)) {
+        if (!inSuburbs(x, y)) {
             return true;
         }
         var title = RomePlugin.onlinePlayerTitles.get(player);

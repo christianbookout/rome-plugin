@@ -106,9 +106,18 @@ public class LandControl {
         return x0 <= x3 && x1 >= x2 && y0 >= y3 && y1 <= y2;
     }
 
+    private static boolean rectInside(int x0, int y0, int x1, int y1,
+                                          int x2, int y2, int x3, int y3) {
+        return x2 >= x0 && x3 <= x1 && y2 <= y0 && y3 >= y1;
+    }
+
     public boolean canClaim(Player player, int x0, int y0, int x1, int y1) {
         var extents = governmentSize * suburbsMult;
-        return rectIntersects(x0, y0, x1, y1, cityX - extents, cityY + extents, cityX + extents, cityY - extents);
+        if (!rectInside(cityX - extents, cityY + extents, cityX + extents, cityY - extents, x0, y0, x1, y1)) {
+            return false;
+        }
+        extents = governmentSize * cityMult;
+        return !rectIntersects(x0, y0, x1, y1, cityX - extents, cityY + extents, cityX + extents, cityY - extents);
     }
 
     public boolean tryClaimLand(Player player, int xa, int ya, int xb, int yb) {

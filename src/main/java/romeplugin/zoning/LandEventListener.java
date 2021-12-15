@@ -1,9 +1,6 @@
 package romeplugin.zoning;
 
 import net.md_5.bungee.api.ChatColor;
-import romeplugin.database.ClaimEntry;
-import romeplugin.database.SQLConn;
-
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.data.Directional;
@@ -13,12 +10,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.Action;
-import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.block.BlockCanBuildEvent;
-import org.bukkit.event.block.BlockDispenseEvent;
-import org.bukkit.event.block.BlockFromToEvent;
-import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.block.*;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.hanging.HangingBreakByEntityEvent;
@@ -27,6 +19,8 @@ import org.bukkit.event.hanging.HangingBreakEvent.RemoveCause;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
+import romeplugin.database.ClaimEntry;
+import romeplugin.database.SQLConn;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -46,17 +40,17 @@ public class LandEventListener implements Listener {
     private final HashMap<Player, Location> players = new HashMap<>();
 
     //the materials people can't right-click in a claim/the city
-    private final Material[] nonClickables = new Material[] {
-        Material.CHEST,
-        Material.BARREL,
-        Material.ANVIL,
-        Material.BEACON,
-        Material.BLAST_FURNACE,
-        Material.FURNACE,
-        Material.SMOKER,
-        Material.CHEST_MINECART,
-        Material.ITEM_FRAME,
-        Material.ARMOR_STAND
+    private final Material[] nonClickables = new Material[]{
+            Material.CHEST,
+            Material.BARREL,
+            Material.ANVIL,
+            Material.BEACON,
+            Material.BLAST_FURNACE,
+            Material.FURNACE,
+            Material.SMOKER,
+            Material.CHEST_MINECART,
+            Material.ITEM_FRAME,
+            Material.ARMOR_STAND
     };
 
     public LandEventListener(LandControl controller, Material claimMaterial, long claimTimeoutMS) {
@@ -75,7 +69,7 @@ public class LandEventListener implements Listener {
         event.getPlayer().sendMessage("you can't break that, dumbass");
         event.setCancelled(true);
     }
-    
+
     @EventHandler
     public void onBlockPlace(BlockPlaceEvent event) {
         var block = event.getBlock();
@@ -86,29 +80,31 @@ public class LandEventListener implements Listener {
     }
 
 
-    @EventHandler (priority = EventPriority.HIGHEST)
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void blockCanBuild(BlockCanBuildEvent e) {
+        if (e.getPlayer() == null) {
+            return;
+        }
         if (!controller.canBreak(e.getPlayer(), e.getBlock().getLocation())) {
             e.setBuildable(false);
             e.getPlayer().sendMessage("you can't build here");
-            return;
         }
     }
 
     @EventHandler
     public void onExplosion(EntityExplodeEvent e) {
-        if (controller.inCity(e.getLocation())) 
+        if (controller.inCity(e.getLocation()))
             e.blockList().clear();
-        
-        else 
+
+        else
             e.blockList().removeIf(block -> controller.inCity(block.getLocation()));
-        
+
     }
-    
+
     //prevent item frames/paintings from being broken by entities like skellingtons or boats in the city
     @EventHandler
     public void hangingItemBroken(HangingBreakEvent e) {
-        if (e.getCause() == RemoveCause.PHYSICS) 
+        if (e.getCause() == RemoveCause.PHYSICS)
             return;
 
         Location loc = e.getEntity().getLocation();
@@ -119,10 +115,10 @@ public class LandEventListener implements Listener {
     //don't let players break hanging items w/ a bow or something in a claim/city
     @EventHandler
     public void hangingItemBroken(HangingBreakByEntityEvent e) {
-        if (!(e.getEntity() instanceof Player)) 
+        if (e.getRemover() == null || !(e.getEntity() instanceof Player))
             return;
-
         Player remover = (Player) e.getRemover();
+
         if (!controller.canBreak(remover, e.getEntity().getLocation())) {
             remover.sendMessage("don't break the hanging thing");
             e.setCancelled(true);
@@ -131,7 +127,7 @@ public class LandEventListener implements Listener {
 
     //When a dispenser outside the city tries to dispense something into the city, then flip it around and dispense (cause that's kinda funny)
     @EventHandler
-    public void blockDispensedEvent(BlockDispenseEvent e){
+    public void blockDispensedEvent(BlockDispenseEvent e) {
         if (e.getBlock().getBlockData() instanceof Directional) {
             Directional direction = (Directional) e.getBlock().getBlockData();
 
@@ -151,7 +147,6 @@ public class LandEventListener implements Listener {
         Location placePosition = e.getBlock().getLocation();
         if (!controller.canBreak(player, placePosition)) {
             e.setCancelled(true);
-            return;
         }
     }
 
@@ -195,24 +190,23 @@ public class LandEventListener implements Listener {
             event.setCancelled(true);
             return;
         }
-        
+
         //liquid can't flow from one claim to someone else's adjacent claim
         if (fromClaim != null && toClaim != null && !fromClaim.owner.equals(toClaim.owner)) {
             event.setCancelled(true);
-            return;
         }
-        
     }
+
     //TODO make it so people can't open fence gates, click on buttons, press levers, etc in the city
     @EventHandler
-    public void claimClicky(PlayerInteractEvent e) { 
+    public void claimClicky(PlayerInteractEvent e) {
         if (e.getClickedBlock() == null || e.getHand() == EquipmentSlot.HAND) {
             return;
         }
         Location newLoc = e.getClickedBlock().getLocation();
         //if player is clicking on a locked chest/door then don't let em
         if (e.getAction() == Action.RIGHT_CLICK_BLOCK && (Arrays.asList(nonClickables).contains(e.getClickedBlock().getType()) || e.getClickedBlock().getState() instanceof Door)) {
-            
+
             if (!controller.canBreak(e.getPlayer(), newLoc)) {
 
                 String formatting = ChatColor.RED.toString() + ChatColor.UNDERLINE.toString() + ChatColor.BOLD.toString();

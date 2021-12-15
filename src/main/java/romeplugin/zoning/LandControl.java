@@ -1,5 +1,6 @@
 package romeplugin.zoning;
 
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import romeplugin.RomePlugin;
 import romeplugin.database.SQLConn;
@@ -47,6 +48,9 @@ public class LandControl {
         }
         return null;
     }
+    public CityArea getArea(Location loc) {
+        return getArea(loc.getBlockX(), loc.getBlockZ());
+    }
 
     public void updateDB() {
         try {
@@ -68,8 +72,12 @@ public class LandControl {
     }*/
 
     public boolean inCity(int x, int y) {
-        var extents = governmentSize * suburbsMult;
+        var extents = governmentSize * cityMult;
         return Math.abs(x - cityX) <= extents && Math.abs(y - cityY) <= extents;
+    }
+
+    public boolean inCity(Location loc) {
+        return inCity(loc.getBlockX(), loc.getBlockZ());
     }
 
     public boolean canBreak(Player player, int x, int y) {
@@ -90,5 +98,9 @@ public class LandControl {
         }
         var claim = SQLConn.getClaim(x, y);
         return claim != null && claim.owner.equals(player.getUniqueId());
+    }
+
+    public boolean canBreak(Player player, Location loc) {
+        return canBreak(player, loc.getBlockX(), loc.getBlockZ());
     }
 }

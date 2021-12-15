@@ -20,7 +20,7 @@ public class DistanceListener implements Listener {
         if (doSwearFilter)
             message = SwearFilter.replaceSwears(message);
         e.setMessage(message);
-        if (distance == 0)
+        if (distance != 0)
             e.getRecipients().removeIf(p -> p.getLocation().distance(e.getPlayer().getLocation()) > distance);
     }
 }

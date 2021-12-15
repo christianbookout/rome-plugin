@@ -19,6 +19,7 @@ import org.bukkit.event.hanging.HangingBreakEvent;
 import org.bukkit.event.hanging.HangingBreakEvent.RemoveCause;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
 import org.bukkit.event.player.PlayerBucketEvent;
+import org.bukkit.event.player.PlayerBucketFillEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import romeplugin.database.ClaimEntry;
@@ -142,7 +143,16 @@ public class LandEventListener implements Listener {
     }
 
     @EventHandler
-    public void playerBucketEmptyEvent(PlayerBucketEvent e) {
+    public void playerBucketFillEvent(PlayerBucketFillEvent e) {
+        Player player = e.getPlayer();
+        Location placePosition = e.getBlockClicked().getLocation();
+        if (!controller.canBreak(player, placePosition)) {
+            e.setCancelled(true);
+        }
+    }
+    
+    @EventHandler
+    public void playerBucketEmptyEvent(PlayerBucketEmptyEvent e) {
         Player player = e.getPlayer();
         Location placePosition = e.getBlockClicked().getLocation();
         if (!controller.canBreak(player, placePosition)) {

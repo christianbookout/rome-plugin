@@ -116,6 +116,10 @@ public class LandControl {
         if (!rectInside(cityX - extents, cityY + extents, cityX + extents, cityY - extents, x0, y0, x1, y1)) {
             return false;
         }
+        extents = governmentSize;
+        if (rectIntersects(x0, y0, x1, y1, cityX - extents, cityY + extents, cityX + extents, cityY - extents)) {
+            return false;
+        }
         extents = governmentSize * cityMult;
         return !rectIntersects(x0, y0, x1, y1, cityX - extents, cityY + extents, cityX + extents, cityY - extents);
     }

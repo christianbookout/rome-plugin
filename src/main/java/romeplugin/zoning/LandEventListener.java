@@ -6,11 +6,8 @@ import romeplugin.database.SQLConn;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.block.BlockState;
-import org.bukkit.block.Dispenser;
 import org.bukkit.block.data.Directional;
 import org.bukkit.block.data.type.Door;
-import org.bukkit.block.data.type.Gate;
 import org.bukkit.entity.ItemFrame;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -18,6 +15,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockCanBuildEvent;
 import org.bukkit.event.block.BlockDispenseEvent;
 import org.bukkit.event.block.BlockFromToEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
@@ -26,6 +24,7 @@ import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.hanging.HangingBreakByEntityEvent;
 import org.bukkit.event.hanging.HangingBreakEvent;
 import org.bukkit.event.hanging.HangingBreakEvent.RemoveCause;
+import org.bukkit.event.player.PlayerBucketEmptyEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
 
@@ -60,12 +59,6 @@ public class LandEventListener implements Listener {
         Material.ARMOR_STAND
     };
 
-    //materials that shouldn't be allowed to flow into the city/a claim
-    private final Material[] nonFlowables = new Material[] {
-        Material.WATER,
-        Material.LAVA
-    };
-
     public LandEventListener(LandControl controller, Material claimMaterial, long claimTimeoutMS) {
         this.controller = controller;
         this.claimMaterial = claimMaterial;
@@ -82,7 +75,7 @@ public class LandEventListener implements Listener {
         event.getPlayer().sendMessage("you can't break that, dumbass");
         event.setCancelled(true);
     }
-
+    
     @EventHandler
     public void onBlockPlace(BlockPlaceEvent event) {
         var block = event.getBlock();
@@ -90,6 +83,16 @@ public class LandEventListener implements Listener {
             return;
         event.getPlayer().sendMessage("no :)");
         event.setCancelled(true);
+    }
+
+
+    @EventHandler (priority = EventPriority.HIGHEST)
+    public void blockCanBuild(BlockCanBuildEvent e) {
+        if (!controller.canBreak(e.getPlayer(), e.getBlock().getLocation())) {
+            e.setBuildable(false);
+            e.getPlayer().sendMessage("you can't build here");
+            return;
+        }
     }
 
     @EventHandler
@@ -142,6 +145,16 @@ public class LandEventListener implements Listener {
         }
     }
 
+    @EventHandler
+    public void playerBucketEmptyEvent(PlayerBucketEmptyEvent e) {
+        Player player = e.getPlayer();
+        Location placePosition = e.getBlock().getLocation();
+        if (!controller.canBreak(player, placePosition)) {
+            e.setCancelled(true);
+            return;
+        }
+    }
+
     //don't let players steal items from an item frame in a claim/city
     @EventHandler
     public void frameItemStolen(EntityDamageByEntityEvent e) {
@@ -154,12 +167,9 @@ public class LandEventListener implements Listener {
         }
     }
 
-    //Only applies to water and lava (and dragon eggs, but that's okay)
-    @EventHandler(priority = EventPriority.HIGHEST)
+    //Only applies to water and lava (might eat dragon eggs lol)
+    @EventHandler(priority = EventPriority.HIGH)
     public void onBlockFromTo(BlockFromToEvent event) {
-        //dragon egg is trying to enter claimed blocks ig
-        if (!Arrays.asList(nonFlowables).contains(event.getToBlock().getType())) 
-            return;
 
         Location fromLoc = event.getBlock().getLocation();
         Location toLoc = event.getToBlock().getLocation();
@@ -185,9 +195,9 @@ public class LandEventListener implements Listener {
             event.setCancelled(true);
             return;
         }
-
+        
         //liquid can't flow from one claim to someone else's adjacent claim
-        if (!fromClaim.owner.equals(toClaim.owner)) {
+        if (fromClaim != null && toClaim != null && !fromClaim.owner.equals(toClaim.owner)) {
             event.setCancelled(true);
             return;
         }

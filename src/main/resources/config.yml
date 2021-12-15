@@ -11,4 +11,4 @@ claims:
 
 messages:
   useSwearFilter: true 
-  messageDistance: 0 # distance to broadcast messages locally (0 for infinite distance)
+  messageDistance: 250 # distance to broadcast messages locally (0 for infinite distance)

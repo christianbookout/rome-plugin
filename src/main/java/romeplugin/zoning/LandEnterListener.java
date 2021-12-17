@@ -5,7 +5,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerMoveEvent;
 
 public class LandEnterListener implements Listener {
-    private LandControl controller;
+    private final LandControl controller;
 
     public LandEnterListener(LandControl controller) {
         this.controller = controller;
@@ -13,6 +13,9 @@ public class LandEnterListener implements Listener {
 
     @EventHandler
     public void onPlayerMoveEvent(PlayerMoveEvent e) {
+        if (e.getTo() == null) {
+            return;
+        }
         if (e.getTo().getBlockX() == e.getFrom().getBlockX() && e.getTo().getBlockZ() == e.getFrom().getBlockZ()) 
             return;
         

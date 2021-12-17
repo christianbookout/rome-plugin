@@ -117,6 +117,7 @@ public class RomePlugin extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new DistanceListener(config.getInt("messages.messageDistance"), config.getBoolean("messages.useSwearFilter")), this);
         getServer().getPluginManager().registerEvents(new BlockchainEventListener(this, ledger), this);
         getServer().getPluginManager().registerEvents(landListener, this);
+        getServer().getPluginManager().registerEvents(new LandEnterListener(landControl), this);
     }
 
     //true/false if it worked or didnt work

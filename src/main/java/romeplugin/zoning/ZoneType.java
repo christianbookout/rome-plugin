@@ -6,7 +6,7 @@ import static romeplugin.newtitle.Title.*;
 import java.util.Arrays;
 
 public enum ZoneType {
-    GOVERNMENT(CONSOLE, MAYOR, BUILDER), CITY(MAYOR, BUILDER), SUBURB(), WILDERNESS();
+    GOVERNMENT(CONSOLE, MAYOR, BUILDER, SENSOR), CITY(MAYOR, BUILDER), SUBURB(), WILDERNESS();
 
     private final Title[] titles;
     ZoneType(Title... titles) {

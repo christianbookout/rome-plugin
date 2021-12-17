@@ -20,12 +20,12 @@ public class LandEnterListener implements Listener {
             return;
 
         CityArea newZone = controller.getArea(e.getTo());
-        if (newZone == null) {
+        CityArea oldZone = controller.getArea(e.getFrom());
+        if (oldZone != null && newZone == null) {
             e.getPlayer().sendMessage("you've entered the wilderness");
             return;
         }
-        CityArea oldZone = controller.getArea(e.getFrom());
-        if (oldZone == null || oldZone.getType() != newZone.getType()) {
+        if (newZone != null && (oldZone == null || oldZone.getType() != newZone.getType())) {
             e.getPlayer().sendMessage("you've entered the " + newZone.getType().toString().toLowerCase() + " zone");
         }
     }

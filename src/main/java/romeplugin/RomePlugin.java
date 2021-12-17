@@ -89,13 +89,14 @@ public class RomePlugin extends JavaPlugin {
                     "owner_uuid CHAR(36) NOT NULL);").execute();
             // overkill
             conn.prepareStatement("CREATE TABLE IF NOT EXISTS cityInfo (" +
+                    "type TINYINT NOT NULL PRIMARY KEY," +
                     "size INT NOT NULL," +
                     "x INT NOT NULL," +
                     "y INT NOT NULL);").execute();
             conn.prepareStatement("CREATE TABLE IF NOT EXISTS usernames (" +
                     "uuid CHAR(36) NOT NULL PRIMARY KEY," +
                     "username CHAR(32) NOT NULL);").execute();
-            var res = conn.prepareStatement("SELECT * FROM cityInfo;").executeQuery();
+            var res = conn.prepareStatement("SELECT * FROM cityInfo WHERE type = 0;").executeQuery();
             if (res.next()) {
                 landControl.setGovernmentSize(res.getInt("size"));
                 landControl.setCenter(res.getInt("x"), res.getInt("y"));

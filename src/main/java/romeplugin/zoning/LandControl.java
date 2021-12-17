@@ -57,7 +57,7 @@ public class LandControl {
     public void updateDB() {
         try {
             var stmt = SQLConn.getConnection()
-                    .prepareStatement("REPLACE INTO cityInfo (size, x, y) VALUE (?, ?, ?);");
+                    .prepareStatement("REPLACE INTO cityInfo VALUES (0, ?, ?, ?);");
             stmt.setInt(1, governmentSize);
             stmt.setInt(2, cityX);
             stmt.setInt(3, cityY);

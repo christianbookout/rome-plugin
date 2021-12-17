@@ -162,4 +162,12 @@ public class LandControl {
     public boolean canBreak(Player player, Location loc) {
         return canBreak(player, loc.getBlockX(), loc.getBlockZ());
     }
+
+    public boolean expandGovernment(int size) {
+        if (governmentSize + size < 0) {
+            return false;
+        }
+        governmentSize += size;
+        return true;
+    }
 }

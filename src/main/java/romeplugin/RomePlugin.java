@@ -104,6 +104,7 @@ public class RomePlugin extends JavaPlugin {
             e.printStackTrace();
         }
 
+        getCommand("rome").setExecutor(new LandCommand(landControl));
         getCommand("claim").setExecutor(new ClaimLandCommand(landControl));
         getCommand("transferclaim").setExecutor(new TransferClaimCommand());
         getCommand("claiminfo").setExecutor(new ClaimInfoCommand());

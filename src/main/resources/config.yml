@@ -5,6 +5,10 @@ database:
   username: user
   password: pass
 
+land:
+  cityMultiplier: 3
+  suburbsMultiplier: 5
+
 claims:
   claimMaterial: BRICK # material to set claims with
   claimTimeoutMS: 20000 # set to 0 for none

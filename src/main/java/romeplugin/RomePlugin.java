@@ -41,8 +41,6 @@ public class RomePlugin extends JavaPlugin {
     //private final String titlesFilename = "rome_titles";
     // TODO: make the ledger persistent
     private final Ledger ledger = new Ledger();
-    // TODO: un-hardcode the multipliers for sizes
-    private final LandControl landControl = new LandControl(0, 0, 0, 5, 10);
 
     //runs when the plugin is enabled on the server startup 
     @Override
@@ -56,6 +54,12 @@ public class RomePlugin extends JavaPlugin {
 
         this.saveDefaultConfig();
         FileConfiguration config = this.getConfig();
+
+        LandControl landControl = new LandControl(0,
+                0,
+                0,
+                config.getInt("land.cityMultiplier"),
+                config.getInt("land.suburbsMultiplier"));
 
         MysqlDataSource dataSource = new MysqlConnectionPoolDataSource();
         // we set our credentials

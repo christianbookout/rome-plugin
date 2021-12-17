@@ -167,7 +167,7 @@ public class LandControl {
         if (governmentSize + size < 0) {
             return false;
         }
-        governmentSize += size;
+        setGovernmentSize(governmentSize + size);
         return true;
     }
 }

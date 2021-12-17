@@ -18,7 +18,6 @@ import org.bukkit.event.hanging.HangingBreakByEntityEvent;
 import org.bukkit.event.hanging.HangingBreakEvent;
 import org.bukkit.event.hanging.HangingBreakEvent.RemoveCause;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
-import org.bukkit.event.player.PlayerBucketEvent;
 import org.bukkit.event.player.PlayerBucketFillEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
@@ -150,7 +149,7 @@ public class LandEventListener implements Listener {
             e.setCancelled(true);
         }
     }
-    
+
     @EventHandler
     public void playerBucketEmptyEvent(PlayerBucketEmptyEvent e) {
         Player player = e.getPlayer();
@@ -232,24 +231,19 @@ public class LandEventListener implements Listener {
             if (!controller.canBreak(e.getPlayer(), newLoc)) {
                 e.getPlayer().sendMessage(" woah that is locked");
                 e.setCancelled(true);
-                return;
             }
         }
         //if a player right clicks w/ the claim material then maybe claim some stuff!!
         else if (e.getPlayer().getInventory().getItemInMainHand().getType().equals(claimMaterial) && e.getAction() == Action.RIGHT_CLICK_BLOCK) {
-            if (players.containsKey(e.getPlayer())) {
-                Location lastLoc = players.get(e.getPlayer());
-
+            Location lastLoc = players.remove(e.getPlayer());
+            if (lastLoc != null) {
                 //you can't claim the block you already clicked, silly
                 if (newLoc.getBlockX() == lastLoc.getBlockX() && newLoc.getBlockZ() == lastLoc.getBlockZ()) {
                     e.getPlayer().sendMessage("try claiming more than 1 block");
 
-                } else { //TODO: check if claim is greater than max claim size . . .
+                } else {
                     controller.tryClaimLand(e.getPlayer(), lastLoc.getBlockX(), lastLoc.getBlockZ(), newLoc.getBlockX(), newLoc.getBlockZ());
                 }
-
-                players.remove(e.getPlayer());
-
             } else {
                 players.put(e.getPlayer(), e.getClickedBlock().getLocation());
                 e.getPlayer().sendMessage("claim started @ (" + newLoc.getBlockX() + ", " + newLoc.getBlockZ() + ").");

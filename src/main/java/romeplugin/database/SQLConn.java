@@ -173,4 +173,19 @@ public class SQLConn {
             return false;
         }
     }
+
+    public static int getTotalClaimedBlocks(UUID who) {
+        try {
+            var stmt = getConnection().prepareStatement("SELECT SUM((x1 - x0) * (y0 - y1)) FROM cityClaims WHERE owner_uuid = ?;");
+            stmt.setString(1, who.toString());
+            var res = stmt.executeQuery();
+            if (!res.next()) {
+                return 9999;
+            }
+            return res.getInt(1);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return 9999;
+        }
+    }
 }

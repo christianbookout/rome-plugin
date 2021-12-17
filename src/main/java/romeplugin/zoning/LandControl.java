@@ -136,7 +136,7 @@ public class LandControl {
                 return false;
             }
         }
-        return true;
+        return SQLConn.getTotalClaimedBlocks(player.getUniqueId()) <= 225;
     }
 
     public boolean tryClaimLand(Player player, int xa, int ya, int xb, int yb) {

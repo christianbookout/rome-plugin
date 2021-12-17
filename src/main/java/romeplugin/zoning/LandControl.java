@@ -135,6 +135,7 @@ public class LandControl {
                 player.sendMessage("sina ken ala jo e ma ni, sina wawa ala");
                 return false;
             }
+            return true;
         }
         return SQLConn.getTotalClaimedBlocks(player.getUniqueId()) <= 225;
     }

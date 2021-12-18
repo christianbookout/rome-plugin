@@ -1,15 +1,21 @@
 package romeplugin.zoning;
 
+import org.bukkit.ChatColor;
 import romeplugin.newtitle.Title;
 import static romeplugin.newtitle.Title.*;
 
 import java.util.Arrays;
 
 public enum ZoneType {
-    GOVERNMENT(CONSOLE, MAYOR, BUILDER, SENSOR), CITY(MAYOR, BUILDER), SUBURB(), WILDERNESS();
+    GOVERNMENT(ChatColor.LIGHT_PURPLE, CONSOLE, MAYOR, BUILDER, SENSOR),
+    CITY(ChatColor.GOLD, MAYOR, BUILDER),
+    SUBURB(ChatColor.DARK_AQUA),
+    WILDERNESS(ChatColor.GREEN);
 
     private final Title[] titles;
-    ZoneType(Title... titles) {
+    public final ChatColor color;
+    ZoneType(ChatColor color, Title... titles) {
+        this.color = color;
         this.titles = titles;
     }
 

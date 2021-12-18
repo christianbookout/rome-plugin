@@ -1,5 +1,6 @@
 package romeplugin.zoning;
 
+import org.bukkit.ChatColor;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerMoveEvent;
@@ -22,11 +23,12 @@ public class LandEnterListener implements Listener {
         CityArea newZone = controller.getArea(e.getTo());
         CityArea oldZone = controller.getArea(e.getFrom());
         if (oldZone != null && newZone == null) {
-            e.getPlayer().sendMessage("you've entered the wilderness");
+            e.getPlayer().sendMessage("you've entered the " + ChatColor.DARK_GREEN + "wilderness");
             return;
         }
         if (newZone != null && (oldZone == null || oldZone.getType() != newZone.getType())) {
-            e.getPlayer().sendMessage("you've entered the " + newZone.getType().toString().toLowerCase() + " zone");
+            e.getPlayer().sendMessage("you've entered the " +
+                    newZone.getType().color + newZone.getType().toString().toLowerCase() + " zone");
         }
     }
 }

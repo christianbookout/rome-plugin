@@ -219,6 +219,15 @@ public class LandEventListener implements Listener {
         }
     }
 
+    @EventHandler
+    public void onEntityDamageEntity(EntityDamageByEntityEvent event) {
+        if (!(event.getEntity() instanceof Player)) {
+            return;
+        }
+        var damaged = (Player) event.getEntity();
+        event.setCancelled(controller.inCity(damaged.getLocation()) && event.getDamager() instanceof Player);
+    }
+
     //TODO make it so people can't open fence gates, click on buttons, press levers, etc in the city
     @EventHandler
     public void claimClicky(PlayerInteractEvent e) {

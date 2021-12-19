@@ -19,6 +19,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import romeplugin.database.SQLConn;
 import romeplugin.messageIntercepter.DistanceListener;
+import romeplugin.messageIntercepter.SwearFilter;
 import romeplugin.newtitle.RemoveTitleCommand;
 import romeplugin.newtitle.SetTitleCommand;
 import romeplugin.newtitle.Title;
@@ -104,6 +105,8 @@ public class RomePlugin extends JavaPlugin {
             e.printStackTrace();
         }
 
+        SwearFilter filter = new SwearFilter(landControl, config.getInt("messages.useSwearFilter"));
+
         getCommand("claim").setExecutor(new ClaimLandCommand(landControl));
         getCommand("transferclaim").setExecutor(new TransferClaimCommand());
         getCommand("claiminfo").setExecutor(new ClaimInfoCommand());
@@ -114,7 +117,7 @@ public class RomePlugin extends JavaPlugin {
         getCommand("pay").setExecutor(new PayCommand(ledger));
         getCommand("bal").setExecutor(new BalanceCommand(ledger));
         getServer().getPluginManager().registerEvents(new TitleEventListener(), this);
-        getServer().getPluginManager().registerEvents(new DistanceListener(config.getInt("messages.messageDistance"), config.getBoolean("messages.useSwearFilter")), this);
+        getServer().getPluginManager().registerEvents(new DistanceListener(config.getInt("messages.messageDistance"), filter), this);
         getServer().getPluginManager().registerEvents(new BlockchainEventListener(this, ledger), this);
         getServer().getPluginManager().registerEvents(landListener, this);
     }

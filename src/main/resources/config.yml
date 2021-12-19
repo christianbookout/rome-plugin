@@ -10,5 +10,5 @@ claims:
   claimTimeoutMS: 20000 # set to 0 for none
 
 messages:
-  useSwearFilter: true 
+  useSwearFilter: 1 # 0 for no filter, 1 for only city/government, and 2 for global
   messageDistance: 250 # distance to broadcast messages locally (0 for infinite distance)

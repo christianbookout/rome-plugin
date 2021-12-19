@@ -44,3 +44,7 @@ commands:
   transferclaim:
     description: "transfer the claim you are in to someone else"
     usage: "/transferclaim <user>"
+  rome:
+    description: "do rome related things"
+    usage: "/rome for help :)"
+    permission: op

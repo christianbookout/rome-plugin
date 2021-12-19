@@ -42,8 +42,6 @@ public class RomePlugin extends JavaPlugin {
     //private final String titlesFilename = "rome_titles";
     // TODO: make the ledger persistent
     private final Ledger ledger = new Ledger();
-    // TODO: un-hardcode the multipliers for sizes
-    private final LandControl landControl = new LandControl(0, 0, 0, 5, 10);
 
     //runs when the plugin is enabled on the server startup 
     @Override
@@ -57,6 +55,12 @@ public class RomePlugin extends JavaPlugin {
 
         this.saveDefaultConfig();
         FileConfiguration config = this.getConfig();
+
+        LandControl landControl = new LandControl(0,
+                0,
+                0,
+                config.getInt("land.cityMultiplier"),
+                config.getInt("land.suburbsMultiplier"));
 
         MysqlDataSource dataSource = new MysqlConnectionPoolDataSource();
         // we set our credentials
@@ -90,13 +94,14 @@ public class RomePlugin extends JavaPlugin {
                     "owner_uuid CHAR(36) NOT NULL);").execute();
             // overkill
             conn.prepareStatement("CREATE TABLE IF NOT EXISTS cityInfo (" +
+                    "type TINYINT NOT NULL PRIMARY KEY," +
                     "size INT NOT NULL," +
                     "x INT NOT NULL," +
                     "y INT NOT NULL);").execute();
             conn.prepareStatement("CREATE TABLE IF NOT EXISTS usernames (" +
                     "uuid CHAR(36) NOT NULL PRIMARY KEY," +
                     "username CHAR(32) NOT NULL);").execute();
-            var res = conn.prepareStatement("SELECT * FROM cityInfo;").executeQuery();
+            var res = conn.prepareStatement("SELECT * FROM cityInfo WHERE type = 0;").executeQuery();
             if (res.next()) {
                 landControl.setGovernmentSize(res.getInt("size"));
                 landControl.setCenter(res.getInt("x"), res.getInt("y"));
@@ -106,7 +111,7 @@ public class RomePlugin extends JavaPlugin {
         }
 
         SwearFilter filter = new SwearFilter(landControl, config.getInt("messages.useSwearFilter"));
-
+        getCommand("rome").setExecutor(new LandCommand(landControl));
         getCommand("claim").setExecutor(new ClaimLandCommand(landControl));
         getCommand("transferclaim").setExecutor(new TransferClaimCommand());
         getCommand("claiminfo").setExecutor(new ClaimInfoCommand());
@@ -120,6 +125,7 @@ public class RomePlugin extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new DistanceListener(config.getInt("messages.messageDistance"), filter), this);
         getServer().getPluginManager().registerEvents(new BlockchainEventListener(this, ledger), this);
         getServer().getPluginManager().registerEvents(landListener, this);
+        getServer().getPluginManager().registerEvents(new LandEnterListener(landControl), this);
     }
 
     //true/false if it worked or didnt work

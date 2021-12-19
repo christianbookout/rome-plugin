@@ -4,6 +4,7 @@ import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import romeplugin.RomePlugin;
 import romeplugin.database.SQLConn;
+import romeplugin.newtitle.Title;
 
 import java.sql.SQLException;
 
@@ -56,7 +57,7 @@ public class LandControl {
     public void updateDB() {
         try {
             var stmt = SQLConn.getConnection()
-                    .prepareStatement("REPLACE INTO cityInfo (size, x, y) VALUE (?, ?, ?);");
+                    .prepareStatement("REPLACE INTO cityInfo VALUES (0, ?, ?, ?);");
             stmt.setInt(1, governmentSize);
             stmt.setInt(2, cityX);
             stmt.setInt(3, cityY);
@@ -77,12 +78,17 @@ public class LandControl {
         return Math.abs(x - cityX) <= extents && Math.abs(y - cityY) <= extents;
     }
 
+    public boolean inSuburbs(int x, int y) {
+        var extents = governmentSize * suburbsMult;
+        return Math.abs(x - cityX) <= extents && Math.abs(y - cityY) <= extents;
+    }
+
     public boolean inCity(Location loc) {
         return inCity(loc.getBlockX(), loc.getBlockZ());
     }
 
     public boolean canBreak(Player player, int x, int y) {
-        if (!inCity(x, y)) {
+        if (!inSuburbs(x, y)) {
             return true;
         }
         var title = RomePlugin.onlinePlayerTitles.get(player);
@@ -114,14 +120,24 @@ public class LandControl {
     public boolean canClaim(Player player, int x0, int y0, int x1, int y1) {
         var extents = governmentSize * suburbsMult;
         if (!rectInside(cityX - extents, cityY + extents, cityX + extents, cityY - extents, x0, y0, x1, y1)) {
+            player.sendMessage("you cannot claim outside of city limits");
             return false;
         }
         extents = governmentSize;
         if (rectIntersects(x0, y0, x1, y1, cityX - extents, cityY + extents, cityX + extents, cityY - extents)) {
+            player.sendMessage("you cannot claim in government");
             return false;
         }
         extents = governmentSize * cityMult;
-        return !rectIntersects(x0, y0, x1, y1, cityX - extents, cityY + extents, cityX + extents, cityY - extents);
+        if (rectIntersects(x0, y0, x1, y1, cityX - extents, cityY + extents, cityX + extents, cityY - extents)) {
+            var title = SQLConn.getTitle(player.getUniqueId());
+            if (title == null || title.t != Title.MAYOR) {
+                player.sendMessage("sina ken ala jo e ma ni, sina wawa ala");
+                return false;
+            }
+            return true;
+        }
+        return SQLConn.getTotalClaimedBlocks(player.getUniqueId()) <= 225;
     }
 
     public boolean tryClaimLand(Player player, int xa, int ya, int xb, int yb) {
@@ -131,7 +147,6 @@ public class LandControl {
         var x1 = Math.max(xa, xb);
         var y1 = Math.min(ya, yb);
         if (!canClaim(player, x0, y0, x1, y1)) {
-            player.sendMessage("you cannot claim outside of city limits");
             return false;
         }
         var claim = SQLConn.getClaimRect(x0, y0, x1, y1);
@@ -146,5 +161,13 @@ public class LandControl {
 
     public boolean canBreak(Player player, Location loc) {
         return canBreak(player, loc.getBlockX(), loc.getBlockZ());
+    }
+
+    public boolean expandGovernment(int size) {
+        if (governmentSize + size < 0) {
+            return false;
+        }
+        setGovernmentSize(governmentSize + size);
+        return true;
     }
 }

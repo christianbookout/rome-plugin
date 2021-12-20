@@ -8,7 +8,7 @@ import romeplugin.database.TitleEntry;
 import java.util.HashMap;
 import java.util.UUID;
 
-public class PermissionsHandler {
+class PermissionsHandler {
     private final Plugin plugin;
     private final HashMap<UUID, PermissionAttachment> perms = new HashMap<>();
 
@@ -24,8 +24,11 @@ public class PermissionsHandler {
         }
     }
 
-    public void deleteTitle(Player player, Title oldTitle) {
-        var playerPerm = perms.get(player.getUniqueId());
+    public void deleteTitle(UUID uuid, Title oldTitle) {
+        var playerPerm = perms.get(uuid);
+        if (playerPerm == null) {
+            return;
+        }
         if (oldTitle.perms != null) {
             playerPerm.setPermission(oldTitle.perms, false);
         }

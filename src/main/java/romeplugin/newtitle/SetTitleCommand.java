@@ -4,18 +4,12 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import romeplugin.RomePlugin;
-import romeplugin.database.SQLConn;
-
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 
 public class SetTitleCommand implements CommandExecutor {
-    private final PermissionsHandler perms;
+    private final TitleHandler titles;
 
-    public SetTitleCommand(PermissionsHandler perms) {
-        this.perms = perms;
+    public SetTitleCommand(TitleHandler titles) {
+        this.titles = titles;
     }
 
     @Override
@@ -35,35 +29,11 @@ public class SetTitleCommand implements CommandExecutor {
             return false;
         }
 
-        if (!setTitle(target, title)) {
-            return false;
+        if (!titles.setTitle(target, title)) {
+            commandSender.sendMessage("could not set title??");
         }
-
-        var oldTitle = RomePlugin.onlinePlayerTitles.put(target, title);
-        perms.updateTitle(target, title, oldTitle);
 
         commandSender.sendMessage(target.getDisplayName() + "'s title is now " + title.toString());
         return true;
-    }
-
-    /**
-     * set title of player
-     *
-     * @param who   target player
-     * @param title target title
-     * @return true on success, false on failure
-     */
-    public static boolean setTitle(Player who, Title title) {
-        try (Connection conn = SQLConn.getConnection()) {
-            PreparedStatement statement = conn.prepareStatement(
-                    "REPLACE INTO players (uuid, title) values (?, ?);");
-            statement.setString(1, who.getUniqueId().toString());
-            statement.setString(2, title.toString());
-            statement.execute();
-            return true;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
-        }
     }
 }

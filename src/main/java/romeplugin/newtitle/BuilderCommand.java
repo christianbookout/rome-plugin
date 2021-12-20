@@ -6,6 +6,11 @@ import org.bukkit.command.CommandSender;
 import romeplugin.database.SQLConn;
 
 public class BuilderCommand implements CommandExecutor {
+    private final TitleHandler titles;
+
+    public BuilderCommand(TitleHandler titles) {
+        this.titles = titles;
+    }
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String s, String[] args) {
@@ -23,13 +28,13 @@ public class BuilderCommand implements CommandExecutor {
                     sender.sendMessage("they already have a job silly!");
                     return false;
                 }
-                SetTitleCommand.setTitle(target, Title.BUILDER);
+                titles.setTitle(target, Title.BUILDER);
                 sender.sendMessage("made " + target.getName() + " a builder");
                 return true;
             case "revoke":
                 var title = SQLConn.getTitle(target.getUniqueId());
                 if (title != null && title.t == Title.BUILDER) {
-                    RemoveTitleCommand.removeTitle(target.getUniqueId());
+                    titles.removeTitle(target);
                 }
                 sender.sendMessage("made " + target.getName() + " not a builder");
                 return true;

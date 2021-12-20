@@ -21,10 +21,10 @@ import java.sql.SQLException;
  * @author chris
  */
 public class TitleEventListener implements Listener {
-    private final PermissionsHandler perms;
+    private final TitleHandler titles;
 
-    public TitleEventListener(PermissionsHandler perms) {
-        this.perms = perms;
+    public TitleEventListener(TitleHandler titles) {
+        this.titles = titles;
     }
 
     @EventHandler
@@ -38,20 +38,13 @@ public class TitleEventListener implements Listener {
 
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
-        var player = event.getPlayer();
-        var title = SQLConn.getTitle(player.getUniqueId());
-        perms.playerJoin(player, title);
         SQLConn.setUsername(event.getPlayer().getUniqueId(), event.getPlayer().getName());
-        if (title == null) {
-            return;
-        }
-        RomePlugin.onlinePlayerTitles.put(event.getPlayer(), title.t);
+        titles.playerJoin(event.getPlayer());
     }
 
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
-        perms.playerQuit(event.getPlayer());
-        RomePlugin.onlinePlayerTitles.remove(event.getPlayer());
+        titles.playerQuit(event.getPlayer());
     }
 
     @EventHandler

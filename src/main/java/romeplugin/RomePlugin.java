@@ -107,20 +107,20 @@ public class RomePlugin extends JavaPlugin {
             e.printStackTrace();
         }
 
-        var perms = new PermissionsHandler(this);
+        var titles = new TitleHandler(this);
         SwearFilter filter = new SwearFilter(landControl, config.getInt("messages.useSwearFilter"));
         getCommand("rome").setExecutor(new LandCommand(landControl));
         getCommand("claim").setExecutor(new ClaimLandCommand(landControl));
         getCommand("transferclaim").setExecutor(new TransferClaimCommand());
         getCommand("claiminfo").setExecutor(new ClaimInfoCommand());
         getCommand("killclaim").setExecutor(new RemoveClaimCommand());
-        getCommand("removetitle").setExecutor(new RemoveTitleCommand(perms));
+        getCommand("removetitle").setExecutor(new RemoveTitleCommand(titles));
         getCommand("foundrome").setExecutor(new FoundCityCommand(landControl));
-        getCommand("settitle").setExecutor(new SetTitleCommand(perms));
+        getCommand("settitle").setExecutor(new SetTitleCommand(titles));
         getCommand("pay").setExecutor(new PayCommand(ledger));
         getCommand("bal").setExecutor(new BalanceCommand(ledger));
-        getCommand("builder").setExecutor(new BuilderCommand());
-        getServer().getPluginManager().registerEvents(new TitleEventListener(perms), this);
+        getCommand("builder").setExecutor(new BuilderCommand(titles));
+        getServer().getPluginManager().registerEvents(new TitleEventListener(titles), this);
         getServer().getPluginManager().registerEvents(new DistanceListener(config.getInt("messages.messageDistance"), filter), this);
         getServer().getPluginManager().registerEvents(new BlockchainEventListener(this, ledger), this);
         getServer().getPluginManager().registerEvents(landListener, this);

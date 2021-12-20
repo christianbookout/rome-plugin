@@ -20,10 +20,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import romeplugin.database.SQLConn;
 import romeplugin.messageIntercepter.DistanceListener;
 import romeplugin.messageIntercepter.SwearFilter;
-import romeplugin.newtitle.RemoveTitleCommand;
-import romeplugin.newtitle.SetTitleCommand;
-import romeplugin.newtitle.Title;
-import romeplugin.newtitle.TitleEventListener;
+import romeplugin.newtitle.*;
 import romeplugin.zoning.*;
 
 import java.sql.Connection;
@@ -110,18 +107,19 @@ public class RomePlugin extends JavaPlugin {
             e.printStackTrace();
         }
 
+        var perms = new PermissionsHandler(this);
         SwearFilter filter = new SwearFilter(landControl, config.getInt("messages.useSwearFilter"));
         getCommand("rome").setExecutor(new LandCommand(landControl));
         getCommand("claim").setExecutor(new ClaimLandCommand(landControl));
         getCommand("transferclaim").setExecutor(new TransferClaimCommand());
         getCommand("claiminfo").setExecutor(new ClaimInfoCommand());
         getCommand("killclaim").setExecutor(new RemoveClaimCommand());
-        getCommand("removetitle").setExecutor(new RemoveTitleCommand());
+        getCommand("removetitle").setExecutor(new RemoveTitleCommand(perms));
         getCommand("foundrome").setExecutor(new FoundCityCommand(landControl));
-        getCommand("settitle").setExecutor(new SetTitleCommand());
+        getCommand("settitle").setExecutor(new SetTitleCommand(perms));
         getCommand("pay").setExecutor(new PayCommand(ledger));
         getCommand("bal").setExecutor(new BalanceCommand(ledger));
-        getServer().getPluginManager().registerEvents(new TitleEventListener(this), this);
+        getServer().getPluginManager().registerEvents(new TitleEventListener(perms), this);
         getServer().getPluginManager().registerEvents(new DistanceListener(config.getInt("messages.messageDistance"), filter), this);
         getServer().getPluginManager().registerEvents(new BlockchainEventListener(this, ledger), this);
         getServer().getPluginManager().registerEvents(landListener, this);
@@ -133,5 +131,5 @@ public class RomePlugin extends JavaPlugin {
     public boolean onCommand(CommandSender sender, Command command, String label, String[] arguments) {
         return false;
     }
-    
+
 }

@@ -14,6 +14,12 @@ import java.sql.SQLException;
 import java.util.UUID;
 
 public class RemoveTitleCommand implements CommandExecutor {
+    private final PermissionsHandler perms;
+
+    public RemoveTitleCommand(PermissionsHandler perms) {
+        this.perms = perms;
+    }
+
     @Override
     public boolean onCommand(CommandSender sender, Command command, String s, String[] params) {
         if (params.length < 1) {
@@ -31,20 +37,30 @@ public class RemoveTitleCommand implements CommandExecutor {
         } else {
             uuid = target.getUniqueId();
         }
-        try (Connection conn = SQLConn.getConnection()) {
-            PreparedStatement statement = conn.prepareStatement(
-                    "DELETE FROM players WHERE uuid = ?;");
-            statement.setString(1, uuid.toString());
-            statement.execute();
-        } catch (SQLException e) {
-            e.printStackTrace();
+        if (!removeTitle(uuid)) {
             sender.sendMessage(ChatColor.RED + "Eskewel li pali ike!");
             return false;
         }
         if (target != null) {
-            RomePlugin.onlinePlayerTitles.remove(target);
+            var oldTitle = RomePlugin.onlinePlayerTitles.remove(target);
+            if (oldTitle != null) {
+                perms.deleteTitle(target, oldTitle);
+            }
         }
         sender.sendMessage("weka e nimi wawa lon jan " + params[0] + ".");
         return true;
+    }
+
+    public static boolean removeTitle(UUID who) {
+        try (Connection conn = SQLConn.getConnection()) {
+            PreparedStatement statement = conn.prepareStatement(
+                    "DELETE FROM players WHERE uuid = ?;");
+            statement.setString(1, who.toString());
+            statement.execute();
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 }

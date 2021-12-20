@@ -8,11 +8,15 @@ package romeplugin.newtitle;
 import org.bukkit.ChatColor;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import romeplugin.RomePlugin;
 import romeplugin.database.SQLConn;
+
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 
 /**
  * @author chris
@@ -40,5 +44,16 @@ public class TitleEventListener implements Listener {
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
         RomePlugin.onlinePlayerTitles.remove(event.getPlayer());
+    }
+
+    @EventHandler
+    public void onPlayerDeath(PlayerDeathEvent event) {
+        try {
+            var stmt = SQLConn.getConnection().prepareStatement("DELETE FROM players WHERE uuid = ? AND title = 'POPE';");
+            stmt.setString(1, event.getEntity().getUniqueId().toString());
+            stmt.execute();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 }

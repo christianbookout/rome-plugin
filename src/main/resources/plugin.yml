@@ -48,3 +48,7 @@ commands:
     description: "do rome related things"
     usage: "/rome for help :)"
     permission: op
+  builder:
+    description: "deal with builders"
+    usage: "/builder assign|revoke <who>"
+    permission: romeplugin.aedile

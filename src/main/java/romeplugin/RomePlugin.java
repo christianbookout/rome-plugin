@@ -119,6 +119,7 @@ public class RomePlugin extends JavaPlugin {
         getCommand("settitle").setExecutor(new SetTitleCommand(perms));
         getCommand("pay").setExecutor(new PayCommand(ledger));
         getCommand("bal").setExecutor(new BalanceCommand(ledger));
+        getCommand("builder").setExecutor(new BuilderCommand());
         getServer().getPluginManager().registerEvents(new TitleEventListener(perms), this);
         getServer().getPluginManager().registerEvents(new DistanceListener(config.getInt("messages.messageDistance"), filter), this);
         getServer().getPluginManager().registerEvents(new BlockchainEventListener(this, ledger), this);

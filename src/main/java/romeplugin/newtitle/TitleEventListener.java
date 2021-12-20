@@ -59,7 +59,9 @@ public class TitleEventListener implements Listener {
         try {
             var stmt = SQLConn.getConnection().prepareStatement("DELETE FROM players WHERE uuid = ? AND title = 'POPE';");
             stmt.setString(1, event.getEntity().getUniqueId().toString());
-            stmt.execute();
+            if (stmt.executeUpdate() > 0) {
+                RomePlugin.onlinePlayerTitles.remove(event.getEntity());
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }

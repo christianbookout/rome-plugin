@@ -191,6 +191,10 @@ public class LandEventListener implements Listener {
         Location fromLoc = event.getBlock().getLocation();
         Location toLoc = event.getToBlock().getLocation();
 
+        if (!controller.inSuburbs(toLoc.getBlockX(), toLoc.getBlockZ())) {
+            return;
+        }
+
         boolean toLocInCity = controller.inCity(toLoc);
         boolean fromLocInCity = controller.inCity(fromLoc);
         //liquid can't flow from outside of city into the city

@@ -51,7 +51,7 @@ public final class SwearFilter {
 
         String newMessage = message;
         for (String swear : swears) {
-            newMessage = newMessage.replaceAll(swear, repeat('♥', swear.length()));
+            newMessage = newMessage.replaceAll("(?i)" + swear, repeat('♥', swear.length()));
         }
         return newMessage;
     }

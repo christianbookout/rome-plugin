@@ -21,7 +21,11 @@ public class DistanceListener implements Listener {
             message = swearFilter.replaceSwears(message);
         }
         e.setMessage(message);
-        if (distance != 0)
-            e.getRecipients().removeIf(p -> p.getLocation().distance(e.getPlayer().getLocation()) > distance);
+        if (this.distance != 0)
+            e.getRecipients().removeIf(
+                p -> 
+                p.getLocation().distance(e.getPlayer().getLocation()) > this.distance 
+                || !p.getLocation().getWorld().getEnvironment().equals(e.getPlayer().getWorld().getEnvironment())
+            );
     }
 }

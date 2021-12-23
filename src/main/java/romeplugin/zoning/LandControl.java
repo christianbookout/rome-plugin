@@ -83,6 +83,9 @@ public class LandControl {
         var extents = governmentSize * suburbsMult;
         return Math.abs(x - cityX) <= extents && Math.abs(y - cityY) <= extents;
     }
+    public boolean inSuburbs(Location loc) {
+        return inSuburbs(loc.getBlockX(), loc.getBlockZ());
+    }
 
     public boolean inCity(Location loc) {
         return inCity(loc.getBlockX(), loc.getBlockZ());

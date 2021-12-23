@@ -1,5 +1,6 @@
 package romeplugin.messageIntercepter;
 
+import org.bukkit.World.Environment;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -21,11 +22,12 @@ public class DistanceListener implements Listener {
             message = swearFilter.replaceSwears(message);
         }
         e.setMessage(message);
+        Environment playerEnvironment = e.getPlayer().getLocation().getWorld().getEnvironment();
         if (this.distance != 0)
             e.getRecipients().removeIf(
                 p -> 
-                p.getLocation().distance(e.getPlayer().getLocation()) > this.distance 
-                || !p.getLocation().getWorld().getEnvironment().equals(e.getPlayer().getWorld().getEnvironment())
+                !playerEnvironment.equals(p.getLocation().getWorld().getEnvironment())
+                || p.getLocation().distance(e.getPlayer().getLocation()) > this.distance 
             );
     }
 }

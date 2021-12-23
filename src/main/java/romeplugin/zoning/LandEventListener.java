@@ -3,6 +3,9 @@ package romeplugin.zoning;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.block.Block;
+import org.bukkit.block.Dispenser;
+import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.Directional;
 import org.bukkit.block.data.type.Door;
 import org.bukkit.entity.ArmorStand;
@@ -16,6 +19,7 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.hanging.HangingBreakByEntityEvent;
 import org.bukkit.event.hanging.HangingBreakEvent;
+import org.bukkit.event.hanging.HangingPlaceEvent;
 import org.bukkit.event.hanging.HangingBreakEvent.RemoveCause;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
 import org.bukkit.event.player.PlayerBucketFillEvent;
@@ -51,6 +55,10 @@ public class LandEventListener implements Listener {
             Material.FURNACE,
             Material.SMOKER,
             Material.CHEST_MINECART,
+            Material.FURNACE_MINECART,
+            Material.HOPPER,
+            Material.HOPPER_MINECART,
+            Material.BREWING_STAND,
             Material.ITEM_FRAME,
             Material.ARMOR_STAND
     };
@@ -65,6 +73,7 @@ public class LandEventListener implements Listener {
     @EventHandler
     public void onBlockBreak(BlockBreakEvent event) {
         var block = event.getBlock();
+        if (!controller.inSuburbs(block.getLocation())) return;
         if (controller.canBreak(event.getPlayer(), block.getLocation()))
             return;
 
@@ -75,6 +84,7 @@ public class LandEventListener implements Listener {
     @EventHandler
     public void onBlockPlace(BlockPlaceEvent event) {
         var block = event.getBlock();
+        if (!controller.inSuburbs(block.getLocation())) return;
         if (controller.canBreak(event.getPlayer(), block.getLocation()))
             return;
         event.getPlayer().sendMessage("no :)");
@@ -84,10 +94,13 @@ public class LandEventListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void blockCanBuild(BlockCanBuildEvent e) {
+        Location location = e.getBlock().getLocation();
+        if (!controller.inSuburbs(location)) return;
+
         if (e.getPlayer() == null) {
             return;
         }
-        if (!controller.canBreak(e.getPlayer(), e.getBlock().getLocation())) {
+        if (!controller.canBreak(e.getPlayer(), location)) {
             e.setBuildable(false);
             e.getPlayer().sendMessage("you can't build here");
         }
@@ -102,49 +115,92 @@ public class LandEventListener implements Listener {
     //prevent item frames/paintings from being broken by entities like skellingtons or boats in the city
     @EventHandler
     public void hangingItemBroken(HangingBreakEvent e) {
-        if (e.getCause() == RemoveCause.PHYSICS)
+        if (e.getCause() != RemoveCause.PHYSICS)
             return;
 
         Location loc = e.getEntity().getLocation();
-        if (controller.inCity(loc))
+        if (controller.inCity(loc) || SQLConn.getClaim(loc) != null)
             e.setCancelled(true);
     }
 
-    //don't let players break hanging items w/ a bow or something in a claim/city
+    //don't let players or mobs break hanging items w/ a bow or something in a claim/city
     @EventHandler
     public void hangingItemBroken(HangingBreakByEntityEvent e) {
-        if (!(e.getEntity() instanceof Player)) {
-            e.setCancelled(true);
+        Location location = e.getEntity().getLocation();
+        if (!controller.inSuburbs(location)) return;
+
+        //If a mob or something else tries to break an item frame and they are in a city or a claim then stop them
+        if (!(e.getRemover() instanceof Player)) {
+            if (controller.inCity(location) 
+                || SQLConn.getClaim(location) != null) {
+
+                e.setCancelled(true);
+            }
             return;
         }
 
+        //If a player's breaking the frame and they aren't allowed then don't let them
         Player remover = (Player) e.getRemover();
-        if (!controller.canBreak(remover, e.getEntity().getLocation())) {
+        if (!controller.canBreak(remover, location)) {
             remover.sendMessage("don't break the hanging thing");
             e.setCancelled(true);
         }
     }
 
-    //When a dispenser outside the city tries to dispense something into the city, then flip it around and dispense (cause that's kinda funny)
+    //don't let people place paintings in a city or claim
+    @EventHandler
+    public void hangingItemPlaced(HangingPlaceEvent e) {
+        Location location = e.getBlock().getLocation();
+        if (!controller.inSuburbs(location)) return;
+        if (!controller.canBreak(e.getPlayer(), location)) {
+            e.setCancelled(true);
+        }
+    }
+
+    //When a dispenser outside the city tries to dispense something into the city, then cancel it
     @EventHandler
     public void blockDispensedEvent(BlockDispenseEvent e) {
-        if (e.getBlock().getBlockData() instanceof Directional) {
-            Directional direction = (Directional) e.getBlock().getBlockData();
+        Block fromBlock = e.getBlock();
 
-            int newX = e.getBlock().getLocation().getBlockX() + direction.getFacing().getModX();
-            int newZ = e.getBlock().getLocation().getBlockZ() + direction.getFacing().getModZ();
+        if (!controller.inSuburbs(fromBlock.getLocation())) return;
 
+        BlockData fromBlockData = e.getBlock().getBlockData();
 
-            if (!controller.inCity(e.getBlock().getLocation()) && controller.inCity(newX, newZ)) {
-                direction.setFacing(direction.getFacing().getOppositeFace());
-            }
+        if (!(fromBlockData instanceof Dispenser)) return;
+
+        Dispenser dispenser = (Dispenser) fromBlockData;
+
+        Block toBlock = fromBlock.getRelative(((Directional) dispenser.getBlockData()).getFacing());
+        boolean toBlockInCity = controller.inCity(toBlock.getLocation());
+
+        if (toBlockInCity && !controller.inCity(fromBlock.getLocation())) {
+            e.setCancelled(true);
+            return;
+        }
+
+        ClaimEntry fromClaim = SQLConn.getClaim(fromBlock.getLocation());
+        ClaimEntry toClaim = SQLConn.getClaim(toBlock.getLocation());
+        //If a dispenser is going from no claim to a claim or other way around (and it's happening in a city) then cancel it
+        if ((fromClaim == null && toClaim != null) || (toClaim == null && fromClaim != null && toBlockInCity)) {
+            e.setCancelled(true);
+            return;
+        }
+
+        //If a dispenser is dispensing from one claim into another claim with a different owner then cancel it
+        if (fromClaim != null && toClaim != null && !fromClaim.owner.equals(toClaim.owner)) {
+            e.setCancelled(true);
+            return;
         }
     }
 
     @EventHandler
     public void playerBucketFillEvent(PlayerBucketFillEvent e) {
+
         Player player = e.getPlayer();
         Location placePosition = e.getBlockClicked().getLocation();
+
+        if (!controller.inSuburbs(placePosition)) return;
+
         if (!controller.canBreak(player, placePosition)) {
             e.setCancelled(true);
         }
@@ -152,8 +208,12 @@ public class LandEventListener implements Listener {
 
     @EventHandler
     public void playerBucketEmptyEvent(PlayerBucketEmptyEvent e) {
+        
         Player player = e.getPlayer();
         Location placePosition = e.getBlockClicked().getLocation();
+
+        if (!controller.inSuburbs(placePosition)) return;
+        
         if (!controller.canBreak(player, placePosition)) {
             e.setCancelled(true);
         }
@@ -167,39 +227,48 @@ public class LandEventListener implements Listener {
     //don't let players steal items from an item frame in a claim/city
     @EventHandler
     public void frameItemStolen(EntityDamageByEntityEvent e) {
+        Location location = e.getEntity().getLocation();
+
+        if (!controller.inSuburbs(location)) return;
+
         if (!(e.getEntity() instanceof ItemFrame || e.getEntity() instanceof ArmorStand))
             return;
 
-        if (controller.inCity(e.getEntity().getLocation())) {
+        if (controller.inCity(location)) {
             e.setCancelled(true);
             return;
         }
 
         if (e.getDamager() instanceof Player) {
             Player damager = (Player) e.getDamager();
-            if (!controller.canBreak(damager, e.getEntity().getLocation())) {
+            if (!controller.canBreak(damager, location)) {
                 damager.sendMessage("filthy thief");
                 e.setCancelled(true);
             }
         }
     }
 
-    //Only applies to water and lava (might eat dragon eggs lol)
-    @EventHandler(priority = EventPriority.HIGH)
+    //Only applies to water and lava
+    @EventHandler
     public void onBlockFromTo(BlockFromToEvent event) {
-
+        if (event.getBlock().getType() == Material.DRAGON_EGG) return;
         Location fromLoc = event.getBlock().getLocation();
         Location toLoc = event.getToBlock().getLocation();
 
         boolean toLocInCity = controller.inCity(toLoc);
         boolean fromLocInCity = controller.inCity(fromLoc);
+
+        if (!controller.inSuburbs(toLoc)) return;
+
         //liquid can't flow from outside of city into the city
         if (toLocInCity && !fromLocInCity) {
             event.setCancelled(true);
             return;
         }
-        ClaimEntry fromClaim = SQLConn.getClaim(fromLoc);
+
         ClaimEntry toClaim = SQLConn.getClaim(toLoc);
+        if (!toLocInCity && toClaim == null) return;
+        ClaimEntry fromClaim = SQLConn.getClaim(fromLoc);
 
         //If liquid is flowing from the wild into a claim, stop it 
         if (fromClaim == null && toClaim != null) {
@@ -235,8 +304,14 @@ public class LandEventListener implements Listener {
             return;
         }
         Location newLoc = e.getClickedBlock().getLocation();
+
+        if (!controller.inSuburbs(newLoc)) return;
+
         //if player is clicking on a locked chest/door then don't let em
-        if (e.getAction() == Action.RIGHT_CLICK_BLOCK && (Arrays.asList(nonClickables).contains(e.getClickedBlock().getType()) || e.getClickedBlock().getType() == Material.CHEST || e.getClickedBlock().getState() instanceof Door)) {
+        if (e.getAction() == Action.RIGHT_CLICK_BLOCK 
+            && (Arrays.asList(nonClickables).contains(e.getClickedBlock().getType()) 
+                || e.getClickedBlock().getState() instanceof Door)) {
+
             if (!controller.canBreak(e.getPlayer(), newLoc)) {
                 e.getPlayer().sendMessage(" woah that is locked");
                 e.setCancelled(true);

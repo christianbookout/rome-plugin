@@ -5,7 +5,6 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.Dispenser;
-import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.Directional;
 import org.bukkit.block.data.type.Door;
 import org.bukkit.entity.ArmorStand;
@@ -23,8 +22,8 @@ import org.bukkit.event.hanging.HangingPlaceEvent;
 import org.bukkit.event.hanging.HangingBreakEvent.RemoveCause;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
 import org.bukkit.event.player.PlayerBucketFillEvent;
+import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.inventory.EquipmentSlot;
 import romeplugin.database.ClaimEntry;
 import romeplugin.database.SQLConn;
 
@@ -64,6 +63,9 @@ public class LandEventListener implements Listener {
             Material.ARMOR_STAND
     };
 
+    //note last player who places sponge to make sure they arent tryna destroy water in someone else's claim
+    private Player spongePlacer = null;
+
     public LandEventListener(LandControl controller, Material claimMaterial, long claimTimeoutMS) {
         this.controller = controller;
         this.claimMaterial = claimMaterial;
@@ -85,10 +87,12 @@ public class LandEventListener implements Listener {
     @EventHandler
     public void onBlockPlace(BlockPlaceEvent event) {
         var block = event.getBlock();
+        if (event.getBlock().getType().equals(Material.SPONGE)) this.spongePlacer = event.getPlayer();
         if (!controller.inSuburbs(block.getLocation())) return;
         if (controller.canBreak(event.getPlayer(), block.getLocation()))
             return;
-        event.getPlayer().sendMessage(ChatColor.RED + "no :)");
+        
+        event.getPlayer().sendMessage(ChatColor.RED + "you can't build here");
         event.setCancelled(true);
     }
 
@@ -165,15 +169,13 @@ public class LandEventListener implements Listener {
 
         if (!controller.inSuburbs(fromBlock.getLocation())) return;
 
-        BlockData fromBlockData = e.getBlock().getBlockData();
+        if (!(fromBlock.getType().equals(Material.DISPENSER))) return;
 
-        if (!(fromBlockData instanceof Dispenser)) return;
-
-        Dispenser dispenser = (Dispenser) fromBlockData;
+        Dispenser dispenser = (Dispenser) fromBlock;
 
         Block toBlock = fromBlock.getRelative(((Directional) dispenser.getBlockData()).getFacing());
         boolean toBlockInCity = controller.inCity(toBlock.getLocation());
-
+        
         if (toBlockInCity && !controller.inCity(fromBlock.getLocation())) {
             e.setCancelled(true);
             return;
@@ -222,7 +224,9 @@ public class LandEventListener implements Listener {
 
     @EventHandler
     public void spongeAbsorbEvent(SpongeAbsorbEvent e) {
-        //TODO
+        if (this.spongePlacer == null) return;
+
+        e.getBlocks().removeIf(block -> !controller.canBreak(spongePlacer, block.getLocation()));
     }
 
     //don't let players steal items from an item frame in a claim/city
@@ -290,6 +294,17 @@ public class LandEventListener implements Listener {
     }
 
     @EventHandler
+    public void onItemFrameObjectAdded(PlayerInteractEntityEvent e) {
+        Location loc = e.getRightClicked().getLocation();
+        if (!controller.inSuburbs(loc))
+            return;
+        
+        if (e.getRightClicked() instanceof ItemFrame && !controller.canBreak(e.getPlayer(), loc)) {
+            e.setCancelled(true);
+        }
+    }
+
+    @EventHandler
     public void onEntityDamageEntity(EntityDamageByEntityEvent event) {
         if (!(event.getEntity() instanceof Player)) {
             return;
@@ -308,6 +323,14 @@ public class LandEventListener implements Listener {
 
         if (!controller.inSuburbs(newLoc)) return;
 
+        Material mainHandItem = e.getPlayer().getInventory().getItemInMainHand().getType();
+
+        //don't let players place/interact w/ armor stands in a claim
+        if (mainHandItem.equals(Material.ARMOR_STAND)) {
+            e.setCancelled(true);
+            return;
+        }
+
         //if player is clicking on a locked chest/door then don't let em
         if (e.getAction() == Action.RIGHT_CLICK_BLOCK 
             && (Arrays.asList(nonClickables).contains(e.getClickedBlock().getType()) 
@@ -316,18 +339,21 @@ public class LandEventListener implements Listener {
             if (!controller.canBreak(e.getPlayer(), newLoc)) {
                 e.getPlayer().sendMessage(ChatColor.RED + "woah that is locked");
                 e.setCancelled(true);
+                return;
             }
         }
         //if a player right clicks w/ the claim material then maybe claim some stuff!!
-        else if (e.getPlayer().getInventory().getItemInMainHand().getType().equals(claimMaterial) && e.getAction() == Action.RIGHT_CLICK_BLOCK) {
+        else if (mainHandItem.equals(claimMaterial) && e.getAction() == Action.RIGHT_CLICK_BLOCK) {
             Location lastLoc = players.remove(e.getPlayer());
             if (lastLoc != null) {
                 //you can't claim the block you already clicked, silly
                 if (newLoc.getBlockX() == lastLoc.getBlockX() && newLoc.getBlockZ() == lastLoc.getBlockZ()) {
                     e.getPlayer().sendMessage(ChatColor.RED + "try claiming more than 1 block");
+                    return;
 
                 } else {
                     controller.tryClaimLand(e.getPlayer(), lastLoc.getBlockX(), lastLoc.getBlockZ(), newLoc.getBlockX(), newLoc.getBlockZ());
+                    return;
                 }
             } else {
                 players.put(e.getPlayer(), e.getClickedBlock().getLocation());

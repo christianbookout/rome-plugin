@@ -52,6 +52,7 @@ public class LandEventListener implements Listener {
             Material.SMOKER,
             Material.CHEST_MINECART,
             Material.ITEM_FRAME,
+            Material.TRAPPED_CHEST,
             Material.ARMOR_STAND
     };
 
@@ -68,7 +69,7 @@ public class LandEventListener implements Listener {
         if (controller.canBreak(event.getPlayer(), block.getLocation()))
             return;
 
-        event.getPlayer().sendMessage("you can't break that, dumbass");
+        event.getPlayer().sendMessage(ChatColor.RED + "you can't break that, dumbass");
         event.setCancelled(true);
     }
 
@@ -77,7 +78,7 @@ public class LandEventListener implements Listener {
         var block = event.getBlock();
         if (controller.canBreak(event.getPlayer(), block.getLocation()))
             return;
-        event.getPlayer().sendMessage("no :)");
+        event.getPlayer().sendMessage(ChatColor.RED + "no :)");
         event.setCancelled(true);
     }
 
@@ -89,7 +90,7 @@ public class LandEventListener implements Listener {
         }
         if (!controller.canBreak(e.getPlayer(), e.getBlock().getLocation())) {
             e.setBuildable(false);
-            e.getPlayer().sendMessage("you can't build here");
+            e.getPlayer().sendMessage(ChatColor.RED + "you can't build here");
         }
     }
 
@@ -120,7 +121,7 @@ public class LandEventListener implements Listener {
 
         Player remover = (Player) e.getRemover();
         if (!controller.canBreak(remover, e.getEntity().getLocation())) {
-            remover.sendMessage("don't break the hanging thing");
+            remover.sendMessage(ChatColor.RED + "don't break the hanging thing");
             e.setCancelled(true);
         }
     }
@@ -178,7 +179,7 @@ public class LandEventListener implements Listener {
         if (e.getDamager() instanceof Player) {
             Player damager = (Player) e.getDamager();
             if (!controller.canBreak(damager, e.getEntity().getLocation())) {
-                damager.sendMessage("filthy thief");
+                damager.sendMessage(ChatColor.RED + "filthy thief");
                 e.setCancelled(true);
             }
         }
@@ -231,14 +232,14 @@ public class LandEventListener implements Listener {
     //TODO make it so people can't open fence gates, click on buttons, press levers, etc in the city
     @EventHandler
     public void claimClicky(PlayerInteractEvent e) {
-        if (e.getClickedBlock() == null || e.getHand() == EquipmentSlot.HAND) {
+        if (e.getClickedBlock() == null) {
             return;
         }
         Location newLoc = e.getClickedBlock().getLocation();
         //if player is clicking on a locked chest/door then don't let em
         if (e.getAction() == Action.RIGHT_CLICK_BLOCK && (Arrays.asList(nonClickables).contains(e.getClickedBlock().getType()) || e.getClickedBlock().getType() == Material.CHEST || e.getClickedBlock().getState() instanceof Door)) {
             if (!controller.canBreak(e.getPlayer(), newLoc)) {
-                e.getPlayer().sendMessage(" woah that is locked");
+                e.getPlayer().sendMessage(ChatColor.RED + "woah that is locked");
                 e.setCancelled(true);
             }
         }
@@ -248,7 +249,7 @@ public class LandEventListener implements Listener {
             if (lastLoc != null) {
                 //you can't claim the block you already clicked, silly
                 if (newLoc.getBlockX() == lastLoc.getBlockX() && newLoc.getBlockZ() == lastLoc.getBlockZ()) {
-                    e.getPlayer().sendMessage("try claiming more than 1 block");
+                    e.getPlayer().sendMessage(ChatColor.RED + "try claiming more than 1 block");
 
                 } else {
                     controller.tryClaimLand(e.getPlayer(), lastLoc.getBlockX(), lastLoc.getBlockZ(), newLoc.getBlockX(), newLoc.getBlockZ());
@@ -280,7 +281,7 @@ public class LandEventListener implements Listener {
                 if (l != null && !l.equals(removeLocation))
                     return;
                 players.remove(removePlayer);
-                removePlayer.sendMessage(ChatColor.RED.toString() + "claim @ (" + removeLocation.getBlockX() + ", " + removeLocation.getBlockZ() + ") timed out");
+                removePlayer.sendMessage(ChatColor.RED + "claim @ (" + removeLocation.getBlockX() + ", " + removeLocation.getBlockZ() + ") timed out");
             } catch (Exception e) {
                 e.printStackTrace();
             }

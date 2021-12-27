@@ -12,7 +12,7 @@ import romeplugin.RomePlugin;
 import romeplugin.database.SQLConn;
 import romeplugin.database.TitleEntry;
 
-public class removePope implements Listener {
+public class RemovePopeListener implements Listener {
     
     @EventHandler
     public boolean onDeathEvent(PlayerDeathEvent e) {

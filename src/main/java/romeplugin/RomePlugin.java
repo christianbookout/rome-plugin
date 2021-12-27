@@ -24,6 +24,7 @@ import romeplugin.newtitle.RemoveTitleCommand;
 import romeplugin.newtitle.SetTitleCommand;
 import romeplugin.newtitle.Title;
 import romeplugin.newtitle.TitleEventListener;
+import romeplugin.newtitle.RemovePopeListener;
 import romeplugin.zoning.*;
 
 import java.sql.Connection;
@@ -121,6 +122,7 @@ public class RomePlugin extends JavaPlugin {
         getCommand("settitle").setExecutor(new SetTitleCommand());
         getCommand("pay").setExecutor(new PayCommand(ledger));
         getCommand("bal").setExecutor(new BalanceCommand(ledger));
+        getServer().getPluginManager().registerEvents(new RemovePopeListener(), this);
         getServer().getPluginManager().registerEvents(new TitleEventListener(), this);
         getServer().getPluginManager().registerEvents(new DistanceListener(config.getInt("messages.messageDistance"), filter), this);
         getServer().getPluginManager().registerEvents(new BlockchainEventListener(this, ledger), this);

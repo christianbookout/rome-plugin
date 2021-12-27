@@ -1,6 +1,8 @@
 package romeplugin.zoning;
 
 import net.md_5.bungee.api.ChatColor;
+
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -113,7 +115,7 @@ public class LandEventListener implements Listener {
 
     @EventHandler
     public void onExplosion(EntityExplodeEvent e) {
-        e.blockList().removeIf(block -> controller.inCity(block.getLocation()));
+        e.blockList().removeIf(block -> controller.inCity(block.getLocation()) || SQLConn.getClaim(block.getLocation()) != null);
 
     }
 
@@ -152,6 +154,7 @@ public class LandEventListener implements Listener {
         }
     }
 
+
     //don't let people place paintings in a city or claim
     @EventHandler
     public void hangingItemPlaced(HangingPlaceEvent e) {
@@ -162,40 +165,61 @@ public class LandEventListener implements Listener {
         }
     }
 
+    //Tests to see if a block can move from one block to another block (like flowing water, pistons, or dispensers)
+    private boolean canBlockMove(Location fromLoc, Location toLoc) {
+        boolean toLocInCity = controller.inCity(toLoc);
+        boolean fromLocInCity = controller.inCity(fromLoc);
+
+        if (!controller.inSuburbs(toLoc)) return false;
+
+        if (toLocInCity && !fromLocInCity) {
+            return true;
+        }
+
+        ClaimEntry toClaim = SQLConn.getClaim(toLoc);
+        if (!toLocInCity && toClaim == null) return false;
+        ClaimEntry fromClaim = SQLConn.getClaim(fromLoc);
+
+        if ((fromClaim == null && toClaim != null)
+            || (toLocInCity && fromClaim != null)
+            || (fromClaim != null && toClaim != null && !fromClaim.owner.equals(toClaim.owner))) {
+            return true;
+        }
+        return false;
+    }
+
+    @EventHandler
+    public void onPistonPush(BlockPistonExtendEvent e) {
+        var initLoc = e.getBlock().getLocation();
+        for (Block b: e.getBlocks()) {
+            if (!canBlockMove(initLoc, b.getLocation())) {
+                e.setCancelled(true);
+                return;
+            }
+        }
+    }
+
     //When a dispenser outside the city tries to dispense something into the city, then cancel it
     @EventHandler
     public void blockDispensedEvent(BlockDispenseEvent e) {
         Block fromBlock = e.getBlock();
-
-        if (!controller.inSuburbs(fromBlock.getLocation())) return;
-
         if (!(fromBlock.getType().equals(Material.DISPENSER))) return;
 
-        Dispenser dispenser = (Dispenser) fromBlock;
-
+        Dispenser dispenser = (Dispenser) fromBlock.getState();
         Block toBlock = fromBlock.getRelative(((Directional) dispenser.getBlockData()).getFacing());
-        boolean toBlockInCity = controller.inCity(toBlock.getLocation());
         
-        if (toBlockInCity && !controller.inCity(fromBlock.getLocation())) {
-            e.setCancelled(true);
-            return;
-        }
-
-        ClaimEntry fromClaim = SQLConn.getClaim(fromBlock.getLocation());
-        ClaimEntry toClaim = SQLConn.getClaim(toBlock.getLocation());
-        //If a dispenser is going from no claim to a claim or other way around (and it's happening in a city) then cancel it
-        if ((fromClaim == null && toClaim != null) || (toClaim == null && fromClaim != null && toBlockInCity)) {
-            e.setCancelled(true);
-            return;
-        }
-
-        //If a dispenser is dispensing from one claim into another claim with a different owner then cancel it
-        if (fromClaim != null && toClaim != null && !fromClaim.owner.equals(toClaim.owner)) {
-            e.setCancelled(true);
-            return;
-        }
+        e.setCancelled(canBlockMove(fromBlock.getLocation(), toBlock.getLocation()));
     }
+    //Only applies to water and lava
+    @EventHandler
+    public void onBlockFromTo(BlockFromToEvent event) {
+        if (event.getBlock().getType() == Material.DRAGON_EGG) return;
 
+        Location fromLoc = event.getBlock().getLocation();
+        Location toLoc = event.getToBlock().getLocation();
+
+        event.setCancelled(canBlockMove(fromLoc, toLoc));
+    }
     @EventHandler
     public void playerBucketFillEvent(PlayerBucketFillEvent e) {
 
@@ -253,46 +277,6 @@ public class LandEventListener implements Listener {
         }
     }
 
-    //Only applies to water and lava
-    @EventHandler
-    public void onBlockFromTo(BlockFromToEvent event) {
-        if (event.getBlock().getType() == Material.DRAGON_EGG) return;
-        Location fromLoc = event.getBlock().getLocation();
-        Location toLoc = event.getToBlock().getLocation();
-
-        boolean toLocInCity = controller.inCity(toLoc);
-        boolean fromLocInCity = controller.inCity(fromLoc);
-
-        if (!controller.inSuburbs(toLoc)) return;
-
-        //liquid can't flow from outside of city into the city
-        if (toLocInCity && !fromLocInCity) {
-            event.setCancelled(true);
-            return;
-        }
-
-        ClaimEntry toClaim = SQLConn.getClaim(toLoc);
-        if (!toLocInCity && toClaim == null) return;
-        ClaimEntry fromClaim = SQLConn.getClaim(fromLoc);
-
-        //If liquid is flowing from the wild into a claim, stop it 
-        if (fromClaim == null && toClaim != null) {
-            event.setCancelled(true);
-            return;
-        }
-
-        //If liquid is moving from a claim into the city, don't let it 
-        if (toLocInCity && fromClaim != null) {
-            event.setCancelled(true);
-            return;
-        }
-
-        //liquid can't flow from one claim to someone else's adjacent claim
-        if (fromClaim != null && toClaim != null && !fromClaim.owner.equals(toClaim.owner)) {
-            event.setCancelled(true);
-        }
-    }
-
     @EventHandler
     public void onItemFrameObjectAdded(PlayerInteractEntityEvent e) {
         Location loc = e.getRightClicked().getLocation();
@@ -335,6 +319,8 @@ public class LandEventListener implements Listener {
         if (e.getAction() == Action.RIGHT_CLICK_BLOCK 
             && (Arrays.asList(nonClickables).contains(e.getClickedBlock().getType()) 
                 || e.getClickedBlock().getState() instanceof Door)) {
+            
+            if (e.getPlayer().getGameMode() == GameMode.SPECTATOR) return;
 
             if (!controller.canBreak(e.getPlayer(), newLoc)) {
                 e.getPlayer().sendMessage(ChatColor.RED + "woah that is locked");

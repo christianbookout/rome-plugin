@@ -4,14 +4,13 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import romeplugin.RomePlugin;
-import romeplugin.database.SQLConn;
-
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 
 public class SetTitleCommand implements CommandExecutor {
+    private final TitleHandler titles;
+
+    public SetTitleCommand(TitleHandler titles) {
+        this.titles = titles;
+    }
 
     @Override
     public boolean onCommand(CommandSender commandSender, Command command, String s, String[] params) {
@@ -30,18 +29,10 @@ public class SetTitleCommand implements CommandExecutor {
             return false;
         }
 
-        try (Connection conn = SQLConn.getConnection()) {
-            PreparedStatement statement = conn.prepareStatement(
-                    "REPLACE INTO players (uuid, title) values (?, ?);");
-            statement.setString(1, target.getUniqueId().toString());
-            statement.setString(2, title.toString());
-            statement.execute();
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
+        if (!titles.setTitle(target, title)) {
+            commandSender.sendMessage("could not set title??");
         }
 
-        RomePlugin.onlinePlayerTitles.put(target, title);
         commandSender.sendMessage(target.getDisplayName() + "'s title is now " + title.toString());
         return true;
     }

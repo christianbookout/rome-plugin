@@ -1,5 +1,6 @@
 package romeplugin.zoning;
 
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import romeplugin.RomePlugin;
@@ -82,6 +83,9 @@ public class LandControl {
         var extents = governmentSize * suburbsMult;
         return Math.abs(x - cityX) <= extents && Math.abs(y - cityY) <= extents;
     }
+    public boolean inSuburbs(Location loc) {
+        return inSuburbs(loc.getBlockX(), loc.getBlockZ());
+    }
 
     public boolean inCity(Location loc) {
         return inCity(loc.getBlockX(), loc.getBlockZ());
@@ -137,7 +141,8 @@ public class LandControl {
             }
             return true;
         }
-        return SQLConn.getTotalClaimedBlocks(player.getUniqueId()) <= 225;
+        var claimed = (x1 - x0) * (y0 - y1);
+        return SQLConn.getTotalClaimedBlocks(player.getUniqueId()) + claimed <= 225;
     }
 
     public boolean tryClaimLand(Player player, int xa, int ya, int xb, int yb) {
@@ -147,6 +152,7 @@ public class LandControl {
         var x1 = Math.max(xa, xb);
         var y1 = Math.min(ya, yb);
         if (!canClaim(player, x0, y0, x1, y1)) {
+            player.sendMessage(ChatColor.RED + "you have hit your block limit!");
             return false;
         }
         var claim = SQLConn.getClaimRect(x0, y0, x1, y1);

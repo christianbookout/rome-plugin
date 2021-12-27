@@ -1,36 +1,38 @@
 package romeplugin.newtitle;
 
+import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import romeplugin.RomePlugin;
 import romeplugin.database.SQLConn;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-
 public class RemoveTitleCommand implements CommandExecutor {
+    private final TitleHandler titles;
+
+    public RemoveTitleCommand(TitleHandler titles) {
+        this.titles = titles;
+    }
+
     @Override
-    public boolean onCommand(CommandSender commandSender, Command command, String s, String[] params) {
+    public boolean onCommand(CommandSender sender, Command command, String s, String[] params) {
         if (params.length < 1) {
+            sender.sendMessage(ChatColor.RED + "sina wile e jan!");
             return false;
         }
-        Player target = commandSender.getServer().getPlayer(params[0]);
+        Player target = sender.getServer().getPlayer(params[0]);
         if (target == null) {
+            var uuid = SQLConn.getUUIDFromUsername(params[0]);
+            if (uuid == null) {
+                sender.sendMessage(ChatColor.RED + "ni jan li lon ala!");
+                return false;
+            }
+            return titles.removeTitleOffline(uuid);
+        }
+        if (!titles.removeTitle(target)) {
             return false;
         }
-        try (Connection conn = SQLConn.getConnection()) {
-            PreparedStatement statement = conn.prepareStatement(
-                    "DELETE FROM players WHERE uuid = ?;");
-            statement.setString(1, target.getUniqueId().toString());
-            statement.execute();
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
-        }
-        RomePlugin.onlinePlayerTitles.remove(target);
+        sender.sendMessage("weka e nimi wawa lon jan " + params[0] + ".");
         return true;
     }
 }

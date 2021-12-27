@@ -66,6 +66,8 @@ public class LandEventListener implements Listener {
     };
 
     //note last player who places sponge to make sure they arent tryna destroy water in someone else's claim
+    //there will be a bug if someone who can build in the city places a sponge and then water flows from the city into the suburbs and someone already has
+    //a sponge placed, it will get rid of the water (but who cares)
     private Player spongePlacer = null;
 
     public LandEventListener(LandControl controller, Material claimMaterial, long claimTimeoutMS) {
@@ -191,6 +193,11 @@ public class LandEventListener implements Listener {
     @EventHandler
     public void onPistonPush(BlockPistonExtendEvent e) {
         var initLoc = e.getBlock().getLocation();
+        var toLoc = e.getBlock().getRelative(((Directional) e.getBlock().getBlockData()).getFacing()).getLocation();
+        if (!canBlockMove(initLoc, toLoc)) {
+            e.setCancelled(true);
+            return;
+        }
         for (Block b: e.getBlocks()) {
             if (!canBlockMove(initLoc, b.getLocation())) {
                 e.setCancelled(true);
@@ -251,6 +258,7 @@ public class LandEventListener implements Listener {
         if (this.spongePlacer == null) return;
 
         e.getBlocks().removeIf(block -> !controller.canBreak(spongePlacer, block.getLocation()));
+        this.spongePlacer = null;
     }
 
     //don't let players steal items from an item frame in a claim/city
@@ -282,8 +290,8 @@ public class LandEventListener implements Listener {
         Location loc = e.getRightClicked().getLocation();
         if (!controller.inSuburbs(loc))
             return;
-        
-        if (e.getRightClicked() instanceof ItemFrame && !controller.canBreak(e.getPlayer(), loc)) {
+        var entity = e.getRightClicked();
+        if ((entity instanceof ItemFrame || entity instanceof ArmorStand) && !controller.canBreak(e.getPlayer(), loc)) {
             e.setCancelled(true);
         }
     }

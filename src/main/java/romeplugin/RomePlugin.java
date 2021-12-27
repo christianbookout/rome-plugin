@@ -122,7 +122,7 @@ public class RomePlugin extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new RemovePopeListener(), this);
         getCommand("builder").setExecutor(new BuilderCommand(titles));
         getServer().getPluginManager().registerEvents(new TitleEventListener(titles), this);
-        getServer().getPluginManager().registerEvents(new DistanceListener(config.getInt("messages.messageDistance"), filter), this);
+        getServer().getPluginManager().registerEvents(new DistanceListener(config.getInt("messages.messageDistance"), filter, landControl), this);
         getServer().getPluginManager().registerEvents(new BlockchainEventListener(this, ledger), this);
         getServer().getPluginManager().registerEvents(landListener, this);
         getServer().getPluginManager().registerEvents(new LandEnterListener(landControl), this);

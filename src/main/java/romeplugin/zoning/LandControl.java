@@ -132,14 +132,15 @@ public class LandControl {
             player.sendMessage("you cannot claim in government");
             return false;
         }
+        var title = SQLConn.getTitle(player.getUniqueId());
+        if (title != null && title.t == Title.MAYOR) {
+            // this allows the mayor to skip the claiming limit check anywhere outside of the government area
+            return true;
+        }
         extents = governmentSize * cityMult;
         if (rectIntersects(x0, y0, x1, y1, cityX - extents, cityY + extents, cityX + extents, cityY - extents)) {
-            var title = SQLConn.getTitle(player.getUniqueId());
-            if (title == null || title.t != Title.MAYOR) {
-                player.sendMessage("sina ken ala jo e ma ni, sina wawa ala");
-                return false;
-            }
-            return true;
+            player.sendMessage("sina ken ala jo e ma ni, sina wawa ala");
+            return false;
         }
         var claimed = (x1 - x0) * (y0 - y1);
         return SQLConn.getTotalClaimedBlocks(player.getUniqueId()) + claimed <= 225;

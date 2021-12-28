@@ -8,14 +8,13 @@ import org.bukkit.block.Block;
 import org.bukkit.block.Dispenser;
 import org.bukkit.block.data.Directional;
 import org.bukkit.block.data.type.Door;
-import org.bukkit.entity.ArmorStand;
-import org.bukkit.entity.ItemFrame;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.*;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.hanging.HangingBreakByEntityEvent;
 import org.bukkit.event.hanging.HangingBreakEvent;
@@ -170,25 +169,26 @@ public class LandEventListener implements Listener {
 
     //Tests to see if a block can move from one block to another block (like flowing water, pistons, or dispensers)
     private boolean canBlockMove(Location fromLoc, Location toLoc) {
+        // fast path, the wilderness has no protections
+        if (controller.inWilderness(toLoc)) {
+            return false;
+        }
+
         boolean toLocInCity = controller.inCity(toLoc);
         boolean fromLocInCity = controller.inCity(fromLoc);
 
-        if (!controller.inSuburbs(toLoc)) return false;
-
         if (toLocInCity && !fromLocInCity) {
-            return true;
+            return false;
         }
 
         ClaimEntry toClaim = SQLConn.getClaim(toLoc);
-        if (!toLocInCity && toClaim == null) return false;
-        ClaimEntry fromClaim = SQLConn.getClaim(fromLoc);
-
-        if ((fromClaim == null && toClaim != null)
-                || (toLocInCity && fromClaim != null)
-                || (fromClaim != null && toClaim != null && !fromClaim.owner.equals(toClaim.owner))) {
+        if (!toLocInCity && toClaim == null) {
             return true;
         }
-        return false;
+        ClaimEntry fromClaim = SQLConn.getClaim(fromLoc);
+
+        return toClaim == null || // can move into unclaimed land
+                (fromClaim != null && fromClaim.owner.equals(toClaim.owner)); // can move between owned claims
     }
 
     @EventHandler
@@ -216,7 +216,7 @@ public class LandEventListener implements Listener {
         Dispenser dispenser = (Dispenser) fromBlock.getState();
         Block toBlock = fromBlock.getRelative(((Directional) dispenser.getBlockData()).getFacing());
 
-        e.setCancelled(canBlockMove(fromBlock.getLocation(), toBlock.getLocation()));
+        e.setCancelled(!canBlockMove(fromBlock.getLocation(), toBlock.getLocation()));
     }
 
     //Only applies to water and lava
@@ -227,7 +227,7 @@ public class LandEventListener implements Listener {
         Location fromLoc = event.getBlock().getLocation();
         Location toLoc = event.getToBlock().getLocation();
 
-        event.setCancelled(canBlockMove(fromLoc, toLoc));
+        event.setCancelled(!canBlockMove(fromLoc, toLoc));
     }
 
     @EventHandler
@@ -302,6 +302,15 @@ public class LandEventListener implements Listener {
     @EventHandler
     public void onEntityDamageEntity(EntityDamageByEntityEvent event) {
         if (!(event.getEntity() instanceof Player)) {
+            return;
+        }
+        if (event.getCause() == EntityDamageEvent.DamageCause.PROJECTILE) {
+            var projectile = (Projectile) event.getDamager();
+            if (projectile.getShooter() instanceof Player &&
+                    !(projectile instanceof Snowball) &&
+                    !(projectile instanceof Egg)) {
+                event.setCancelled(controller.inCity(event.getEntity().getLocation()));
+            }
             return;
         }
         var damaged = (Player) event.getEntity();

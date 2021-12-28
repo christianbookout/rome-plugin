@@ -180,4 +180,8 @@ public class LandControl {
         setGovernmentSize(governmentSize + size);
         return true;
     }
+
+    public boolean inWilderness(Location toLoc) {
+        return !inSuburbs(toLoc);
+    }
 }

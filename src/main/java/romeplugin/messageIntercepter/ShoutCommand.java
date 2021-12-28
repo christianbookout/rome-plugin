@@ -17,14 +17,16 @@ public class ShoutCommand implements CommandExecutor  {
         Player player = (Player) sender;
 
         Title playerTitle = RomePlugin.onlinePlayerTitles.get(player);
-        if (playerTitle == null) return false;
+        String title = "";
+        if (playerTitle != null) 
+            title = "[" + playerTitle.color + playerTitle.fancyName + ChatColor.RESET + "]";
         String message = "";
         if (args.length == 0) 
             message = "aaaaah";
         else 
             message = String.join(" ", args);
 
-        message = "[" + playerTitle.color + playerTitle.fancyName + ChatColor.RESET + "] " + message;
+        message = title + " <" + player.getDisplayName() + "> " + message;
         
         for (var p: sender.getServer().getOnlinePlayers()) {
             p.sendMessage("[" + ChatColor.RED + "SHOUT" + ChatColor.RESET + "] " + message);

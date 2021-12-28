@@ -32,20 +32,27 @@ public class TitleHandler {
     }
 
     public boolean setTitle(Player player, Title title) {
-        try (Connection conn = SQLConn.getConnection()) {
-            PreparedStatement statement = conn.prepareStatement(
-                    "REPLACE INTO players (uuid, title) values (?, ?);");
-            statement.setString(1, player.getUniqueId().toString());
-            statement.setString(2, title.toString());
-            statement.execute();
-        } catch (SQLException e) {
-            e.printStackTrace();
+        if (!setTitleOffline(player.getUniqueId(), title)) {
             return false;
         }
 
         var oldTitle = RomePlugin.onlinePlayerTitles.put(player, title);
         perms.updateTitle(player, title, oldTitle);
         return true;
+    }
+
+    boolean setTitleOffline(UUID uuid, Title title) {
+        try (Connection conn = SQLConn.getConnection()) {
+            PreparedStatement statement = conn.prepareStatement(
+                    "REPLACE INTO players (uuid, title) values (?, ?);");
+            statement.setString(1, uuid.toString());
+            statement.setString(2, title.toString());
+            statement.execute();
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     public boolean removeTitle(Player player) {

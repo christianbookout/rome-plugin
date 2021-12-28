@@ -21,6 +21,7 @@ import romeplugin.database.SQLConn;
 import romeplugin.messageIntercepter.DistanceListener;
 import romeplugin.messageIntercepter.ShoutCommand;
 import romeplugin.messageIntercepter.SwearFilter;
+import romeplugin.misc.PeeController;
 import romeplugin.newtitle.*;
 import romeplugin.zoning.*;
 
@@ -110,6 +111,7 @@ public class RomePlugin extends JavaPlugin {
 
         var titles = new TitleHandler(this);
         SwearFilter filter = new SwearFilter(landControl, config.getInt("messages.useSwearFilter"));
+        var peeController = new PeeController();
         getCommand("rome").setExecutor(new LandCommand(landControl));
         getCommand("claim").setExecutor(new ClaimLandCommand(landControl));
         getCommand("transferclaim").setExecutor(new TransferClaimCommand());
@@ -123,6 +125,8 @@ public class RomePlugin extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new RemovePopeListener(), this);
         getCommand("builder").setExecutor(new BuilderCommand(titles));
         getCommand("shout").setExecutor(new ShoutCommand());
+        getCommand("pee").setExecutor(peeController);
+        getServer().getPluginManager().registerEvents(peeController, this);
         getServer().getPluginManager().registerEvents(new TitleEventListener(titles), this);
         getServer().getPluginManager().registerEvents(new DistanceListener(config.getInt("messages.messageDistance"), filter, landControl), this);
         getServer().getPluginManager().registerEvents(new BlockchainEventListener(this, ledger), this);

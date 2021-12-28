@@ -19,6 +19,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import romeplugin.database.SQLConn;
 import romeplugin.messageIntercepter.DistanceListener;
+import romeplugin.messageIntercepter.ShoutCommand;
 import romeplugin.messageIntercepter.SwearFilter;
 import romeplugin.newtitle.*;
 import romeplugin.zoning.*;
@@ -121,6 +122,7 @@ public class RomePlugin extends JavaPlugin {
         getCommand("bal").setExecutor(new BalanceCommand(ledger));
         getServer().getPluginManager().registerEvents(new RemovePopeListener(), this);
         getCommand("builder").setExecutor(new BuilderCommand(titles));
+        getCommand("shout").setExecutor(new ShoutCommand());
         getServer().getPluginManager().registerEvents(new TitleEventListener(titles), this);
         getServer().getPluginManager().registerEvents(new DistanceListener(config.getInt("messages.messageDistance"), filter, landControl), this);
         getServer().getPluginManager().registerEvents(new BlockchainEventListener(this, ledger), this);

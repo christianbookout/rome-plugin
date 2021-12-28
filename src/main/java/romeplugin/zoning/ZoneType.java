@@ -8,7 +8,7 @@ import java.util.Arrays;
 
 public enum ZoneType {
     GOVERNMENT(ChatColor.LIGHT_PURPLE, CONSOLE, MAYOR, BUILDER, SENSOR),
-    CITY(ChatColor.GOLD, MAYOR, BUILDER),
+    CITY(ChatColor.GOLD, MAYOR, BUILDER, JUDGE),
     SUBURB(ChatColor.DARK_AQUA),
     WILDERNESS(ChatColor.GREEN);
 

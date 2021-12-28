@@ -127,15 +127,15 @@ public class LandControl {
             player.sendMessage("you cannot claim outside of city limits");
             return false;
         }
+        var title = SQLConn.getTitle(player.getUniqueId());
+        if (title != null && title.t == Title.MAYOR) {
+            // this allows the mayor to skip the claiming limit check anywhere inside rome
+            return true;
+        }
         extents = governmentSize;
         if (rectIntersects(x0, y0, x1, y1, cityX - extents, cityY + extents, cityX + extents, cityY - extents)) {
             player.sendMessage("you cannot claim in government");
             return false;
-        }
-        var title = SQLConn.getTitle(player.getUniqueId());
-        if (title != null && title.t == Title.MAYOR) {
-            // this allows the mayor to skip the claiming limit check anywhere outside of the government area
-            return true;
         }
         extents = governmentSize * cityMult;
         if (rectIntersects(x0, y0, x1, y1, cityX - extents, cityY + extents, cityX + extents, cityY - extents)) {
@@ -143,7 +143,11 @@ public class LandControl {
             return false;
         }
         var claimed = (x1 - x0) * (y0 - y1);
-        return SQLConn.getTotalClaimedBlocks(player.getUniqueId()) + claimed <= 225;
+        if (SQLConn.getTotalClaimedBlocks(player.getUniqueId()) + claimed <= 225) {
+            player.sendMessage(ChatColor.RED + "you have hit your block limit!");
+            return false;
+        }
+        return true;
     }
 
     public boolean tryClaimLand(Player player, int xa, int ya, int xb, int yb) {
@@ -153,7 +157,6 @@ public class LandControl {
         var x1 = Math.max(xa, xb);
         var y1 = Math.min(ya, yb);
         if (!canClaim(player, x0, y0, x1, y1)) {
-            player.sendMessage(ChatColor.RED + "you have hit your block limit!");
             return false;
         }
         var claim = SQLConn.getClaimRect(x0, y0, x1, y1);

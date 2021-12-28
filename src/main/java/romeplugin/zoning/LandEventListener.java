@@ -353,14 +353,15 @@ public class LandEventListener implements Listener {
                 players.put(e.getPlayer(), e.getClickedBlock().getLocation());
                 e.getPlayer().sendMessage("claim started @ (" + newLoc.getBlockX() + ", " + newLoc.getBlockZ() + ").");
 
-                if (claimTimeoutMS != 0)
-                    claimTimer.schedule(new PlayerUnclaimTimer(e.getPlayer(), newLoc), claimTimeoutMS);
+                //too cursed 
+                //if (claimTimeoutMS != 0)
+                   // claimTimer.schedule(new PlayerUnclaimTimer(e.getPlayer(), newLoc), claimTimeoutMS);
             }
         }
     }
 
     //funny
-    class PlayerUnclaimTimer extends TimerTask { //timer already cancelled error? what
+    class PlayerUnclaimTimer extends TimerTask {
         private final Player removePlayer;
         private final Location removeLocation;
 

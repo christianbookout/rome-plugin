@@ -8,14 +8,13 @@ import org.bukkit.block.Block;
 import org.bukkit.block.Dispenser;
 import org.bukkit.block.data.Directional;
 import org.bukkit.block.data.type.Door;
-import org.bukkit.entity.ArmorStand;
-import org.bukkit.entity.ItemFrame;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.*;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.hanging.HangingBreakByEntityEvent;
 import org.bukkit.event.hanging.HangingBreakEvent;
@@ -299,6 +298,15 @@ public class LandEventListener implements Listener {
     @EventHandler
     public void onEntityDamageEntity(EntityDamageByEntityEvent event) {
         if (!(event.getEntity() instanceof Player)) {
+            return;
+        }
+        if (event.getCause() == EntityDamageEvent.DamageCause.PROJECTILE) {
+            var projectile = (Projectile) event.getDamager();
+            if (projectile.getShooter() instanceof Player &&
+                    !(projectile instanceof Snowball) &&
+                    !(projectile instanceof Egg)) {
+                event.setCancelled(controller.inCity(event.getEntity().getLocation()));
+            }
             return;
         }
         var damaged = (Player) event.getEntity();

@@ -24,6 +24,11 @@ public enum Title {
     }
 
     public static Title getTitle(String title) {
+        for (var t : Title.values()) {
+            if (t.fancyName.toLowerCase().equals(title)) {
+                return t;
+            }
+        }
         return Title.valueOf(title.toUpperCase());
     }
 }

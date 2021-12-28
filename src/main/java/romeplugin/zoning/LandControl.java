@@ -2,6 +2,7 @@ package romeplugin.zoning;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 import romeplugin.RomePlugin;
 import romeplugin.database.SQLConn;
@@ -170,6 +171,9 @@ public class LandControl {
     }
 
     public boolean canBreak(Player player, Location loc) {
+        if (player.getWorld().getEnvironment() != World.Environment.NORMAL) {
+            return true;
+        }
         return canBreak(player, loc.getBlockX(), loc.getBlockZ());
     }
 

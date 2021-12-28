@@ -21,22 +21,23 @@ import org.bukkit.potion.PotionType;
 public class PeeController implements CommandExecutor, Listener{
 
     //speed after pee for 30 seconds (times 20 ticks per second)
-    private static final int PEE_TICKS = 30 * 20;
+    private static final int PEE_TICKS = 30 * 20; //TODO get server ticks instead of using default of 20
 
     //level of speed to give player after they pee
-    private static final int PEE_AMPLIFIER = 1;
+    private static final int PEE_AMPLIFIER = 0;
 
-    private static final List<Player> canPeePlayers = new ArrayList<Player>();
+    private final List<Player> canPeePlayers = new ArrayList<Player>();
 
     @Override
     public boolean onCommand(CommandSender arg0, Command arg1, String arg2, String[] arg3) {
         if (!(arg0 instanceof Player)) return false;
         Player player = (Player) arg0;
 
+        //if the player is not in the canPeePlayers list then return
+        if (!canPeePlayers.remove(player)) return false;
+
         player.sendMessage(ChatColor.YELLOW + "ahhh... you feel relieved.");
         player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, PEE_TICKS, PEE_AMPLIFIER));
-
-        canPeePlayers.remove(player);
         return true;
     }
 

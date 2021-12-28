@@ -1,11 +1,11 @@
 package romeplugin.zoning;
 
 import net.md_5.bungee.api.ChatColor;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.Dispenser;
-import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.Directional;
 import org.bukkit.block.data.type.Door;
 import org.bukkit.entity.ArmorStand;
@@ -19,12 +19,12 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.hanging.HangingBreakByEntityEvent;
 import org.bukkit.event.hanging.HangingBreakEvent;
-import org.bukkit.event.hanging.HangingPlaceEvent;
 import org.bukkit.event.hanging.HangingBreakEvent.RemoveCause;
+import org.bukkit.event.hanging.HangingPlaceEvent;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
 import org.bukkit.event.player.PlayerBucketFillEvent;
+import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.inventory.EquipmentSlot;
 import romeplugin.database.ClaimEntry;
 import romeplugin.database.SQLConn;
 
@@ -60,8 +60,14 @@ public class LandEventListener implements Listener {
             Material.HOPPER_MINECART,
             Material.BREWING_STAND,
             Material.ITEM_FRAME,
+            Material.TRAPPED_CHEST,
             Material.ARMOR_STAND
     };
+
+    //note last player who places sponge to make sure they arent tryna destroy water in someone else's claim
+    //there will be a bug if someone who can build in the city places a sponge and then water flows from the city into the suburbs and someone already has
+    //a sponge placed, it will get rid of the water (but who cares)
+    private Player spongePlacer = null;
 
     public LandEventListener(LandControl controller, Material claimMaterial, long claimTimeoutMS) {
         this.controller = controller;
@@ -77,17 +83,19 @@ public class LandEventListener implements Listener {
         if (controller.canBreak(event.getPlayer(), block.getLocation()))
             return;
 
-        event.getPlayer().sendMessage("you can't break that, dumbass");
+        event.getPlayer().sendMessage(ChatColor.RED + "you can't break that, dumbass");
         event.setCancelled(true);
     }
 
     @EventHandler
     public void onBlockPlace(BlockPlaceEvent event) {
         var block = event.getBlock();
+        if (event.getBlock().getType().equals(Material.SPONGE)) this.spongePlacer = event.getPlayer();
         if (!controller.inSuburbs(block.getLocation())) return;
         if (controller.canBreak(event.getPlayer(), block.getLocation()))
             return;
-        event.getPlayer().sendMessage("no :)");
+
+        event.getPlayer().sendMessage(ChatColor.RED + "you can't build here");
         event.setCancelled(true);
     }
 
@@ -102,13 +110,13 @@ public class LandEventListener implements Listener {
         }
         if (!controller.canBreak(e.getPlayer(), location)) {
             e.setBuildable(false);
-            e.getPlayer().sendMessage("you can't build here");
+            e.getPlayer().sendMessage(ChatColor.RED + "you can't build here");
         }
     }
 
     @EventHandler
     public void onExplosion(EntityExplodeEvent e) {
-        e.blockList().removeIf(block -> controller.inCity(block.getLocation()));
+        e.blockList().removeIf(block -> controller.inCity(block.getLocation()) || SQLConn.getClaim(block.getLocation()) != null);
 
     }
 
@@ -131,8 +139,8 @@ public class LandEventListener implements Listener {
 
         //If a mob or something else tries to break an item frame and they are in a city or a claim then stop them
         if (!(e.getRemover() instanceof Player)) {
-            if (controller.inCity(location) 
-                || SQLConn.getClaim(location) != null) {
+            if (controller.inCity(location)
+                    || SQLConn.getClaim(location) != null) {
 
                 e.setCancelled(true);
             }
@@ -141,8 +149,8 @@ public class LandEventListener implements Listener {
 
         //If a player's breaking the frame and they aren't allowed then don't let them
         Player remover = (Player) e.getRemover();
-        if (!controller.canBreak(remover, location)) {
-            remover.sendMessage("don't break the hanging thing");
+        if (!controller.canBreak(remover, e.getEntity().getLocation())) {
+            remover.sendMessage(ChatColor.RED + "don't break the hanging thing");
             e.setCancelled(true);
         }
     }
@@ -157,40 +165,66 @@ public class LandEventListener implements Listener {
         }
     }
 
+    //Tests to see if a block can move from one block to another block (like flowing water, pistons, or dispensers)
+    private boolean canBlockMove(Location fromLoc, Location toLoc) {
+        boolean toLocInCity = controller.inCity(toLoc);
+        boolean fromLocInCity = controller.inCity(fromLoc);
+
+        if (!controller.inSuburbs(toLoc)) return false;
+
+        if (toLocInCity && !fromLocInCity) {
+            return true;
+        }
+
+        ClaimEntry toClaim = SQLConn.getClaim(toLoc);
+        if (!toLocInCity && toClaim == null) return false;
+        ClaimEntry fromClaim = SQLConn.getClaim(fromLoc);
+
+        if ((fromClaim == null && toClaim != null)
+                || (toLocInCity && fromClaim != null)
+                || (fromClaim != null && toClaim != null && !fromClaim.owner.equals(toClaim.owner))) {
+            return true;
+        }
+        return false;
+    }
+
+    @EventHandler
+    public void onPistonPush(BlockPistonExtendEvent e) {
+        var initLoc = e.getBlock().getLocation();
+        var toLoc = e.getBlock().getRelative(((Directional) e.getBlock().getBlockData()).getFacing()).getLocation();
+        if (!canBlockMove(initLoc, toLoc)) {
+            e.setCancelled(true);
+            return;
+        }
+        for (Block b : e.getBlocks()) {
+            if (!canBlockMove(initLoc, b.getLocation())) {
+                e.setCancelled(true);
+                return;
+            }
+        }
+    }
+
     //When a dispenser outside the city tries to dispense something into the city, then cancel it
     @EventHandler
     public void blockDispensedEvent(BlockDispenseEvent e) {
         Block fromBlock = e.getBlock();
+        if (!(fromBlock.getType().equals(Material.DISPENSER))) return;
 
-        if (!controller.inSuburbs(fromBlock.getLocation())) return;
-
-        BlockData fromBlockData = e.getBlock().getBlockData();
-
-        if (!(fromBlockData instanceof Dispenser)) return;
-
-        Dispenser dispenser = (Dispenser) fromBlockData;
-
+        Dispenser dispenser = (Dispenser) fromBlock.getState();
         Block toBlock = fromBlock.getRelative(((Directional) dispenser.getBlockData()).getFacing());
-        boolean toBlockInCity = controller.inCity(toBlock.getLocation());
 
-        if (toBlockInCity && !controller.inCity(fromBlock.getLocation())) {
-            e.setCancelled(true);
-            return;
-        }
+        e.setCancelled(canBlockMove(fromBlock.getLocation(), toBlock.getLocation()));
+    }
 
-        ClaimEntry fromClaim = SQLConn.getClaim(fromBlock.getLocation());
-        ClaimEntry toClaim = SQLConn.getClaim(toBlock.getLocation());
-        //If a dispenser is going from no claim to a claim or other way around (and it's happening in a city) then cancel it
-        if ((fromClaim == null && toClaim != null) || (toClaim == null && fromClaim != null && toBlockInCity)) {
-            e.setCancelled(true);
-            return;
-        }
+    //Only applies to water and lava
+    @EventHandler
+    public void onBlockFromTo(BlockFromToEvent event) {
+        if (event.getBlock().getType() == Material.DRAGON_EGG) return;
 
-        //If a dispenser is dispensing from one claim into another claim with a different owner then cancel it
-        if (fromClaim != null && toClaim != null && !fromClaim.owner.equals(toClaim.owner)) {
-            e.setCancelled(true);
-            return;
-        }
+        Location fromLoc = event.getBlock().getLocation();
+        Location toLoc = event.getToBlock().getLocation();
+
+        event.setCancelled(canBlockMove(fromLoc, toLoc));
     }
 
     @EventHandler
@@ -208,12 +242,12 @@ public class LandEventListener implements Listener {
 
     @EventHandler
     public void playerBucketEmptyEvent(PlayerBucketEmptyEvent e) {
-        
+
         Player player = e.getPlayer();
         Location placePosition = e.getBlockClicked().getLocation();
 
         if (!controller.inSuburbs(placePosition)) return;
-        
+
         if (!controller.canBreak(player, placePosition)) {
             e.setCancelled(true);
         }
@@ -221,7 +255,10 @@ public class LandEventListener implements Listener {
 
     @EventHandler
     public void spongeAbsorbEvent(SpongeAbsorbEvent e) {
-        //TODO
+        if (this.spongePlacer == null) return;
+
+        e.getBlocks().removeIf(block -> !controller.canBreak(spongePlacer, block.getLocation()));
+        this.spongePlacer = null;
     }
 
     //don't let players steal items from an item frame in a claim/city
@@ -241,54 +278,21 @@ public class LandEventListener implements Listener {
 
         if (e.getDamager() instanceof Player) {
             Player damager = (Player) e.getDamager();
-            if (!controller.canBreak(damager, location)) {
-                damager.sendMessage("filthy thief");
+            if (!controller.canBreak(damager, e.getEntity().getLocation())) {
+                damager.sendMessage(ChatColor.RED + "filthy thief");
                 e.setCancelled(true);
             }
         }
     }
 
-    //Only applies to water and lava
     @EventHandler
-    public void onBlockFromTo(BlockFromToEvent event) {
-        if (event.getBlock().getType() == Material.DRAGON_EGG) return;
-        Location fromLoc = event.getBlock().getLocation();
-        Location toLoc = event.getToBlock().getLocation();
-
-        if (!controller.inSuburbs(toLoc.getBlockX(), toLoc.getBlockZ())) {
+    public void onItemFrameObjectAdded(PlayerInteractEntityEvent e) {
+        Location loc = e.getRightClicked().getLocation();
+        if (!controller.inSuburbs(loc))
             return;
-        }
-
-        boolean toLocInCity = controller.inCity(toLoc);
-        boolean fromLocInCity = controller.inCity(fromLoc);
-
-        if (!controller.inSuburbs(toLoc)) return;
-
-        //liquid can't flow from outside of city into the city
-        if (toLocInCity && !fromLocInCity) {
-            event.setCancelled(true);
-            return;
-        }
-
-        ClaimEntry toClaim = SQLConn.getClaim(toLoc);
-        if (!toLocInCity && toClaim == null) return;
-        ClaimEntry fromClaim = SQLConn.getClaim(fromLoc);
-
-        //If liquid is flowing from the wild into a claim, stop it 
-        if (fromClaim == null && toClaim != null) {
-            event.setCancelled(true);
-            return;
-        }
-
-        //If liquid is moving from a claim into the city, don't let it 
-        if (toLocInCity && fromClaim != null) {
-            event.setCancelled(true);
-            return;
-        }
-
-        //liquid can't flow from one claim to someone else's adjacent claim
-        if (fromClaim != null && toClaim != null && !fromClaim.owner.equals(toClaim.owner)) {
-            event.setCancelled(true);
+        var entity = e.getRightClicked();
+        if ((entity instanceof ItemFrame || entity instanceof ArmorStand) && !controller.canBreak(e.getPlayer(), loc)) {
+            e.setCancelled(true);
         }
     }
 
@@ -304,46 +308,60 @@ public class LandEventListener implements Listener {
     //TODO make it so people can't open fence gates, click on buttons, press levers, etc in the city
     @EventHandler
     public void claimClicky(PlayerInteractEvent e) {
-        if (e.getClickedBlock() == null || e.getHand() == EquipmentSlot.HAND) {
+        if (e.getClickedBlock() == null) {
             return;
         }
         Location newLoc = e.getClickedBlock().getLocation();
 
         if (!controller.inSuburbs(newLoc)) return;
 
+        Material mainHandItem = e.getPlayer().getInventory().getItemInMainHand().getType();
+
+        //don't let players place/interact w/ armor stands in a claim
+        if (mainHandItem.equals(Material.ARMOR_STAND)) {
+            e.setCancelled(true);
+            return;
+        }
+
         //if player is clicking on a locked chest/door then don't let em
-        if (e.getAction() == Action.RIGHT_CLICK_BLOCK 
-            && (Arrays.asList(nonClickables).contains(e.getClickedBlock().getType()) 
+        if (e.getAction() == Action.RIGHT_CLICK_BLOCK
+                && (Arrays.asList(nonClickables).contains(e.getClickedBlock().getType())
                 || e.getClickedBlock().getState() instanceof Door)) {
 
+            if (e.getPlayer().getGameMode() == GameMode.SPECTATOR) return;
+
             if (!controller.canBreak(e.getPlayer(), newLoc)) {
-                e.getPlayer().sendMessage(" woah that is locked");
+                e.getPlayer().sendMessage(ChatColor.RED + "woah that is locked");
                 e.setCancelled(true);
+                return;
             }
         }
         //if a player right clicks w/ the claim material then maybe claim some stuff!!
-        else if (e.getPlayer().getInventory().getItemInMainHand().getType().equals(claimMaterial) && e.getAction() == Action.RIGHT_CLICK_BLOCK) {
+        else if (mainHandItem.equals(claimMaterial) && e.getAction() == Action.RIGHT_CLICK_BLOCK) {
             Location lastLoc = players.remove(e.getPlayer());
             if (lastLoc != null) {
                 //you can't claim the block you already clicked, silly
                 if (newLoc.getBlockX() == lastLoc.getBlockX() && newLoc.getBlockZ() == lastLoc.getBlockZ()) {
-                    e.getPlayer().sendMessage("try claiming more than 1 block");
+                    e.getPlayer().sendMessage(ChatColor.RED + "try claiming more than 1 block");
+                    return;
 
                 } else {
                     controller.tryClaimLand(e.getPlayer(), lastLoc.getBlockX(), lastLoc.getBlockZ(), newLoc.getBlockX(), newLoc.getBlockZ());
+                    return;
                 }
             } else {
                 players.put(e.getPlayer(), e.getClickedBlock().getLocation());
                 e.getPlayer().sendMessage("claim started @ (" + newLoc.getBlockX() + ", " + newLoc.getBlockZ() + ").");
 
-                if (claimTimeoutMS != 0)
-                    claimTimer.schedule(new PlayerUnclaimTimer(e.getPlayer(), newLoc), claimTimeoutMS);
+                //too cursed
+                //if (claimTimeoutMS != 0)
+                // claimTimer.schedule(new PlayerUnclaimTimer(e.getPlayer(), newLoc), claimTimeoutMS);
             }
         }
     }
 
     //funny
-    class PlayerUnclaimTimer extends TimerTask { //timer already cancelled error? what
+    class PlayerUnclaimTimer extends TimerTask {
         private final Player removePlayer;
         private final Location removeLocation;
 
@@ -359,7 +377,7 @@ public class LandEventListener implements Listener {
                 if (l != null && !l.equals(removeLocation))
                     return;
                 players.remove(removePlayer);
-                removePlayer.sendMessage(ChatColor.RED.toString() + "claim @ (" + removeLocation.getBlockX() + ", " + removeLocation.getBlockZ() + ") timed out");
+                removePlayer.sendMessage(ChatColor.RED + "claim @ (" + removeLocation.getBlockX() + ", " + removeLocation.getBlockZ() + ") timed out");
             } catch (Exception e) {
                 e.printStackTrace();
             }

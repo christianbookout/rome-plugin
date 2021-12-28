@@ -1,18 +1,19 @@
 package romeplugin.newtitle;
 
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
-import org.bukkit.event.entity.PlayerDeathEvent;
-import romeplugin.RomePlugin;
-import romeplugin.database.SQLConn;
-import romeplugin.database.TitleEntry;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-public class RemovePopeListener implements Listener {
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.entity.PlayerDeathEvent;
 
+import romeplugin.RomePlugin;
+import romeplugin.database.SQLConn;
+import romeplugin.database.TitleEntry;
+
+public class RemovePopeListener implements Listener {
+    
     @EventHandler
     public boolean onDeathEvent(PlayerDeathEvent e) {
         TitleEntry titleEntry = SQLConn.getTitle(e.getEntity().getUniqueId());

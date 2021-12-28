@@ -24,6 +24,8 @@ import org.bukkit.event.player.PlayerBucketEmptyEvent;
 import org.bukkit.event.player.PlayerBucketFillEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.EquipmentSlot;
+
 import romeplugin.database.ClaimEntry;
 import romeplugin.database.SQLConn;
 
@@ -60,7 +62,8 @@ public class LandEventListener implements Listener {
             Material.BREWING_STAND,
             Material.ITEM_FRAME,
             Material.TRAPPED_CHEST,
-            Material.ARMOR_STAND
+            Material.ARMOR_STAND,
+            Material.SHULKER_BOX 
     };
 
     //note last player who places sponge to make sure they arent tryna destroy water in someone else's claim
@@ -333,8 +336,9 @@ public class LandEventListener implements Listener {
         }
 
         //if player is clicking on a locked chest/door then don't let em
-        if (e.getAction() == Action.RIGHT_CLICK_BLOCK
-                && (Arrays.asList(nonClickables).contains(e.getClickedBlock().getType())
+        if (e.getAction() == Action.RIGHT_CLICK_BLOCK 
+            && e.getHand() != EquipmentSlot.OFF_HAND
+            && (Arrays.asList(nonClickables).contains(e.getClickedBlock().getType()) 
                 || e.getClickedBlock().getState() instanceof Door)) {
 
             if (e.getPlayer().getGameMode() == GameMode.SPECTATOR) return;
@@ -346,7 +350,7 @@ public class LandEventListener implements Listener {
             }
         }
         //if a player right clicks w/ the claim material then maybe claim some stuff!!
-        else if (mainHandItem.equals(claimMaterial) && e.getAction() == Action.RIGHT_CLICK_BLOCK) {
+        else if (mainHandItem.equals(claimMaterial) && e.getAction() == Action.RIGHT_CLICK_BLOCK && e.getHand() != EquipmentSlot.OFF_HAND) {
             Location lastLoc = players.remove(e.getPlayer());
             if (lastLoc != null) {
                 //you can't claim the block you already clicked, silly

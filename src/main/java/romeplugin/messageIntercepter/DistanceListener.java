@@ -5,6 +5,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
+
 import romeplugin.zoning.LandControl;
 
 public class DistanceListener implements Listener {
@@ -29,10 +30,10 @@ public class DistanceListener implements Listener {
         if (this.distance != 0) {
             boolean playerInCity = controller.inCity(e.getPlayer().getLocation());
             e.getRecipients().removeIf(
-                    p ->
-                            !(playerInCity && controller.inCity(p.getLocation()))
-                                    && (!playerEnvironment.equals(p.getLocation().getWorld().getEnvironment())
-                                    || p.getLocation().distance(e.getPlayer().getLocation()) > this.distance)
+                p -> 
+                !(playerInCity && controller.inCity(p.getLocation()))
+                && (!playerEnvironment.equals(p.getLocation().getWorld().getEnvironment())
+                    || p.getLocation().distance(e.getPlayer().getLocation()) > this.distance) 
             );
         }
     }

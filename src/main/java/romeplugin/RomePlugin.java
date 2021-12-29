@@ -8,7 +8,6 @@ package romeplugin;
 import blockchain.BalanceCommand;
 import blockchain.BlockchainEventListener;
 import blockchain.Ledger;
-import blockchain.PayCommand;
 import com.mysql.cj.jdbc.MysqlConnectionPoolDataSource;
 import com.mysql.cj.jdbc.MysqlDataSource;
 import org.bukkit.Material;
@@ -111,7 +110,7 @@ public class RomePlugin extends JavaPlugin {
 
         var titles = new TitleHandler(this);
         SwearFilter filter = new SwearFilter(landControl, config.getInt("messages.useSwearFilter"));
-        var peeController = new PeeController();
+        var peeController = new PeeController(this);
         getCommand("rome").setExecutor(new LandCommand(landControl));
         getCommand("claim").setExecutor(new ClaimLandCommand(landControl));
         getCommand("transferclaim").setExecutor(new TransferClaimCommand());

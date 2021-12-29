@@ -26,9 +26,6 @@ commands:
     description: "it was made in a day :)"
     usage: "/foundrome [size]"
     permission: op
-  pay:
-    description: "pay someone"
-    usage: "/pay <who>"
   bal:
     description: "get balance"
     usage: "/bal"

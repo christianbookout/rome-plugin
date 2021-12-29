@@ -120,7 +120,6 @@ public class RomePlugin extends JavaPlugin {
         getCommand("removetitle").setExecutor(new RemoveTitleCommand(titles));
         getCommand("foundrome").setExecutor(new FoundCityCommand(landControl));
         getCommand("settitle").setExecutor(new SetTitleCommand(titles));
-        getCommand("pay").setExecutor(new PayCommand(ledger));
         getCommand("bal").setExecutor(new BalanceCommand(ledger));
         getServer().getPluginManager().registerEvents(new RemovePopeListener(), this);
         getCommand("builder").setExecutor(new BuilderCommand(titles));

@@ -5,32 +5,28 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-
 import romeplugin.RomePlugin;
-
 import romeplugin.newtitle.Title;
 
-public class ShoutCommand implements CommandExecutor  {
+public class ShoutCommand implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String s, String[] args) {
-        if (!(sender instanceof Player)) return false;
-        Player player = (Player) sender;
-
-        Title playerTitle = RomePlugin.onlinePlayerTitles.get(player);
         String title = "";
-        if (playerTitle != null) 
-            title = "[" + playerTitle.color + playerTitle.fancyName + ChatColor.RESET + "]";
-        String message = "";
-        if (args.length == 0) 
+        if (sender instanceof Player) {
+            Player player = (Player) sender;
+            Title playerTitle = RomePlugin.onlinePlayerTitles.get(player);
+            if (playerTitle != null)
+                title = "[" + playerTitle.color + playerTitle.fancyName + ChatColor.RESET + "] ";
+        }
+
+        String message;
+        if (args.length == 0)
             message = "aaaaah";
-        else 
+        else
             message = String.join(" ", args);
 
-        message = title + " <" + player.getDisplayName() + "> " + message;
-        
-        for (var p: sender.getServer().getOnlinePlayers()) {
-            p.sendMessage("[" + ChatColor.RED + "SHOUT" + ChatColor.RESET + "] " + message);
-        }
+        message = title + "<" + sender.getName() + "> " + message;
+        sender.getServer().broadcastMessage("[" + ChatColor.RED + "SHOUT" + ChatColor.RESET + "] " + message);
         return true;
     }
 }

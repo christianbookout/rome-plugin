@@ -63,7 +63,11 @@ public class LandEventListener implements Listener {
             Material.ITEM_FRAME,
             Material.TRAPPED_CHEST,
             Material.ARMOR_STAND,
-            Material.SHULKER_BOX 
+            Material.SHULKER_BOX,
+            Material.DROPPER,
+            Material.DISPENSER,
+            Material.CHIPPED_ANVIL,
+            Material.DAMAGED_ANVIL
     };
 
     //note last player who places sponge to make sure they arent tryna destroy water in someone else's claim
@@ -342,6 +346,8 @@ public class LandEventListener implements Listener {
                 || e.getClickedBlock().getState() instanceof Door)) {
 
             if (e.getPlayer().getGameMode() == GameMode.SPECTATOR) return;
+            var lockOwner = SQLConn.getLockOwner(e.getClickedBlock());
+            if (lockOwner != null && lockOwner.equals(e.getPlayer().getUniqueId());
 
             if (!controller.canBreak(e.getPlayer(), newLoc)) {
                 e.getPlayer().sendMessage(ChatColor.RED + "woah that is locked");

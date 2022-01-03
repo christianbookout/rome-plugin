@@ -55,3 +55,6 @@ commands:
   pee:
     description: "take a piss"
     usage: "/pee"
+  makekey:
+    description: "make a key out of the currently held item"
+    usage: "/makekey"

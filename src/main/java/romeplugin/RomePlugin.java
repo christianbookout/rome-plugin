@@ -23,6 +23,8 @@ import romeplugin.messageIntercepter.SwearFilter;
 import romeplugin.misc.PeeController;
 import romeplugin.newtitle.*;
 import romeplugin.zoning.*;
+import romeplugin.zoning.locks.LockManager;
+import romeplugin.zoning.locks.MakeKeyCommand;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -79,7 +81,15 @@ public class RomePlugin extends JavaPlugin {
         }
         var protectedMaterials = new ArrayList<Material>();
         protectedMaterialStrings.forEach(matStr -> protectedMaterials.add(Material.valueOf(matStr)));
-        LandEventListener landListener = new LandEventListener(landControl, claimMaterial, protectedMaterials, config.getLong("claims.claimTimeoutMS"));
+
+        var lockManager = new LockManager(this);
+        LandEventListener landListener = new LandEventListener(
+                landControl,
+                lockManager,
+                claimMaterial,
+                protectedMaterials,
+                config.getLong("claims.claimTimeoutMS")
+        );
 
         SQLConn.setSource(dataSource);
         var titleEnum = "ENUM('TRIBUNE', 'SENATOR', 'MAYOR', 'JUDGE', 'CONSOLE', 'SENSOR', 'POPE', 'BUILDER', 'CITIZEN')";
@@ -144,11 +154,13 @@ public class RomePlugin extends JavaPlugin {
         getCommand("builder").setExecutor(new BuilderCommand(titles));
         getCommand("shout").setExecutor(new ShoutCommand());
         getCommand("pee").setExecutor(peeController);
+        getCommand("makekey").setExecutor(new MakeKeyCommand(lockManager));
         getServer().getPluginManager().registerEvents(peeController, this);
         getServer().getPluginManager().registerEvents(new TitleEventListener(titles), this);
         getServer().getPluginManager().registerEvents(new DistanceListener(config.getInt("messages.messageDistance"), filter, landControl), this);
         getServer().getPluginManager().registerEvents(new BlockchainEventListener(this, ledger), this);
         getServer().getPluginManager().registerEvents(landListener, this);
+        getServer().getPluginManager().registerEvents(lockManager, this);
         getServer().getPluginManager().registerEvents(new LandEnterListener(landControl), this);
     }
 

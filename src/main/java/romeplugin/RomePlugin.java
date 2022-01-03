@@ -17,6 +17,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import romeplugin.database.SQLConn;
+import romeplugin.election.ElectionHandler;
 import romeplugin.messageIntercepter.DistanceListener;
 import romeplugin.messageIntercepter.ShoutCommand;
 import romeplugin.messageIntercepter.SwearFilter;
@@ -28,7 +29,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.logging.Level;
 
 /**
@@ -83,7 +83,7 @@ public class RomePlugin extends JavaPlugin {
         LandEventListener landListener = new LandEventListener(landControl, claimMaterial, protectedMaterials, config.getLong("claims.claimTimeoutMS"));
 
         SQLConn.setSource(dataSource);
-        var titleEnum = "ENUM('TRIBUNE', 'SENATOR', 'MAYOR', 'JUDGE', 'CONSOLE', 'SENSOR', 'POPE', 'BUILDER', 'CITIZEN')";
+        var titleEnum = "ENUM('TRIBUNE', 'QUAESTOR', 'AEDILE', 'PRAETOR', 'CONSUL', 'CENSOR', 'POPE', 'BUILDER', 'CITIZEN')";
         try (Connection conn = SQLConn.getConnection()) {
             conn.prepareStatement("CREATE TABLE IF NOT EXISTS players (" +
                     "uuid CHAR(36) NOT NULL PRIMARY KEY," +
@@ -105,13 +105,26 @@ public class RomePlugin extends JavaPlugin {
             conn.prepareStatement("CREATE TABLE IF NOT EXISTS usernames (" +
                     "uuid CHAR(36) NOT NULL PRIMARY KEY," +
                     "username CHAR(32) NOT NULL);").execute();
+            //table representing current election's candidates and votes
             conn.prepareStatement("CREATE TABLE IF NOT EXISTS election (" +
                     "uuid CHAR(36) NOT NULL PRIMARY KEY," +
-                    "username CHAR(32) NOT NULL" + 
-                    "title " + titleEnum + " NOT NULL)," +
-                    "votes INT NOT NULL").execute();
-            //conn.prepareStatement("CREATE TABLE IF NOT EXISTS locks (" +
-            //);
+                    "username CHAR(32) NOT NULL," + 
+                    "title " + titleEnum + " NOT NULL," +
+                    "votes INT NOT NULL);").execute();
+            //the server's election number and current election phase
+            conn.prepareStatement("CREATE TABLE IF NOT EXISTS electionState (" +
+                    "electionNumber INT NOT NULL DEFAULT 0 PRIMARY KEY," +
+                    "electionPhase CHAR(12) DEFAULT 'ENDED' NOT NULL);").execute();
+            //a history of election results
+            conn.prepareStatement("CREATE TABLE IF NOT EXISTS electionResults (" +
+                    "number INT NOT NULL DEFAULT 0 PRIMARY KEY," + 
+                    "title " + titleEnum + " NOT NULL," +
+                    "uuid CHAR(36) NOT NULL," +
+                    "votes INT NOT NULL);").execute();
+            //all players who have already voted
+            conn.prepareStatement("CREATE TABLE IF NOT EXISTS playerVotes (" +
+                    "uuid CHAR(36) NOT NULL PRIMARY KEY," + 
+                    "titleVotedFor " + titleEnum + " NOT NULL);");
             var res = conn.prepareStatement("SELECT * FROM cityInfo WHERE type = 0;").executeQuery();
             if (res.next()) {
                 landControl.setGovernmentSize(res.getInt("size"));
@@ -120,8 +133,10 @@ public class RomePlugin extends JavaPlugin {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-
         var titles = new TitleHandler(this);
+
+        ElectionHandler handler = new ElectionHandler(this, titles);
+
         SwearFilter filter = new SwearFilter(landControl, config.getInt("messages.useSwearFilter"));
         var peeController = new PeeController(this);
         getCommand("rome").setExecutor(new LandCommand(landControl));

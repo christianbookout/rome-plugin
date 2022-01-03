@@ -28,7 +28,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.logging.Level;
 
 /**
@@ -105,9 +104,17 @@ public class RomePlugin extends JavaPlugin {
             conn.prepareStatement("CREATE TABLE IF NOT EXISTS usernames (" +
                     "uuid CHAR(36) NOT NULL PRIMARY KEY," +
                     "username CHAR(32) NOT NULL);").execute();
+            conn.prepareStatement("CREATE TABLE IF NOT EXISTS lockedBlocks (" +
+                    "x INT NOT NULL," +
+                    "y INT NOT NULL," +
+                    "z INT NOT NULL," +
+                    "keyId INT NOT NULL);").execute();
+            conn.prepareStatement("CREATE TABLE IF NOT EXISTS lockKeys (" +
+                    "keyId INT NOT NULL AUTO_INCREMENT PRIMARY KEY," +
+                    "creator_uuid CHAR(36) NOT NULL);").execute();
             conn.prepareStatement("CREATE TABLE IF NOT EXISTS election (" +
                     "uuid CHAR(36) NOT NULL PRIMARY KEY," +
-                    "username CHAR(32) NOT NULL" + 
+                    "username CHAR(32) NOT NULL" +
                     "title " + titleEnum + " NOT NULL)," +
                     "votes INT NOT NULL").execute();
             //conn.prepareStatement("CREATE TABLE IF NOT EXISTS locks (" +

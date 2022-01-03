@@ -38,7 +38,7 @@ public class LockManager implements Listener {
     public OptionalInt getBlockLockId(Block block) {
         try {
             var stmt = SQLConn.getConnection()
-                    .prepareStatement("SELECT * FROM lockedBlocks WHERE x = ? AND y = ? AND z = ?");
+                    .prepareStatement("SELECT keyId FROM lockedBlocks WHERE x = ? AND y = ? AND z = ?;");
             stmt.setInt(1, block.getX());
             stmt.setInt(2, block.getY());
             stmt.setInt(3, block.getZ());
@@ -100,7 +100,7 @@ public class LockManager implements Listener {
     public boolean lockBlock(Block block, int keyId) {
         try {
             var stmt = SQLConn.getConnection()
-                    .prepareStatement("INSERT INTO lockedBlocks VALUES (?, ?, ?, ?)");
+                    .prepareStatement("INSERT INTO lockedBlocks VALUES (?, ?, ?, ?);");
             stmt.setInt(1, block.getX());
             stmt.setInt(2, block.getY());
             stmt.setInt(3, block.getZ());
@@ -128,7 +128,11 @@ public class LockManager implements Listener {
                 }
                 // TODO: remove the lock when the block is already locked
                 if (getBlockLockId(block).isEmpty()) {
-                    lockBlock(block, keyId);
+                    if (lockBlock(block, keyId)) {
+                        event.getPlayer().sendMessage("locked your " + block);
+                    } else {
+                        event.getPlayer().sendMessage("something went wrong!");
+                    }
                 }
             }
         });

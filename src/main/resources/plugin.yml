@@ -68,3 +68,6 @@ commands:
     usage: "/run <position>"
     permission: romeplugin.quaestor
   
+  makekey:
+    description: "make a key out of the currently held item"
+    usage: "/makekey"

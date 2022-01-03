@@ -14,6 +14,15 @@ public class Candidate implements Comparable<Candidate> {
         this.uuid = uuid;
         this.title = title;
     }
+
+    public int getVotes() {
+        return this.votes;
+    }
+
+    public void setVotes(int votes) {
+        this.votes = votes;
+    }
+
     public void addVote() {
         this.votes++;
     }

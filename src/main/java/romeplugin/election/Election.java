@@ -11,6 +11,15 @@ import romeplugin.newtitle.Title;
 public class Election {
     private Collection<Candidate> candidates = new ArrayList<>();
 
+    public Candidate getCandidate(UUID uuid) {
+        for(Candidate c: candidates) {
+            if (c.getUniqueId().equals(uuid)) {
+                return c;
+            }
+        }
+        return null;
+    }
+
     public Collection<Candidate> getCandidates() {
         return this.candidates;
     }
@@ -24,13 +33,7 @@ public class Election {
     }
 
     public boolean vote(UUID uuid) {
-        Candidate candidate = null;
-        for(Candidate c: candidates) {
-            if (c.getUniqueId().equals(uuid)) {
-                candidate = c;
-                break;
-            }
-        }
+        Candidate candidate = getCandidate(uuid);
 
         if (candidate == null) 
             return false;

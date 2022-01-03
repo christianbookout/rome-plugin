@@ -3,15 +3,15 @@ package romeplugin.newtitle;
 import org.bukkit.ChatColor;
 
 public enum Title {
-    TRIBUNE("Tribune of the Plebs", ChatColor.DARK_RED, null),
-    SENATOR("Quaestor", ChatColor.GREEN, null),
-    MAYOR("Aedile", ChatColor.YELLOW, "romeplugin.aedile"),
-    JUDGE("Praetor", ChatColor.GOLD, null),
-    CONSOLE("Consul", ChatColor.BLUE, null),
-    SENSOR("Censor", ChatColor.AQUA, null),
-    POPE("Pontifex Maximus", ChatColor.DARK_PURPLE, null),
-    BUILDER("Builder", ChatColor.RESET, null),
-    CITIZEN("ok and?", ChatColor.RESET, null);
+    TRIBUNE("Tribune of the Plebs", ChatColor.DARK_RED, "romeplugin.tribune"),
+    QUAESTOR("Quaestor", ChatColor.GREEN, "romeplugin.quaestor"),
+    AEDILE("Aedile", ChatColor.YELLOW, "romeplugin.aedile"),
+    PRAETOR("Praetor", ChatColor.GOLD, "romeplugin.praetor"),
+    CONSUL("Consul", ChatColor.BLUE, "romeplugin.consul"),
+    CENSOR("Censor", ChatColor.AQUA, "romeplugin.censor"),
+    POPE("Pontifex Maximus", ChatColor.DARK_PURPLE, "romeplugin.pope"),
+    BUILDER("Builder", ChatColor.RESET, "romeplugin.builder"),
+    CITIZEN("ok and?", ChatColor.RESET, "romeplugin.okand?");
 
     public final String fancyName;
     public final ChatColor color;
@@ -29,6 +29,10 @@ public enum Title {
                 return t;
             }
         }
-        return Title.valueOf(title.toUpperCase());
+        try {
+            return Title.valueOf(title.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
     }
 }

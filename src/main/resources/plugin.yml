@@ -5,8 +5,10 @@ main: romeplugin.RomePlugin
 api-version: 1.16
 permissions:
   romeplugin.aedile:
-    description: "aedile :)"
+    description: "Mayor"
     default: op
+  romeplugin.quaestor:
+    description: "Senator"
 commands:
   checktitle:
     description: "SycPrsFacNem"
@@ -55,3 +57,14 @@ commands:
   pee:
     description: "take a piss"
     usage: "/pee"
+  startelection:
+    description: "start an election"
+    permission: op
+  vote:
+    description: "vote for an election candidate"
+    usage: "/vote <user>"
+  run:
+    description: "run for a position in an election"
+    usage: "/run <position>"
+    permission: romeplugin.quaestor
+  

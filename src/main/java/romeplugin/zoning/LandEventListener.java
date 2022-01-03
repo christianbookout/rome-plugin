@@ -31,6 +31,7 @@ import romeplugin.database.SQLConn;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -47,35 +48,15 @@ public class LandEventListener implements Listener {
     private final HashMap<Player, Location> players = new HashMap<>();
 
     //the materials people can't right-click in a claim/the city
-    private final Material[] nonClickables = new Material[]{
-            Material.CHEST,
-            Material.BARREL,
-            Material.ANVIL,
-            Material.BEACON,
-            Material.BLAST_FURNACE,
-            Material.FURNACE,
-            Material.SMOKER,
-            Material.CHEST_MINECART,
-            Material.FURNACE_MINECART,
-            Material.HOPPER,
-            Material.HOPPER_MINECART,
-            Material.BREWING_STAND,
-            Material.ITEM_FRAME,
-            Material.TRAPPED_CHEST,
-            Material.ARMOR_STAND,
-            Material.SHULKER_BOX,
-            Material.DROPPER,
-            Material.DISPENSER,
-            Material.CHIPPED_ANVIL,
-            Material.DAMAGED_ANVIL
-    };
+    private final List<Material> nonClickables;
 
     //note last player who places sponge to make sure they arent tryna destroy water in someone else's claim
     //there will be a bug if someone who can build in the city places a sponge and then water flows from the city into the suburbs and someone already has
     //a sponge placed, it will get rid of the water (but who cares)
     private Player spongePlacer = null;
 
-    public LandEventListener(LandControl controller, Material claimMaterial, long claimTimeoutMS) {
+    public LandEventListener(LandControl controller, Material claimMaterial, List<Material> autoLockedBlocks, long claimTimeoutMS) {
+        this.nonClickables = autoLockedBlocks;
         this.controller = controller;
         this.claimMaterial = claimMaterial;
         this.claimTimeoutMS = claimTimeoutMS;
@@ -342,12 +323,12 @@ public class LandEventListener implements Listener {
         //if player is clicking on a locked chest/door then don't let em
         if (e.getAction() == Action.RIGHT_CLICK_BLOCK 
             && e.getHand() != EquipmentSlot.OFF_HAND
-            && (Arrays.asList(nonClickables).contains(e.getClickedBlock().getType()) 
+            && (nonClickables.contains(e.getClickedBlock().getType()) 
                 || e.getClickedBlock().getState() instanceof Door)) {
 
             if (e.getPlayer().getGameMode() == GameMode.SPECTATOR) return;
-            var lockOwner = SQLConn.getLockOwner(e.getClickedBlock());
-            if (lockOwner != null && lockOwner.equals(e.getPlayer().getUniqueId());
+            //var lockOwner = SQLConn.getLockOwner(e.getClickedBlock()); //TODO this
+            //if (lockOwner != null && lockOwner.equals(e.getPlayer().getUniqueId());
 
             if (!controller.canBreak(e.getPlayer(), newLoc)) {
                 e.getPlayer().sendMessage(ChatColor.RED + "woah that is locked");

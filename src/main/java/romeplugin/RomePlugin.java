@@ -26,7 +26,9 @@ import romeplugin.zoning.*;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.logging.Level;
 
 /**
@@ -68,20 +70,24 @@ public class RomePlugin extends JavaPlugin {
         dataSource.setUser(config.getString("database.username"));
         dataSource.setPassword(config.getString("database.password"));
         Material claimMaterial;
+        String claimMaterialStr = config.getString("claims.claimMaterial");
+        var protectedMaterialStrings = config.getStringList("claims.autoLockedBlocks");
         try {
-            claimMaterial = Material.valueOf(config.getString("claims.claimMaterial").toUpperCase().strip());
+            claimMaterial = Material.valueOf(claimMaterialStr.toUpperCase().strip());
         } catch (IllegalArgumentException e) {
-            this.getLogger().log(Level.WARNING, "set you's claim material in the config file fam, using " + LandEventListener.DEFAULT_MATERIAL.toString() + " instead!!!");
+            this.getLogger().log(Level.WARNING, "error getting minecraft material from " + claimMaterialStr);
             claimMaterial = LandEventListener.DEFAULT_MATERIAL;
         }
-        LandEventListener landListener = new LandEventListener(landControl, claimMaterial, config.getLong("claims.claimTimeoutMS"));
+        var protectedMaterials = new ArrayList<Material>();
+        protectedMaterialStrings.forEach(matStr -> protectedMaterials.add(Material.valueOf(matStr)));
+        LandEventListener landListener = new LandEventListener(landControl, claimMaterial, protectedMaterials, config.getLong("claims.claimTimeoutMS"));
 
         SQLConn.setSource(dataSource);
-
+        var titleEnum = "ENUM('TRIBUNE', 'SENATOR', 'MAYOR', 'JUDGE', 'CONSOLE', 'SENSOR', 'POPE', 'BUILDER', 'CITIZEN')";
         try (Connection conn = SQLConn.getConnection()) {
             conn.prepareStatement("CREATE TABLE IF NOT EXISTS players (" +
                     "uuid CHAR(36) NOT NULL PRIMARY KEY," +
-                    "title ENUM('TRIBUNE', 'SENATOR', 'MAYOR', 'JUDGE', 'CONSOLE', 'SENSOR', 'POPE', 'BUILDER', 'CITIZEN') NOT NULL);")
+                    "title " + titleEnum + " NOT NULL);")
                     .execute();
             // (x0, y0) must be the top-left point and (x1, y1) must be the bottom-right point
             conn.prepareStatement("CREATE TABLE IF NOT EXISTS cityClaims (" +
@@ -99,6 +105,13 @@ public class RomePlugin extends JavaPlugin {
             conn.prepareStatement("CREATE TABLE IF NOT EXISTS usernames (" +
                     "uuid CHAR(36) NOT NULL PRIMARY KEY," +
                     "username CHAR(32) NOT NULL);").execute();
+            conn.prepareStatement("CREATE TABLE IF NOT EXISTS election (" +
+                    "uuid CHAR(36) NOT NULL PRIMARY KEY," +
+                    "username CHAR(32) NOT NULL" + 
+                    "title " + titleEnum + " NOT NULL)," +
+                    "votes INT NOT NULL").execute();
+            //conn.prepareStatement("CREATE TABLE IF NOT EXISTS locks (" +
+            //);
             var res = conn.prepareStatement("SELECT * FROM cityInfo WHERE type = 0;").executeQuery();
             if (res.next()) {
                 landControl.setGovernmentSize(res.getInt("size"));

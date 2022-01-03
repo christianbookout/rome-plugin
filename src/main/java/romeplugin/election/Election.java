@@ -15,12 +15,12 @@ public class Election {
         return this.candidates;
     }
 
-    public void addCandidate(Candidate candidate) {
-        candidates.add(candidate);
+    public boolean addCandidate(Candidate candidate) {
+        return candidates.add(candidate);
     }
 
-    public void removeCandidate(Candidate candidate) {
-        candidates.remove(candidate);
+    public boolean removeCandidate(Candidate candidate) {
+        return candidates.remove(candidate);
     }
 
     public boolean vote(UUID uuid) {

@@ -21,7 +21,6 @@ public class StartElectionCommand implements CommandExecutor{
         }
         else {
             electionHandler.startElection();
-            sender.sendMessage(MessageConstants.SUCCESSFUL_ELECTION_START);
         }
         return true;
     }

@@ -1,4 +1,4 @@
-package romeplugin.newtitle;
+package romeplugin.title;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

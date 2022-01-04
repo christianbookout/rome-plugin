@@ -7,7 +7,7 @@ import org.bukkit.entity.Player;
 
 import romeplugin.MessageConstants;
 import romeplugin.election.ElectionHandler.ElectionPhase;
-import romeplugin.newtitle.Title;
+import romeplugin.title.Title;
 
 public class RunCommand implements CommandExecutor {
     private final ElectionHandler electionHandler;

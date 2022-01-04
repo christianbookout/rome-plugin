@@ -1,6 +1,6 @@
 package romeplugin.database;
 
-import romeplugin.newtitle.Title;
+import romeplugin.title.Title;
 
 import java.util.UUID;
 

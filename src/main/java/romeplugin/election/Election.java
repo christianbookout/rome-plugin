@@ -6,7 +6,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.UUID;
 
-import romeplugin.newtitle.Title;
+import romeplugin.title.Title;
 
 public class Election {
     private Collection<Candidate> candidates = new ArrayList<>();

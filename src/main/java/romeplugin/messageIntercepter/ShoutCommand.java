@@ -6,7 +6,7 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import romeplugin.RomePlugin;
-import romeplugin.newtitle.Title;
+import romeplugin.title.Title;
 
 public class ShoutCommand implements CommandExecutor {
     @Override

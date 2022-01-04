@@ -2,7 +2,7 @@ package romeplugin.election;
 
 import java.util.UUID;
 
-import romeplugin.newtitle.Title;
+import romeplugin.title.Title;
 
 public class Candidate implements Comparable<Candidate> {
     private int votes;

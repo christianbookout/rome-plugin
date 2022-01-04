@@ -11,8 +11,8 @@ import org.bukkit.plugin.Plugin;
 
 import romeplugin.MessageConstants;
 import romeplugin.database.SQLConn;
-import romeplugin.newtitle.Title;
-import romeplugin.newtitle.TitleHandler;
+import romeplugin.title.Title;
+import romeplugin.title.TitleHandler;
 
 public class ElectionHandler {
     //don't make one of these greater than 12 characters :D 

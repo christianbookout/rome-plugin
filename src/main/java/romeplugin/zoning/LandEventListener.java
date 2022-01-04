@@ -161,7 +161,7 @@ public class LandEventListener implements Listener {
     private boolean canBlockMove(Location fromLoc, Location toLoc) {
         // fast path, the wilderness has no protections
         if (controller.inWilderness(toLoc)) {
-            return false;
+            return true;
         }
 
         boolean toLocInCity = controller.inCity(toLoc);

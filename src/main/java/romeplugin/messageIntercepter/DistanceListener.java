@@ -6,7 +6,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 
-import romeplugin.zoning.LandControl;
+import romeplugin.zoning.claims.LandControl;
 
 public class DistanceListener implements Listener {
     private final int distance;

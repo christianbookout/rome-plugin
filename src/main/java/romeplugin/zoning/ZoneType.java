@@ -7,8 +7,8 @@ import static romeplugin.newtitle.Title.*;
 import java.util.Arrays;
 
 public enum ZoneType {
-    GOVERNMENT(ChatColor.LIGHT_PURPLE, CONSOLE, MAYOR, BUILDER, SENSOR),
-    CITY(ChatColor.GOLD, MAYOR, BUILDER, JUDGE),
+    GOVERNMENT(ChatColor.LIGHT_PURPLE, CONSUL, AEDILE, BUILDER, CENSOR),
+    CITY(ChatColor.GOLD, AEDILE, BUILDER, PRAETOR),
     SUBURB(ChatColor.DARK_AQUA),
     WILDERNESS(ChatColor.GREEN);
 

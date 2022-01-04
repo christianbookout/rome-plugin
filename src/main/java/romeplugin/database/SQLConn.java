@@ -62,6 +62,29 @@ public class SQLConn {
         return getClaim(loc.getBlockX(), loc.getBlockZ());
     }
 
+    /**
+     * @param uuid user to search for
+     * @return the amount of extra blocks the user can claim (granted by whatever)
+     */
+    public static int getClaimAmount(UUID uuid) {
+        try {
+            var stmt = getConnection().prepareStatement("SELECT * FROM extraClaimBlocks WHERE uuid = ?");
+            stmt.setString(1, uuid.toString());
+            var results = stmt.executeQuery();
+            if (results.next()) {
+                return results.getInt("claimBlocks");
+            }
+        } catch (SQLException e) {}
+        return 0;
+    }
+    
+    //TODO implement this :)
+    /*public static void changeClaimAmount(UUID uuid) {
+        try {
+            var stmt = getConnection().prepareStatement("");
+        } catch (SQLException e) {}
+    }*/
+
     public static ClaimEntry getClaimRect(int x0, int y0, int x1, int y1) {
         try {
             var stmt = claimConn.prepareStatement("SELECT * FROM cityClaims WHERE x0 <= ? AND x1 >= ? AND y0 >= ? AND y1 <= ?;");

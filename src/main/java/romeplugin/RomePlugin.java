@@ -24,6 +24,9 @@ import romeplugin.messageIntercepter.SwearFilter;
 import romeplugin.misc.PeeController;
 import romeplugin.newtitle.*;
 import romeplugin.zoning.*;
+import romeplugin.zoning.claims.ClaimInfoCommand;
+import romeplugin.zoning.claims.ClaimLandCommand;
+import romeplugin.zoning.claims.LandControl;
 import romeplugin.zoning.locks.LockManager;
 import romeplugin.zoning.locks.MakeKeyCommand;
 
@@ -62,7 +65,8 @@ public class RomePlugin extends JavaPlugin {
                 0,
                 0,
                 config.getInt("land.cityMultiplier"),
-                config.getInt("land.suburbsMultiplier"));
+                config.getInt("land.suburbsMultiplier"),
+                config.getInt("claims.defaultClaimBlocks"));
 
         MysqlDataSource dataSource = new MysqlConnectionPoolDataSource();
         // we set our credentials
@@ -135,6 +139,9 @@ public class RomePlugin extends JavaPlugin {
             conn.prepareStatement("CREATE TABLE IF NOT EXISTS playerVotes (" +
                     "uuid CHAR(36) NOT NULL PRIMARY KEY," + 
                     "titleVotedFor " + titleEnum + " NOT NULL);");
+            conn.prepareStatement("CREATE TABLE IF NOT EXISTS extraClaimBlocks (" +
+                    "uuid CHAR(36) NOT NULL PRIMARY KEY," +
+                    "blocks INT NOT NULL DEFAULT 0);");
             conn.prepareStatement("CREATE TABLE IF NOT EXISTS lockedBlocks (" +
                     "x INT NOT NULL," +
                     "y INT NOT NULL," +
@@ -147,7 +154,7 @@ public class RomePlugin extends JavaPlugin {
                     "uuid CHAR(36) NOT NULL PRIMARY KEY," +
                     "username CHAR(32) NOT NULL" +
                     "title " + titleEnum + " NOT NULL)," +
-                    "votes INT NOT NULL").execute();
+                    "votes INT NOT NULL);").execute();
             //conn.prepareStatement("CREATE TABLE IF NOT EXISTS locks (" +
             //);
             var res = conn.prepareStatement("SELECT * FROM cityInfo WHERE type = 0;").executeQuery();

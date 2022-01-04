@@ -12,6 +12,7 @@ land:
 claims:
   claimMaterial: BRICK # material to set claims with
   claimTimeoutMS: 20000 # set to 0 for none
+  defaultClaimBlocks: 400
   autoLockedBlocks:
     - CHEST
     - BARREL

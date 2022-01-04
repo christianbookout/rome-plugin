@@ -116,6 +116,7 @@ public class ElectionHandler {
         this.currentElection = new Election();
         this.currentPhase = ElectionPhase.RUNNING;
         this.updateElectionState();
+        plugin.getServer().broadcastMessage(MessageConstants.SUCCESSFUL_ELECTION_START);
     }
 
     /**
@@ -124,6 +125,7 @@ public class ElectionHandler {
     public void startVoting() {
         this.currentPhase = ElectionPhase.VOTING;
         this.updateElectionState();
+        plugin.getServer().broadcastMessage(MessageConstants.SUCCESSFUL_VOTING_START);
     }
 
     /**

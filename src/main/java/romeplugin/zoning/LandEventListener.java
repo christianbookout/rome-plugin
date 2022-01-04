@@ -27,6 +27,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import romeplugin.database.ClaimEntry;
 import romeplugin.database.SQLConn;
+import romeplugin.zoning.claims.LandControl;
 import romeplugin.zoning.locks.LockManager;
 
 import java.util.*;

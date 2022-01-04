@@ -5,6 +5,8 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerMoveEvent;
 
+import romeplugin.zoning.claims.LandControl;
+
 public class LandEnterListener implements Listener {
     private final LandControl controller;
 

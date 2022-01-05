@@ -17,15 +17,22 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import romeplugin.database.SQLConn;
+import romeplugin.election.ElectionHandler;
 import romeplugin.messageIntercepter.DistanceListener;
 import romeplugin.messageIntercepter.ShoutCommand;
 import romeplugin.messageIntercepter.SwearFilter;
 import romeplugin.misc.PeeController;
-import romeplugin.newtitle.*;
+import romeplugin.title.*;
 import romeplugin.zoning.*;
+import romeplugin.zoning.claims.ClaimInfoCommand;
+import romeplugin.zoning.claims.ClaimLandCommand;
+import romeplugin.zoning.claims.LandControl;
+import romeplugin.zoning.locks.LockManager;
+import romeplugin.zoning.locks.MakeKeyCommand;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.logging.Level;
 
@@ -58,7 +65,8 @@ public class RomePlugin extends JavaPlugin {
                 0,
                 0,
                 config.getInt("land.cityMultiplier"),
-                config.getInt("land.suburbsMultiplier"));
+                config.getInt("land.suburbsMultiplier"),
+                config.getInt("claims.defaultClaimBlocks"));
 
         MysqlDataSource dataSource = new MysqlConnectionPoolDataSource();
         // we set our credentials
@@ -68,20 +76,32 @@ public class RomePlugin extends JavaPlugin {
         dataSource.setUser(config.getString("database.username"));
         dataSource.setPassword(config.getString("database.password"));
         Material claimMaterial;
+        String claimMaterialStr = config.getString("claims.claimMaterial");
+        var protectedMaterialStrings = config.getStringList("claims.autoLockedBlocks");
         try {
-            claimMaterial = Material.valueOf(config.getString("claims.claimMaterial").toUpperCase().strip());
+            claimMaterial = Material.valueOf(claimMaterialStr.toUpperCase().strip());
         } catch (IllegalArgumentException e) {
-            this.getLogger().log(Level.WARNING, "set you's claim material in the config file fam, using " + LandEventListener.DEFAULT_MATERIAL.toString() + " instead!!!");
+            this.getLogger().log(Level.WARNING, "error getting minecraft material from " + claimMaterialStr);
             claimMaterial = LandEventListener.DEFAULT_MATERIAL;
         }
-        LandEventListener landListener = new LandEventListener(landControl, claimMaterial, config.getLong("claims.claimTimeoutMS"));
+        var protectedMaterials = new ArrayList<Material>();
+        protectedMaterialStrings.forEach(matStr -> protectedMaterials.add(Material.valueOf(matStr)));
+
+        var lockManager = new LockManager(this);
+        LandEventListener landListener = new LandEventListener(
+                landControl,
+                lockManager,
+                claimMaterial,
+                protectedMaterials,
+                config.getLong("claims.claimTimeoutMS")
+        );
 
         SQLConn.setSource(dataSource);
-
+        var titleEnum = "ENUM('TRIBUNE', 'QUAESTOR', 'AEDILE', 'PRAETOR', 'CONSUL', 'CENSOR', 'POPE', 'BUILDER', 'CITIZEN')";
         try (Connection conn = SQLConn.getConnection()) {
             conn.prepareStatement("CREATE TABLE IF NOT EXISTS players (" +
                     "uuid CHAR(36) NOT NULL PRIMARY KEY," +
-                    "title ENUM('TRIBUNE', 'SENATOR', 'MAYOR', 'JUDGE', 'CONSOLE', 'SENSOR', 'POPE', 'BUILDER', 'CITIZEN') NOT NULL);")
+                    "title " + titleEnum + " NOT NULL);")
                     .execute();
             // (x0, y0) must be the top-left point and (x1, y1) must be the bottom-right point
             conn.prepareStatement("CREATE TABLE IF NOT EXISTS cityClaims (" +
@@ -99,6 +119,44 @@ public class RomePlugin extends JavaPlugin {
             conn.prepareStatement("CREATE TABLE IF NOT EXISTS usernames (" +
                     "uuid CHAR(36) NOT NULL PRIMARY KEY," +
                     "username CHAR(32) NOT NULL);").execute();
+            //table representing current election's candidates and votes
+            conn.prepareStatement("CREATE TABLE IF NOT EXISTS election (" +
+                    "uuid CHAR(36) NOT NULL PRIMARY KEY," +
+                    "username CHAR(32) NOT NULL," + 
+                    "title " + titleEnum + " NOT NULL," +
+                    "votes INT NOT NULL);").execute();
+            //the server's election number and current election phase
+            conn.prepareStatement("CREATE TABLE IF NOT EXISTS electionState (" +
+                    "electionNumber INT NOT NULL DEFAULT 0 PRIMARY KEY," +
+                    "electionPhase CHAR(12) DEFAULT 'ENDED' NOT NULL);").execute();
+            //a history of election results
+            conn.prepareStatement("CREATE TABLE IF NOT EXISTS electionResults (" +
+                    "number INT NOT NULL DEFAULT 0 PRIMARY KEY," + 
+                    "title " + titleEnum + " NOT NULL," +
+                    "uuid CHAR(36) NOT NULL," +
+                    "votes INT NOT NULL);").execute();
+            //all players who have already voted
+            conn.prepareStatement("CREATE TABLE IF NOT EXISTS playerVotes (" +
+                    "uuid CHAR(36) NOT NULL PRIMARY KEY," + 
+                    "titleVotedFor " + titleEnum + " NOT NULL);");
+            conn.prepareStatement("CREATE TABLE IF NOT EXISTS extraClaimBlocks (" +
+                    "uuid CHAR(36) NOT NULL PRIMARY KEY," +
+                    "blocks INT NOT NULL DEFAULT 0);");
+            conn.prepareStatement("CREATE TABLE IF NOT EXISTS lockedBlocks (" +
+                    "x INT NOT NULL," +
+                    "y INT NOT NULL," +
+                    "z INT NOT NULL," +
+                    "keyId INT NOT NULL);").execute();
+            conn.prepareStatement("CREATE TABLE IF NOT EXISTS lockKeys (" +
+                    "keyId INT NOT NULL AUTO_INCREMENT PRIMARY KEY," +
+                    "creator_uuid CHAR(36) NOT NULL);").execute();
+            conn.prepareStatement("CREATE TABLE IF NOT EXISTS election (" +
+                    "uuid CHAR(36) NOT NULL PRIMARY KEY," +
+                    "username CHAR(32) NOT NULL" +
+                    "title " + titleEnum + " NOT NULL)," +
+                    "votes INT NOT NULL);").execute();
+            //conn.prepareStatement("CREATE TABLE IF NOT EXISTS locks (" +
+            //);
             var res = conn.prepareStatement("SELECT * FROM cityInfo WHERE type = 0;").executeQuery();
             if (res.next()) {
                 landControl.setGovernmentSize(res.getInt("size"));
@@ -107,8 +165,10 @@ public class RomePlugin extends JavaPlugin {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-
         var titles = new TitleHandler(this);
+
+        ElectionHandler handler = new ElectionHandler(this, titles);
+
         SwearFilter filter = new SwearFilter(landControl, config.getInt("messages.useSwearFilter"));
         var peeController = new PeeController(this);
         getCommand("rome").setExecutor(new LandCommand(landControl));
@@ -124,11 +184,13 @@ public class RomePlugin extends JavaPlugin {
         getCommand("builder").setExecutor(new BuilderCommand(titles));
         getCommand("shout").setExecutor(new ShoutCommand());
         getCommand("pee").setExecutor(peeController);
+        getCommand("makekey").setExecutor(new MakeKeyCommand(lockManager));
         getServer().getPluginManager().registerEvents(peeController, this);
         getServer().getPluginManager().registerEvents(new TitleEventListener(titles), this);
         getServer().getPluginManager().registerEvents(new DistanceListener(config.getInt("messages.messageDistance"), filter, landControl), this);
         getServer().getPluginManager().registerEvents(new BlockchainEventListener(this, ledger), this);
         getServer().getPluginManager().registerEvents(landListener, this);
+        getServer().getPluginManager().registerEvents(lockManager, this);
         getServer().getPluginManager().registerEvents(new LandEnterListener(landControl), this);
     }
 

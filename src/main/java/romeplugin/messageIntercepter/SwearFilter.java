@@ -7,7 +7,8 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import org.bukkit.entity.Player;
-import romeplugin.zoning.LandControl;
+
+import romeplugin.zoning.claims.LandControl;
 
 public final class SwearFilter {
 

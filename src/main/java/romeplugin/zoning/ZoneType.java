@@ -1,14 +1,14 @@
 package romeplugin.zoning;
 
 import org.bukkit.ChatColor;
-import romeplugin.newtitle.Title;
-import static romeplugin.newtitle.Title.*;
+import romeplugin.title.Title;
+import static romeplugin.title.Title.*;
 
 import java.util.Arrays;
 
 public enum ZoneType {
-    GOVERNMENT(ChatColor.LIGHT_PURPLE, CONSOLE, MAYOR, BUILDER, SENSOR),
-    CITY(ChatColor.GOLD, MAYOR, BUILDER, JUDGE),
+    GOVERNMENT(ChatColor.LIGHT_PURPLE, CONSUL, AEDILE, BUILDER, CENSOR),
+    CITY(ChatColor.GOLD, AEDILE, BUILDER, PRAETOR),
     SUBURB(ChatColor.DARK_AQUA),
     WILDERNESS(ChatColor.GREEN);
 

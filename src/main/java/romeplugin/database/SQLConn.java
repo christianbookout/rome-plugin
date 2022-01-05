@@ -1,7 +1,7 @@
 package romeplugin.database;
 
 import org.bukkit.Location;
-import romeplugin.newtitle.Title;
+import romeplugin.title.Title;
 
 import javax.sql.DataSource;
 import java.sql.*;
@@ -61,6 +61,29 @@ public class SQLConn {
     public static ClaimEntry getClaim(Location loc) {
         return getClaim(loc.getBlockX(), loc.getBlockZ());
     }
+
+    /**
+     * @param uuid user to search for
+     * @return the amount of extra blocks the user can claim (granted by whatever)
+     */
+    public static int getClaimAmount(UUID uuid) {
+        try {
+            var stmt = getConnection().prepareStatement("SELECT * FROM extraClaimBlocks WHERE uuid = ?");
+            stmt.setString(1, uuid.toString());
+            var results = stmt.executeQuery();
+            if (results.next()) {
+                return results.getInt("claimBlocks");
+            }
+        } catch (SQLException e) {}
+        return 0;
+    }
+    
+    //TODO implement this :)
+    /*public static void changeClaimAmount(UUID uuid) {
+        try {
+            var stmt = getConnection().prepareStatement("");
+        } catch (SQLException e) {}
+    }*/
 
     public static ClaimEntry getClaimRect(int x0, int y0, int x1, int y1) {
         try {
@@ -180,7 +203,7 @@ public class SQLConn {
             stmt.setString(1, who.toString());
             var res = stmt.executeQuery();
             if (!res.next()) {
-                return 9999;
+                return 0;
             }
             return res.getInt(1);
         } catch (SQLException e) {

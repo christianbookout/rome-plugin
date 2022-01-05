@@ -1,4 +1,4 @@
-package romeplugin.zoning;
+package romeplugin.zoning.claims;
 
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;

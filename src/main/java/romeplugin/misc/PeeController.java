@@ -44,7 +44,8 @@ public class PeeController implements CommandExecutor, Listener {
         //if the player is not in the canPeePlayers list then return
         var task = canPeePlayers.remove(player);
         if (task == null) {
-            return false;
+            player.sendMessage(ChatColor.RED + "there is nothing left in your bladder");
+            return true;
         }
 
         task.cancel();

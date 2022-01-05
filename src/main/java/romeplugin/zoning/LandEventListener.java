@@ -25,16 +25,15 @@ import org.bukkit.event.player.PlayerBucketFillEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
-
 import romeplugin.database.ClaimEntry;
 import romeplugin.database.SQLConn;
+import romeplugin.zoning.claims.LandControl;
+import romeplugin.zoning.locks.LockManager;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 
 public class LandEventListener implements Listener {
+    private final LockManager lockManager;
     private final LandControl controller;
     public static final Material DEFAULT_MATERIAL = Material.BRICK;
 
@@ -47,33 +46,24 @@ public class LandEventListener implements Listener {
     private final HashMap<Player, Location> players = new HashMap<>();
 
     //the materials people can't right-click in a claim/the city
-    private final Material[] nonClickables = new Material[]{
-            Material.CHEST,
-            Material.BARREL,
-            Material.ANVIL,
-            Material.BEACON,
-            Material.BLAST_FURNACE,
-            Material.FURNACE,
-            Material.SMOKER,
-            Material.CHEST_MINECART,
-            Material.FURNACE_MINECART,
-            Material.HOPPER,
-            Material.HOPPER_MINECART,
-            Material.BREWING_STAND,
-            Material.ITEM_FRAME,
-            Material.TRAPPED_CHEST,
-            Material.ARMOR_STAND,
-            Material.SHULKER_BOX 
-    };
+    private final List<Material> nonClickables;
 
     //note last player who places sponge to make sure they arent tryna destroy water in someone else's claim
     //there will be a bug if someone who can build in the city places a sponge and then water flows from the city into the suburbs and someone already has
     //a sponge placed, it will get rid of the water (but who cares)
     private Player spongePlacer = null;
 
-    public LandEventListener(LandControl controller, Material claimMaterial, long claimTimeoutMS) {
+    public LandEventListener(
+            LandControl controller,
+            LockManager lockManager,
+            Material claimMaterial,
+            List<Material> autoLockedBlocks,
+            long claimTimeoutMS
+    ) {
         this.controller = controller;
+        this.lockManager = lockManager;
         this.claimMaterial = claimMaterial;
+        this.nonClickables = autoLockedBlocks;
         this.claimTimeoutMS = claimTimeoutMS;
     }
 
@@ -86,6 +76,7 @@ public class LandEventListener implements Listener {
             return;
 
         event.getPlayer().sendMessage(ChatColor.RED + "you can't break that, dumbass");
+        // TODO: if the block successfully breaks, remove the lock on it
         event.setCancelled(true);
     }
 
@@ -171,7 +162,7 @@ public class LandEventListener implements Listener {
     private boolean canBlockMove(Location fromLoc, Location toLoc) {
         // fast path, the wilderness has no protections
         if (controller.inWilderness(toLoc)) {
-            return false;
+            return true;
         }
 
         boolean toLocInCity = controller.inCity(toLoc);
@@ -336,17 +327,34 @@ public class LandEventListener implements Listener {
         }
 
         //if player is clicking on a locked chest/door then don't let em
-        if (e.getAction() == Action.RIGHT_CLICK_BLOCK 
-            && e.getHand() != EquipmentSlot.OFF_HAND
-            && (Arrays.asList(nonClickables).contains(e.getClickedBlock().getType()) 
+        if (e.getAction() == Action.RIGHT_CLICK_BLOCK
+                && e.getHand() != EquipmentSlot.OFF_HAND
+                && (nonClickables.contains(e.getClickedBlock().getType())
                 || e.getClickedBlock().getState() instanceof Door)) {
 
             if (e.getPlayer().getGameMode() == GameMode.SPECTATOR) return;
+            var maybeLocked = lockManager.getBlockLockId(e.getClickedBlock());
+            if (maybeLocked.isPresent()) {
+                if (e.getItem() != null) {
+                    var maybeKey = lockManager.getKey(e.getItem());
+                    if (maybeKey.equals(maybeLocked)) {
+                        e.setCancelled(false);
+                        return;
+                    }
+                }
+                // check if the lock's owner is the player who is trying to open it
+                maybeLocked.ifPresent(id -> {
+                    var owner = lockManager.getOwner(id);
+                    e.setCancelled(!owner.equals(e.getPlayer().getUniqueId()));
+                });
+                return;
+            }
+            //var lockOwner = SQLConn.getLockOwner(e.getClickedBlock()); //TODO this
+            //if (lockOwner != null && lockOwner.equals(e.getPlayer().getUniqueId());
 
             if (!controller.canBreak(e.getPlayer(), newLoc)) {
                 e.getPlayer().sendMessage(ChatColor.RED + "woah that is locked");
                 e.setCancelled(true);
-                return;
             }
         }
         //if a player right clicks w/ the claim material then maybe claim some stuff!!

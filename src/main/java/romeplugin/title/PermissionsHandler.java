@@ -1,4 +1,4 @@
-package romeplugin.newtitle;
+package romeplugin.title;
 
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.PermissionAttachment;

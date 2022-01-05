@@ -1,12 +1,14 @@
-package romeplugin.zoning;
+package romeplugin.zoning.claims;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.bukkit.World.Environment;
 import org.bukkit.entity.Player;
 import romeplugin.RomePlugin;
 import romeplugin.database.SQLConn;
-import romeplugin.newtitle.Title;
+import romeplugin.title.Title;
+import romeplugin.zoning.CityArea;
 
 import java.sql.SQLException;
 
@@ -19,8 +21,10 @@ public class LandControl {
     private int governmentSize;
     private final int cityMult;
     private final int suburbsMult;
+    private final int minBlockLimit;
 
-    public LandControl(int cityX, int cityY, int governmentSize, int cityMult, int suburbsMult) {
+    public LandControl(int cityX, int cityY, int governmentSize, int cityMult, int suburbsMult, int minBlockLimit) {
+        this.minBlockLimit = minBlockLimit;
         this.cityX = cityX;
         this.cityY = cityY;
         this.governmentSize = governmentSize;
@@ -43,7 +47,7 @@ public class LandControl {
         };
     }
 
-    public CityArea getArea(int x, int y) {
+    private CityArea getArea(int x, int y) {
         for (CityArea area : areas) {
             if (Math.abs(x - cityX) <= area.getSize() && Math.abs(y - cityY) <= area.getSize()) {
                 return area;
@@ -53,6 +57,7 @@ public class LandControl {
     }
 
     public CityArea getArea(Location loc) {
+        if (loc.getWorld().getEnvironment() != Environment.NORMAL) return null;
         return getArea(loc.getBlockX(), loc.getBlockZ());
     }
 
@@ -69,30 +74,26 @@ public class LandControl {
         }
     }
 
-    /*public double distToCity(int x, int y) {
-        var x_dist = cityX - x;
-        var y_dist = cityY - y;
-        return Math.sqrt(x_dist * x_dist + y_dist * y_dist);
-    }*/
-
-    public boolean inCity(int x, int y) {
+    private boolean inCity(int x, int y) {
         var extents = governmentSize * cityMult;
         return Math.abs(x - cityX) <= extents && Math.abs(y - cityY) <= extents;
     }
 
-    public boolean inSuburbs(int x, int y) {
+    private boolean inSuburbs(int x, int y) {
         var extents = governmentSize * suburbsMult;
         return Math.abs(x - cityX) <= extents && Math.abs(y - cityY) <= extents;
     }
     public boolean inSuburbs(Location loc) {
+        if (loc.getWorld().getEnvironment() != Environment.NORMAL) return false;
         return inSuburbs(loc.getBlockX(), loc.getBlockZ());
     }
 
     public boolean inCity(Location loc) {
+        if (loc.getWorld().getEnvironment() != Environment.NORMAL) return false;
         return inCity(loc.getBlockX(), loc.getBlockZ());
     }
 
-    public boolean canBreak(Player player, int x, int y) {
+    private boolean canBreak(Player player, int x, int y) {
         if (!inSuburbs(x, y)) {
             return true;
         }
@@ -121,15 +122,15 @@ public class LandControl {
                                           int x2, int y2, int x3, int y3) {
         return x2 >= x0 && x3 <= x1 && y2 <= y0 && y3 >= y1;
     }
-
-    public boolean canClaim(Player player, int x0, int y0, int x1, int y1) {
+    //TODO make it so you cant claim in da nether and stuff
+    private boolean canClaim(Player player, int x0, int y0, int x1, int y1) {
         var extents = governmentSize * suburbsMult;
         if (!rectInside(cityX - extents, cityY + extents, cityX + extents, cityY - extents, x0, y0, x1, y1)) {
             player.sendMessage("you cannot claim outside of city limits");
             return false;
         }
         var title = SQLConn.getTitle(player.getUniqueId());
-        if (title != null && title.t == Title.MAYOR) {
+        if (title != null && title.t == Title.AEDILE) {
             // this allows the mayor to skip the claiming limit check anywhere inside rome
             return true;
         }
@@ -144,7 +145,7 @@ public class LandControl {
             return false;
         }
         var claimed = (x1 - x0) * (y0 - y1);
-        if (SQLConn.getTotalClaimedBlocks(player.getUniqueId()) + claimed <= 225) {
+        if (SQLConn.getTotalClaimedBlocks(player.getUniqueId()) + claimed <= minBlockLimit + SQLConn.getClaimAmount(player.getUniqueId())) {
             player.sendMessage(ChatColor.RED + "you have hit your block limit!");
             return false;
         }

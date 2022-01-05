@@ -208,7 +208,7 @@ public class SQLConn {
             return res.getInt(1);
         } catch (SQLException e) {
             e.printStackTrace();
-            return 0;
+            return 9999;
         }
     }
 }

@@ -203,12 +203,12 @@ public class SQLConn {
             stmt.setString(1, who.toString());
             var res = stmt.executeQuery();
             if (!res.next()) {
-                return 9999;
+                return 0;
             }
             return res.getInt(1);
         } catch (SQLException e) {
             e.printStackTrace();
-            return 9999;
+            return 0;
         }
     }
 }

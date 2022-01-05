@@ -152,8 +152,8 @@ public class RomePlugin extends JavaPlugin {
                     "creator_uuid CHAR(36) NOT NULL);").execute();
             conn.prepareStatement("CREATE TABLE IF NOT EXISTS election (" +
                     "uuid CHAR(36) NOT NULL PRIMARY KEY," +
-                    "username CHAR(32) NOT NULL" +
-                    "title " + titleEnum + " NOT NULL)," +
+                    "username CHAR(32) NOT NULL," +
+                    "title " + titleEnum + " NOT NULL," +
                     "votes INT NOT NULL);").execute();
             //conn.prepareStatement("CREATE TABLE IF NOT EXISTS locks (" +
             //);

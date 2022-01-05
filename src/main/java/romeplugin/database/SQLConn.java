@@ -1,7 +1,7 @@
 package romeplugin.database;
 
 import org.bukkit.Location;
-import romeplugin.newtitle.Title;
+import romeplugin.title.Title;
 
 import javax.sql.DataSource;
 import java.sql.*;

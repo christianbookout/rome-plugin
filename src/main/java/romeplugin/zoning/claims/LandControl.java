@@ -7,7 +7,7 @@ import org.bukkit.World.Environment;
 import org.bukkit.entity.Player;
 import romeplugin.RomePlugin;
 import romeplugin.database.SQLConn;
-import romeplugin.newtitle.Title;
+import romeplugin.title.Title;
 import romeplugin.zoning.CityArea;
 
 import java.sql.SQLException;

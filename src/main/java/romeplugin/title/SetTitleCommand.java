@@ -1,5 +1,6 @@
-package romeplugin.newtitle;
+package romeplugin.title;
 
+import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -14,34 +15,33 @@ public class SetTitleCommand implements CommandExecutor {
     }
 
     @Override
-    public boolean onCommand(CommandSender commandSender, Command command, String s, String[] args) {
+    public boolean onCommand(CommandSender sender, Command command, String s, String[] args) {
         if (args.length < 2) {
             return false;
         }
-        Title title;
-        try {
-            title = Title.getTitle(args[1]);
-        } catch (IllegalArgumentException e) {
-            commandSender.sendMessage("invalid title :)");
-            return false;
+        Title title = Title.getTitle(args[1]);
+        if (title == null) {
+            sender.sendMessage(ChatColor.RED + "invalid title");
+            return true;
         }
-        Player target = commandSender.getServer().getPlayer(args[0]);
+        Player target = sender.getServer().getPlayer(args[0]);
         if (target == null) {
             var uuid = SQLConn.getUUIDFromUsername(args[0]);
             if (uuid == null) {
-                commandSender.sendMessage("ni jan li lon ala");
-                return false;
+                sender.sendMessage(ChatColor.RED + "ni jan li lon ala");
+                return true;
             }
             titles.setTitleOffline(uuid, title);
-            commandSender.sendMessage(args[0] + "'s title is now " + title.fancyName);
+            sender.sendMessage(args[0] + "'s title is now " + title.fancyName);
             return true;
         }
 
         if (!titles.setTitle(target, title)) {
-            commandSender.sendMessage("could not set title??");
+            sender.sendMessage("could not set title??");
+            return true;
         }
 
-        commandSender.sendMessage(target.getDisplayName() + "'s title is now " + title.toString());
+        sender.sendMessage(target.getDisplayName() + "'s title is now " + title.fancyName);
         return true;
     }
 }

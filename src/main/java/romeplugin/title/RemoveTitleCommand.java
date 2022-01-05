@@ -1,4 +1,4 @@
-package romeplugin.newtitle;
+package romeplugin.title;
 
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;

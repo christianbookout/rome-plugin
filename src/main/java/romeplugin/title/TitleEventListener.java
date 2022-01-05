@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package romeplugin.newtitle;
+package romeplugin.title;
 
 import org.bukkit.ChatColor;
 import org.bukkit.event.EventHandler;

@@ -1,8 +1,8 @@
 package romeplugin.zoning;
 
 import org.bukkit.ChatColor;
-import romeplugin.newtitle.Title;
-import static romeplugin.newtitle.Title.*;
+import romeplugin.title.Title;
+import static romeplugin.title.Title.*;
 
 import java.util.Arrays;
 

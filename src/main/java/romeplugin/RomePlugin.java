@@ -22,7 +22,7 @@ import romeplugin.messageIntercepter.DistanceListener;
 import romeplugin.messageIntercepter.ShoutCommand;
 import romeplugin.messageIntercepter.SwearFilter;
 import romeplugin.misc.PeeController;
-import romeplugin.newtitle.*;
+import romeplugin.title.*;
 import romeplugin.zoning.*;
 import romeplugin.zoning.claims.ClaimInfoCommand;
 import romeplugin.zoning.claims.ClaimLandCommand;

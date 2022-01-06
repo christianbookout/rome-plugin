@@ -199,7 +199,7 @@ public class SQLConn {
 
     public static int getTotalClaimedBlocks(UUID who) {
         try {
-            var stmt = getConnection().prepareStatement("SELECT SUM((x1 - x0) * (y0 - y1)) FROM cityClaims WHERE owner_uuid = ?;");
+            var stmt = getConnection().prepareStatement("SELECT SUM((x1 - x0 + 1) * (y0 - y1 + 1)) FROM cityClaims WHERE owner_uuid = ?;");
             stmt.setString(1, who.toString());
             var res = stmt.executeQuery();
             if (!res.next()) {

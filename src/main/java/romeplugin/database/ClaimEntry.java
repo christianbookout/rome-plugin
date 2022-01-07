@@ -16,4 +16,8 @@ public class ClaimEntry {
         this.y1 = y1;
         this.owner = owner;
     }
+
+    public int getArea() {
+        return (x1 - x0 + 1) * (y0 - y1 + 1);
+    }
 }

@@ -25,6 +25,7 @@ public class ClaimInfoCommand implements CommandExecutor {
             owner_username = claim.owner.toString();
         }
         sender.sendMessage("claim owner: " + owner_username +
+                "\narea: " + claim.getArea() + " blocks" +
                 "\nfrom (" + claim.x0 + ", " + claim.y0 + ") to (" + claim.x1 + ", " + claim.y1 + ")");
         return true;
     }

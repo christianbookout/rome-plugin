@@ -11,6 +11,7 @@ import romeplugin.title.Title;
 import romeplugin.zoning.CityArea;
 
 import java.sql.SQLException;
+import java.util.UUID;
 
 import static romeplugin.zoning.ZoneType.*;
 
@@ -145,7 +146,7 @@ public class LandControl {
             return false;
         }
         var claimed = (x1 - x0) * (y0 - y1);
-        if (SQLConn.getTotalClaimedBlocks(player.getUniqueId()) + claimed <= minBlockLimit + SQLConn.getClaimAmount(player.getUniqueId())) {
+        if (getClaimedBlocksInSuburbs(player.getUniqueId()) + claimed <= minBlockLimit + SQLConn.getClaimAmount(player.getUniqueId())) {
             player.sendMessage(ChatColor.RED + "you have hit your block limit!");
             return false;
         }
@@ -188,5 +189,25 @@ public class LandControl {
 
     public boolean inWilderness(Location toLoc) {
         return !inSuburbs(toLoc);
+    }
+
+    public int getClaimedBlocksInSuburbs(UUID who) {
+        try {
+            var stmt = SQLConn.getConnection().prepareStatement("SELECT SUM((x1 - x0 + 1) * (y0 - y1 + 1)) FROM cityClaims WHERE NOT (x0 <= ? AND x1 >= ? AND y0 >= ? AND y1 <= ?) AND owner_uuid = ?");
+            var extents = governmentSize * cityMult;
+            stmt.setInt(1, cityX + extents); // x1
+            stmt.setInt(2, cityX - extents); // x0
+            stmt.setInt(3, cityY + extents); // y1
+            stmt.setInt(4, cityY - extents); // y0
+            stmt.setString(5, who.toString());
+            var res = stmt.executeQuery();
+            if (!res.next()) {
+                return 0;
+            }
+            return res.getInt(1);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return 9999;
+        }
     }
 }

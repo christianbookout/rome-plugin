@@ -47,6 +47,9 @@ commands:
   claiminfo:
     description: "get information on the claim you are in"
     usage: "/claiminfo"
+  getblocks:
+    description: "get blocks owned by a yourself or another player"
+    usage: "/getblocks [who]"
   killclaim:
     description: "remove a claim at your location"
     usage: "/killclaim"

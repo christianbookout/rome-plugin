@@ -26,6 +26,7 @@ import romeplugin.title.*;
 import romeplugin.zoning.*;
 import romeplugin.zoning.claims.ClaimInfoCommand;
 import romeplugin.zoning.claims.ClaimLandCommand;
+import romeplugin.zoning.claims.GetClaimBlocksCommand;
 import romeplugin.zoning.claims.LandControl;
 import romeplugin.zoning.locks.LockManager;
 import romeplugin.zoning.locks.MakeKeyCommand;
@@ -185,6 +186,7 @@ public class RomePlugin extends JavaPlugin {
         getCommand("shout").setExecutor(new ShoutCommand());
         getCommand("pee").setExecutor(peeController);
         getCommand("makekey").setExecutor(new MakeKeyCommand(lockManager));
+        getCommand("getblocks").setExecutor(new GetClaimBlocksCommand(landControl));
         getServer().getPluginManager().registerEvents(peeController, this);
         getServer().getPluginManager().registerEvents(new TitleEventListener(titles), this);
         getServer().getPluginManager().registerEvents(new DistanceListener(config.getInt("messages.messageDistance"), filter, landControl), this);

@@ -146,7 +146,7 @@ public class LandControl {
             return false;
         }
         var claimed = (x1 - x0) * (y0 - y1);
-        if (SQLConn.getTotalClaimedBlocks(player.getUniqueId()) + claimed <= minBlockLimit + SQLConn.getClaimAmount(player.getUniqueId())) {
+        if (getClaimedBlocksInSuburbs(player.getUniqueId()) + claimed <= minBlockLimit + SQLConn.getClaimAmount(player.getUniqueId())) {
             player.sendMessage(ChatColor.RED + "you have hit your block limit!");
             return false;
         }

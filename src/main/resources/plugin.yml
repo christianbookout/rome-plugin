@@ -9,6 +9,16 @@ permissions:
     default: op
   romeplugin.quaestor:
     description: "Senator"
+    default: op
+  romeplugin.censor:
+    description: "Censor"
+    default: op
+  romeplugin.consul:
+    description: "Consul"
+    default: op
+  romeplugin.praetor:
+    description: "Praetor"
+    default: op
 commands:
   checktitle:
     description: "SycPrsFacNem"
@@ -40,6 +50,9 @@ commands:
   killclaim:
     description: "remove a claim at your location"
     usage: "/killclaim"
+  killallclaims:
+    description: "remove every existing claim of yours (or another players)"
+    usage: "/killallclaims <optional user>"
   transferclaim:
     description: "transfer the claim you are in to someone else"
     usage: "/transferclaim <user>"
@@ -57,17 +70,9 @@ commands:
   pee:
     description: "take a piss"
     usage: "/pee"
-  startelection:
-    description: "start an election"
-    permission: op
-  vote:
-    description: "vote for an election candidate"
-    usage: "/vote <user>"
-  run:
-    description: "run for a position in an election"
-    usage: "/run <position>"
-    permission: romeplugin.quaestor
-  
+  elections:
+    description: "type /elections help for help"
+    usage: "/elections help"
   makekey:
     description: "make a key out of the currently held item"
     usage: "/makekey"

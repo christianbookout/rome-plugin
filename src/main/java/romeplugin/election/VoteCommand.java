@@ -38,7 +38,7 @@ public class VoteCommand implements CommandExecutor {
             UUID uuid = SQLConn.getUUIDFromUsername(args[0]);
             //Can't find player in database
             if (uuid == null) {
-                player.sendMessage(MessageConstants.CANT_FIND_PLAYER + args[0]);
+                player.sendMessage(MessageConstants.CANT_FIND_PLAYER);
                 return true;
             }
             toVote = uuid;

@@ -2,6 +2,8 @@ package romeplugin.election;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.SQLType;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.UUID;
@@ -18,8 +20,7 @@ public class ElectionHandler {
     //don't make one of these greater than 12 characters :D 
     public enum ElectionPhase {
         RUNNING,
-        VOTING,
-        ENDED
+        VOTING
     }
     private Election currentElection;
     private TitleHandler titleHandler;
@@ -34,7 +35,7 @@ public class ElectionHandler {
     public ElectionHandler(Plugin plugin, TitleHandler titleHandler) {
         this.titleHandler = titleHandler;
         this.plugin = plugin;
-        this.currentPhase = ElectionPhase.ENDED;
+        this.currentPhase = null;
         this.currentElection = null;
         this.results = null;
         this.electionNum = 0;
@@ -138,13 +139,25 @@ public class ElectionHandler {
         this.results.forEach(winner -> titleHandler.setTitle(winner.getUniqueId(), winner.getTitle()));
 
         this.currentElection = null;
-        this.currentPhase = ElectionPhase.ENDED;
+        this.currentPhase = null;
         this.electionNum++;
 
         this.updateElectionState();
         this.storeElectionResults();
 
         plugin.getServer().broadcastMessage(MessageConstants.ELECTION_ENDED);
+    }
+
+    //TODO: implement electionNum in a good way
+    public void clearElectionTable() {
+        try (Connection conn = SQLConn.getConnection()) {
+            var results = conn.prepareStatement("SELECT number FROM election;").executeQuery();
+            if (results.next())
+                this.electionNum = results.getInt("number");
+            conn.prepareStatement("TRUNCATE TABLE election;");
+        } catch (SQLException e) {
+
+        }
     }
 
     private boolean alreadyVoted(UUID player, Title title) {
@@ -164,15 +177,18 @@ public class ElectionHandler {
             
             this.readElectionState();
             
-            if (this.currentPhase == ElectionPhase.ENDED) return;
+            if (this.currentPhase != null) return;
 
             this.currentElection = new Election();
 
-            var statement = conn.prepareStatement("SELECT uuid, username, title, votes FROM election;");
+            var statement = conn.prepareStatement("SELECT uuid, username, title, votes, number, phase FROM election;");
             var results = statement.executeQuery();
             
             while (results.next()) {
-
+                String phase = results.getString("phase");
+                this.currentPhase = phase != null ? ElectionPhase.valueOf(phase) : null;
+                this.electionNum = results.getInt("number");
+                
                 UUID uuid = UUID.fromString(results.getString("uuid"));
                 Title title = Title.getTitle(results.getString("title"));
                 
@@ -189,11 +205,13 @@ public class ElectionHandler {
      * reads the current election phase and number from the database
      */
     public void readElectionState() {
+        if (true) return;
         try(Connection conn = SQLConn.getConnection()) {
-            var currInfo = conn.prepareStatement("SELECT electionNumber, electionPhase FROM electionState").executeQuery();
+            var currInfo = conn.prepareStatement("SELECT number, phase FROM election").executeQuery();
             if (currInfo.next()) {
-                this.electionNum = currInfo.getInt("electionNumber");
-                this.currentPhase = ElectionPhase.valueOf(currInfo.getString("electionPhase"));
+                this.electionNum = currInfo.getInt("number");
+                String phase = currInfo.getString("phase");
+                this.currentPhase = phase != null ? ElectionPhase.valueOf(phase) : null;
             } 
         } catch (SQLException e) {}
     }
@@ -201,10 +219,16 @@ public class ElectionHandler {
      * updates the electionState table to represent current election number and phase
      */
     public void updateElectionState() {
+        if (true) return;
         try(Connection conn = SQLConn.getConnection()) {
-            var statement = conn.prepareStatement("REPLACE INTO electionState (?, ?)");
+            var statement = conn.prepareStatement("REPLACE INTO election (?, ?)");
             statement.setInt(1, this.electionNum);
-            statement.setString(2, this.currentPhase.toString());
+            if (this.currentPhase == null) {
+                statement.setNull(2, Types.OTHER);
+            } else {
+                statement.setString(2, this.currentPhase.toString());
+            }
+            statement.execute();
         } catch (SQLException e) {}
     }
 
@@ -246,7 +270,7 @@ public class ElectionHandler {
     public void storeElectionResults() {
         try(Connection conn = SQLConn.getConnection()) {
             for (Candidate winner: results) {   
-                var statement = conn.prepareStatement("REPLACE INTO electionResults VALUES (?, ?, ?, ?);");
+                var statement = conn.prepareStatement("INSERT INTO electionResults VALUES (?, ?, ?, ?);");
                 statement.setInt(1, this.electionNum);
                 statement.setString(2, winner.getTitle().toString());
                 statement.setString(3, winner.getUniqueId().toString());

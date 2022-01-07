@@ -30,7 +30,7 @@ public class RunCommand implements CommandExecutor {
         Title title = Title.getTitle(args[0]);
 
         if (title == null) {
-            player.sendMessage(MessageConstants.CANT_FIND_TITLE + args[0]);
+            player.sendMessage(MessageConstants.CANT_FIND_TITLE);
         }
         electionHandler.addCandidate(player.getUniqueId(), title);
         return false;

@@ -26,10 +26,8 @@ public class ElectionCommand implements CommandExecutor {
 
         if (sender instanceof Player) {
             Player player = (Player) sender;
+            var playerTitle = SQLConn.getTitle(player);
             String arg = args[0].toLowerCase();
-            //If the player has perms to start/end elections
-            boolean electionPerms = false;
-            //If player has perms to run for office;
             Title title = null;
             UUID targetedPlayer = null;
             if (args.length >= 2) {
@@ -60,7 +58,7 @@ public class ElectionCommand implements CommandExecutor {
                     vote(player, targetedPlayer);
                     break;
                 default:
-                    if (!electionPerms) {
+                    if (!player.isOp() && playerTitle != Title.CENSOR) {
                         player.sendMessage(MessageConstants.NO_PERMISSION_ERROR);
                         return true;
                     }
@@ -74,7 +72,6 @@ public class ElectionCommand implements CommandExecutor {
                     } else if (arg.equals("cancel")) {
                         cancel(player);
                     }
-
                     break;
             }
         }

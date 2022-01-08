@@ -1,6 +1,7 @@
 package romeplugin.database;
 
 import org.bukkit.Location;
+import org.bukkit.entity.Player;
 import romeplugin.title.Title;
 
 import javax.sql.DataSource;
@@ -48,6 +49,25 @@ public class SQLConn {
                 return null;
             }
             return new TitleEntry(Title.getTitle(titleName), who);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public static Title getTitle(Player p) {
+        try {
+            var stmt = getConnection().prepareStatement("SELECT title FROM players WHERE uuid = ?;");
+            stmt.setString(1, p.getUniqueId().toString());
+            var res = stmt.executeQuery();
+            if (!res.next()) {
+                return null;
+            }
+            var titleName = res.getString("title");
+            if (titleName == null) {
+                return null;
+            }
+            return Title.getTitle(titleName);
         } catch (SQLException e) {
             e.printStackTrace();
             return null;

@@ -33,10 +33,7 @@ public class ElectionCommand implements CommandExecutor {
             if (args.length >= 2) {
                 targetedPlayer = SQLConn.getUUIDFromUsername(args[1]);
                 if (targetedPlayer != null) {
-                    var maybeTitle = SQLConn.getTitle(targetedPlayer);
-                    if (maybeTitle != null) {
-                        title = maybeTitle.t;
-                    }
+                    title = SQLConn.getTitle(targetedPlayer);
                 } else {
                     title = Title.getTitle(args[1]);
                 }
@@ -154,24 +151,14 @@ public class ElectionCommand implements CommandExecutor {
         }
     }
 
-    private void vote(Player player, UUID other) {
+    private void vote(Player player, UUID toVote) {
         if (!this.electionHandler.hasElection()) {
             player.sendMessage(MessageConstants.NO_ELECTION_ERROR);
             return;
         }
-
-        Player target = player.getServer().getPlayer(other);
-        UUID toVote;
-        //If the target isn't online then go into the database to fetch their UUID
-        if (target == null) {
-            //Can't find player in database
-            if (other == null) {
-                player.sendMessage(MessageConstants.CANT_FIND_PLAYER);
-                return;
-            }
-            toVote = other;
-        } else {
-            toVote = target.getUniqueId();
+        if (toVote == null) {
+            player.sendMessage(MessageConstants.CANT_FIND_PLAYER);
+            return;
         }
         if (!electionHandler.vote(player.getUniqueId(), toVote)) {
             player.sendMessage(MessageConstants.NO_VOTING);
@@ -197,11 +184,7 @@ public class ElectionCommand implements CommandExecutor {
             return;
         }
 
-        var currentTitleEntry = SQLConn.getTitle(player.getUniqueId());
-        Title currentTitle = null;
-        if (currentTitleEntry != null) {
-            currentTitle = currentTitleEntry.t;
-        }
+        var currentTitle = SQLConn.getTitle(player.getUniqueId());
         if (!isEligibleFor(currentTitle, targetTitle)) {
             player.sendMessage("you can't run for this position!");
             return;

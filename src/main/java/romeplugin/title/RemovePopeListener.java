@@ -1,23 +1,21 @@
 package romeplugin.title;
 
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.entity.PlayerDeathEvent;
+import romeplugin.RomePlugin;
+import romeplugin.database.SQLConn;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
-import org.bukkit.event.entity.PlayerDeathEvent;
-
-import romeplugin.RomePlugin;
-import romeplugin.database.SQLConn;
-import romeplugin.database.TitleEntry;
-
 public class RemovePopeListener implements Listener {
-    
+
     @EventHandler
     public boolean onDeathEvent(PlayerDeathEvent e) {
-        TitleEntry titleEntry = SQLConn.getTitle(e.getEntity().getUniqueId());
-        if (titleEntry != null && titleEntry.t == Title.POPE) {
+        Title titleEntry = SQLConn.getTitle(e.getEntity().getUniqueId());
+        if (titleEntry == Title.POPE) {
             try (Connection conn = SQLConn.getConnection()) {
                 PreparedStatement statement = conn.prepareStatement(
                         "DELETE FROM players WHERE uuid = ?;");

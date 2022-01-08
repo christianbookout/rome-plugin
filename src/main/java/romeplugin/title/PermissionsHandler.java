@@ -3,7 +3,6 @@ package romeplugin.title;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.PermissionAttachment;
 import org.bukkit.plugin.Plugin;
-import romeplugin.database.TitleEntry;
 
 import java.util.HashMap;
 import java.util.UUID;
@@ -16,11 +15,11 @@ class PermissionsHandler {
         this.plugin = plugin;
     }
 
-    public void playerJoin(Player player, TitleEntry title) {
+    public void playerJoin(Player player, Title title) {
         var attachment = player.addAttachment(plugin);
         perms.put(player.getUniqueId(), attachment);
-        if (title != null && title.t.perms != null) {
-            attachment.setPermission(title.t.perms, true);
+        if (title != null && title.perms != null) {
+            attachment.setPermission(title.perms, true);
         }
     }
 

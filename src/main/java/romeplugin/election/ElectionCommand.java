@@ -43,32 +43,39 @@ public class ElectionCommand implements CommandExecutor {
                     title = Title.getTitle(args[1]);
                 }
             }
-            if (arg.equals("run")) {
-                run(player, title);
-            } else if (arg.equals("help")) {
-                help(player);
-            } else if (arg.equals("results")) {
-                getResults(player);
-            } else if (arg.equals("candidates")) {
-                getCandidates(player);
-            } else if (arg.equals("vote")) {
-                vote(player, targetedPlayer);
-            } else {
-                if (!electionPerms) {
-                    player.sendMessage(MessageConstants.NO_PERMISSION_ERROR);
-                    return true;
-                }
+            switch (arg) {
+                case "run":
+                    run(player, title);
+                    break;
+                case "help":
+                    help(player);
+                    break;
+                case "results":
+                    getResults(player);
+                    break;
+                case "candidates":
+                    getCandidates(player);
+                    break;
+                case "vote":
+                    vote(player, targetedPlayer);
+                    break;
+                default:
+                    if (!electionPerms) {
+                        player.sendMessage(MessageConstants.NO_PERMISSION_ERROR);
+                        return true;
+                    }
 
-                if (arg.equals("start")) {
-                    startElection(player);
-                } else if (arg.equals("voting")) {
-                    startVoting(player);
-                } else if (arg.equals("end")) {
-                    endElection(player);
-                } else if (arg.equals("cancel")) {
-                    cancel(player);
-                }
+                    if (arg.equals("start")) {
+                        startElection(player);
+                    } else if (arg.equals("voting")) {
+                        startVoting(player);
+                    } else if (arg.equals("end")) {
+                        endElection(player);
+                    } else if (arg.equals("cancel")) {
+                        cancel(player);
+                    }
 
+                    break;
             }
         }
         return true;

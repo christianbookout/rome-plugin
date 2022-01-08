@@ -1,22 +1,19 @@
 package romeplugin.election;
 
-import java.sql.SQLException;
-import java.util.UUID;
-
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-
 import romeplugin.MessageConstants;
 import romeplugin.database.SQLConn;
-import romeplugin.database.TitleEntry;
 import romeplugin.election.ElectionHandler.ElectionPhase;
 import romeplugin.title.Title;
 
+import java.util.UUID;
+
 public class ElectionCommand implements CommandExecutor {
-    
+
     private final ElectionHandler electionHandler;
 
     public ElectionCommand(ElectionHandler electionHandler) {
@@ -33,20 +30,22 @@ public class ElectionCommand implements CommandExecutor {
             //If the player has perms to start/end elections
             boolean electionPerms = false;
             //If player has perms to run for office;
-            boolean canRun = false;
             Title title = null;
             UUID targetedPlayer = null;
-            if (args.length >= 1) {
+            if (args.length >= 2) {
                 targetedPlayer = SQLConn.getUUIDFromUsername(args[1]);
                 if (targetedPlayer != null) {
-                    title = SQLConn.getTitle(targetedPlayer).t;
+                    var maybeTitle = SQLConn.getTitle(targetedPlayer);
+                    if (maybeTitle != null) {
+                        title = maybeTitle.t;
+                    }
                 } else {
                     title = Title.getTitle(args[1]);
                 }
             }
-            if (arg.equals("run") && canRun && args.length > 1) {
+            if (arg.equals("run")) {
                 run(player, title);
-            }else if (arg.equals("help")) {
+            } else if (arg.equals("help")) {
                 help(player);
             } else if (arg.equals("results")) {
                 getResults(player);
@@ -69,7 +68,7 @@ public class ElectionCommand implements CommandExecutor {
                 } else if (arg.equals("cancel")) {
                     cancel(player);
                 }
-                
+
             }
         }
         return true;
@@ -107,7 +106,7 @@ public class ElectionCommand implements CommandExecutor {
             return;
         }
         String toSend = ChatColor.GOLD + "<--RESULTS-->" + ChatColor.RESET;
-        for (Candidate c: results) {
+        for (Candidate c : results) {
             String username = SQLConn.getUsername(c.getUniqueId());
             toSend += "\n" + username + ": " + c.getTitle().fancyName + ChatColor.RESET + " with " + c.getVotes() + " votes";
         }
@@ -126,7 +125,7 @@ public class ElectionCommand implements CommandExecutor {
 
         var candidates = electionHandler.getCurrentElection().getCandidates();
         String toSend = ChatColor.GOLD + "<--CANDIDATES-->" + ChatColor.RESET;
-        for (Candidate c: candidates) {
+        for (Candidate c : candidates) {
             String username = SQLConn.getUsername(c.getUniqueId());
             toSend += "\n" + username + ": " + c.getTitle().fancyName;
         }
@@ -136,8 +135,7 @@ public class ElectionCommand implements CommandExecutor {
     private void startElection(Player player) {
         if (electionHandler.hasElection()) {
             player.sendMessage(MessageConstants.ALREADY_ELECTION_ERROR);
-        }
-        else {
+        } else {
             electionHandler.startElection();
         }
     }
@@ -145,16 +143,14 @@ public class ElectionCommand implements CommandExecutor {
     private void startVoting(Player player) {
         if (!electionHandler.hasElection()) {
             player.sendMessage(MessageConstants.NO_ELECTION_ERROR);
-        }
-        else if (electionHandler.getElectionPhase() != ElectionPhase.RUNNING) {
+        } else if (electionHandler.getElectionPhase() != ElectionPhase.RUNNING) {
             player.sendMessage(MessageConstants.ALREADY_VOTING_ERROR);
-        }
-        else {
+        } else {
             electionHandler.startElection();
         }
     }
 
-    private void vote (Player player, UUID other) {
+    private void vote(Player player, UUID other) {
         if (!this.electionHandler.hasElection()) {
             player.sendMessage(MessageConstants.NO_ELECTION_ERROR);
             return;
@@ -180,19 +176,38 @@ public class ElectionCommand implements CommandExecutor {
         }
     }
 
+    private boolean isEligibleFor(Title current, Title target) {
+        if (target == Title.TRIBUNE && current == null) {
+            return true;
+        }
+        if ((target == Title.AEDILE || target == Title.PRAETOR) && current == Title.QUAESTOR) {
+            return true;
+        }
+        return target == Title.CONSUL && (current == Title.QUAESTOR || current == Title.PRAETOR || current == Title.AEDILE);
+    }
+
     //title may be null! 
-    private void run(Player player, Title title) {
+    private void run(Player player, Title targetTitle) {
+        if (targetTitle == null) {
+            player.sendMessage(MessageConstants.CANT_FIND_TITLE);
+            return;
+        }
+
+        var currentTitleEntry = SQLConn.getTitle(player.getUniqueId());
+        Title currentTitle = null;
+        if (currentTitleEntry != null) {
+            currentTitle = currentTitleEntry.t;
+        }
+        if (!isEligibleFor(currentTitle, targetTitle)) {
+            player.sendMessage("you can't run for this position!");
+            return;
+        }
 
         //If there's no election or the election is not currently running then return
         if (!electionHandler.hasElection() || electionHandler.getElectionPhase() != ElectionPhase.RUNNING) {
             player.sendMessage(MessageConstants.NO_ELECTION_ERROR);
             return;
         }
-
-        if (title == null) {
-            player.sendMessage(MessageConstants.CANT_FIND_TITLE);
-            return;
-        }
-        electionHandler.addCandidate(player.getUniqueId(), title);
+        electionHandler.addCandidate(player.getUniqueId(), targetTitle);
     }
 }

@@ -30,7 +30,10 @@ import romeplugin.database.SQLConn;
 import romeplugin.zoning.claims.LandControl;
 import romeplugin.zoning.locks.LockManager;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class LandEventListener implements Listener {
     private final LockManager lockManager;
@@ -151,6 +154,9 @@ public class LandEventListener implements Listener {
     //don't let people place paintings in a city or claim
     @EventHandler
     public void hangingItemPlaced(HangingPlaceEvent e) {
+        if (e.getPlayer() == null) {
+            return;
+        }
         Location location = e.getBlock().getLocation();
         if (!controller.inSuburbs(location)) return;
         if (!controller.canBreak(e.getPlayer(), location)) {
@@ -223,7 +229,6 @@ public class LandEventListener implements Listener {
 
     @EventHandler
     public void playerBucketFillEvent(PlayerBucketFillEvent e) {
-
         Player player = e.getPlayer();
         Location placePosition = e.getBlockClicked().getLocation();
 
@@ -236,7 +241,6 @@ public class LandEventListener implements Listener {
 
     @EventHandler
     public void playerBucketEmptyEvent(PlayerBucketEmptyEvent e) {
-
         Player player = e.getPlayer();
         Location placePosition = e.getBlockClicked().getLocation();
 
@@ -364,11 +368,8 @@ public class LandEventListener implements Listener {
                 //you can't claim the block you already clicked, silly
                 if (newLoc.getBlockX() == lastLoc.getBlockX() && newLoc.getBlockZ() == lastLoc.getBlockZ()) {
                     e.getPlayer().sendMessage(ChatColor.RED + "try claiming more than 1 block");
-                    return;
-
                 } else {
                     controller.tryClaimLand(e.getPlayer(), lastLoc.getBlockX(), lastLoc.getBlockZ(), newLoc.getBlockX(), newLoc.getBlockZ());
-                    return;
                 }
             } else {
                 players.put(e.getPlayer(), e.getClickedBlock().getLocation());
@@ -405,5 +406,3 @@ public class LandEventListener implements Listener {
         }
     }
 }
-
-

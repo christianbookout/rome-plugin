@@ -84,6 +84,7 @@ public class LandControl {
         var extents = governmentSize * suburbsMult;
         return Math.abs(x - cityX) <= extents && Math.abs(y - cityY) <= extents;
     }
+
     public boolean inSuburbs(Location loc) {
         if (loc.getWorld().getEnvironment() != Environment.NORMAL) return false;
         return inSuburbs(loc.getBlockX(), loc.getBlockZ());
@@ -120,9 +121,10 @@ public class LandControl {
     }
 
     private static boolean rectInside(int x0, int y0, int x1, int y1,
-                                          int x2, int y2, int x3, int y3) {
+                                      int x2, int y2, int x3, int y3) {
         return x2 >= x0 && x3 <= x1 && y2 <= y0 && y3 >= y1;
     }
+
     //TODO make it so you cant claim in da nether and stuff
     private boolean canClaim(Player player, int x0, int y0, int x1, int y1) {
         var extents = governmentSize * suburbsMult;
@@ -131,7 +133,7 @@ public class LandControl {
             return false;
         }
         var title = SQLConn.getTitle(player.getUniqueId());
-        if (title != null && title.t == Title.AEDILE) {
+        if (title == Title.AEDILE) {
             // this allows the mayor to skip the claiming limit check anywhere inside rome
             return true;
         }

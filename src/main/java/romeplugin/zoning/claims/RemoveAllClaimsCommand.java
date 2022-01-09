@@ -1,15 +1,14 @@
 package romeplugin.zoning.claims;
 
-import java.sql.SQLException;
-import java.util.UUID;
-
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-
 import romeplugin.MessageConstants;
 import romeplugin.database.SQLConn;
+
+import java.sql.SQLException;
+import java.util.UUID;
 
 public class RemoveAllClaimsCommand implements CommandExecutor {
 
@@ -34,17 +33,19 @@ public class RemoveAllClaimsCommand implements CommandExecutor {
                 } else {
                     target = uuid;
                 }
-            } 
+            }
         }
 
         try {
-            SQLConn.getConnection().prepareStatement("DELETE FROM cityClaims WHERE owner_uuid = '" + target.toString() + "'");
-            player.sendMessage("Successfully deleted all of " + args.toString() + "'s claims");
+            var stmt = SQLConn.getConnection().prepareStatement("DELETE FROM cityClaims WHERE owner_uuid = ?;");
+            stmt.setString(1, target.toString());
+            stmt.execute();
+            player.sendMessage("Successfully deleted all of " + args[0] + "'s claims");
         } catch (SQLException e) {
-            
+            sender.sendMessage("oopsies! we're vewwy sowwy!! o(╥﹏╥)o something went wrong...");
+            e.printStackTrace();
         }
-
-        return false;
+        return true;
     }
-    
+
 }

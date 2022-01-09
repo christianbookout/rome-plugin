@@ -25,7 +25,7 @@ public class TitleHandler {
         if (title == null) {
             return;
         }
-        RomePlugin.onlinePlayerTitles.put(player, title.t);
+        RomePlugin.onlinePlayerTitles.put(player, title);
     }
 
     public void playerQuit(Player player) {
@@ -43,17 +43,17 @@ public class TitleHandler {
             return false;
         }
         Player player = plugin.getServer().getOnlinePlayers()
-            .stream()
-            .filter(p -> p.getUniqueId().equals(uuid))
-            .findFirst()
-            .orElse(null);
+                .stream()
+                .filter(p -> p.getUniqueId().equals(uuid))
+                .findFirst()
+                .orElse(null);
 
         if (player != null) {
             updatePlayer(player, title);
             return true;
-        }
-        else return false;
+        } else return false;
     }
+
     public boolean setTitle(Player player, Title title) {
         if (!setTitleOffline(player.getUniqueId(), title)) {
             return false;

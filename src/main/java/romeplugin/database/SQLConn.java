@@ -1,6 +1,7 @@
 package romeplugin.database;
 
 import org.bukkit.Location;
+import org.bukkit.entity.Player;
 import romeplugin.title.Title;
 
 import javax.sql.DataSource;
@@ -35,7 +36,7 @@ public class SQLConn {
         }
     }
 
-    public static TitleEntry getTitle(UUID who) {
+    public static Title getTitle(UUID who) {
         try {
             var stmt = getConnection().prepareStatement("SELECT * FROM players WHERE uuid = ?;");
             stmt.setString(1, who.toString());
@@ -47,7 +48,26 @@ public class SQLConn {
             if (titleName == null) {
                 return null;
             }
-            return new TitleEntry(Title.getTitle(titleName), who);
+            return Title.getTitle(titleName);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public static Title getTitle(Player p) {
+        try {
+            var stmt = getConnection().prepareStatement("SELECT title FROM players WHERE uuid = ?;");
+            stmt.setString(1, p.getUniqueId().toString());
+            var res = stmt.executeQuery();
+            if (!res.next()) {
+                return null;
+            }
+            var titleName = res.getString("title");
+            if (titleName == null) {
+                return null;
+            }
+            return Title.getTitle(titleName);
         } catch (SQLException e) {
             e.printStackTrace();
             return null;
@@ -74,10 +94,11 @@ public class SQLConn {
             if (results.next()) {
                 return results.getInt("claimBlocks");
             }
-        } catch (SQLException e) {}
+        } catch (SQLException e) {
+        }
         return 0;
     }
-    
+
     //TODO implement this :)
     /*public static void changeClaimAmount(UUID uuid) {
         try {

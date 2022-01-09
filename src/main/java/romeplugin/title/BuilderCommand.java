@@ -33,7 +33,7 @@ public class BuilderCommand implements CommandExecutor {
                 return true;
             case "revoke":
                 var title = SQLConn.getTitle(target.getUniqueId());
-                if (title != null && title.t == Title.BUILDER) {
+                if (title == Title.BUILDER) {
                     titles.removeTitle(target);
                 }
                 sender.sendMessage("made " + target.getName() + " not a builder");

@@ -147,7 +147,7 @@ public class ElectionCommand implements CommandExecutor {
         } else if (electionHandler.getElectionPhase() != ElectionPhase.RUNNING) {
             player.sendMessage(MessageConstants.ALREADY_VOTING_ERROR);
         } else {
-            electionHandler.startElection();
+            electionHandler.startVoting();
         }
     }
 

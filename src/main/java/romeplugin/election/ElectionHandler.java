@@ -1,27 +1,32 @@
 package romeplugin.election;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.SQLType;
-import java.sql.Types;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.UUID;
-import java.util.logging.Level;
-
 import org.bukkit.plugin.Plugin;
-
 import romeplugin.MessageConstants;
 import romeplugin.database.SQLConn;
 import romeplugin.title.Title;
 import romeplugin.title.TitleHandler;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Types;
+import java.util.*;
+import java.util.logging.Level;
+
 public class ElectionHandler {
-    //don't make one of these greater than 12 characters :D 
+    // list of every required title
+    private static final Title[] RUNNABLE_TITLES = {
+            Title.TRIBUNE,
+            Title.AEDILE,
+            Title.PRAETOR,
+            Title.CONSUL
+    };
+
+    //don't make one of these greater than 12 characters :D
     public enum ElectionPhase {
         RUNNING,
         VOTING
     }
+
     private Election currentElection;
     private TitleHandler titleHandler;
     private ElectionPhase currentPhase;
@@ -60,18 +65,18 @@ public class ElectionHandler {
         if (alreadyVoted(voter, title)) return false;
 
         if (this.currentPhase != ElectionPhase.VOTING) return false;
-        
+
         return currentElection.vote(candidate);
     }
 
     public boolean removeCandidate(UUID uuid) {
         if (this.currentPhase != ElectionPhase.RUNNING) return false;
         Candidate candidate = currentElection
-                                .getCandidates()
-                                .stream()
-                                .filter(c -> c.getUniqueId().equals(uuid))
-                                .findFirst()
-                                .orElse(null);
+                .getCandidates()
+                .stream()
+                .filter(c -> c.getUniqueId().equals(uuid))
+                .findFirst()
+                .orElse(null);
 
         if (candidate == null) return false;
         unstoreCandidate(uuid);
@@ -90,29 +95,31 @@ public class ElectionHandler {
     }
 
     private void unstoreCandidate(UUID uuid) {
-        try(Connection conn = SQLConn.getConnection()) {
-            
+        try (Connection conn = SQLConn.getConnection()) {
+
             conn.prepareStatement("DELETE FROM election WHERE uuid = '" + uuid.toString() + "';").execute();
 
-        } catch (SQLException e) {}
+        } catch (SQLException e) {
+        }
     }
 
     private void storeCandidate(UUID uuid, Title title) {
-        
-        try(Connection conn = SQLConn.getConnection()) {
-            
+
+        try (Connection conn = SQLConn.getConnection()) {
+
             var preparedStatement = conn.prepareStatement("REPLACE INTO election VALUES (?, ?, ?, ?);");
 
             //set 1: uuid, 2: username, 3: title, 4: votes
-            preparedStatement.setString(1, uuid.toString()); 
+            preparedStatement.setString(1, uuid.toString());
             preparedStatement.setString(2, SQLConn.getUsername(uuid));
             preparedStatement.setString(3, title.toString());
             preparedStatement.setInt(4, 0);
             preparedStatement.execute();
 
-        } catch (SQLException e) {}
+        } catch (SQLException e) {
+        }
     }
-    
+
     public void startElection() {
         this.currentElection = new Election();
         this.currentPhase = ElectionPhase.RUNNING;
@@ -121,9 +128,21 @@ public class ElectionHandler {
     }
 
     /**
-     * begin the voting phase in the election 
+     * begin the voting phase in the election
      */
     public void startVoting() {
+        // verify there is a candidate for every position
+        Set<Title> filledTitles = new HashSet<>();
+        for (var candidate : currentElection.getCandidates()) {
+            filledTitles.add(candidate.getTitle());
+        }
+        for (var title : RUNNABLE_TITLES) {
+            if (!filledTitles.contains(title)) {
+                // TODO: tell the user not all positions are filled.
+                return;
+            }
+        }
+
         this.currentPhase = ElectionPhase.VOTING;
         this.updateElectionState();
         plugin.getServer().broadcastMessage(MessageConstants.SUCCESSFUL_VOTING_START);
@@ -161,11 +180,12 @@ public class ElectionHandler {
     }
 
     private boolean alreadyVoted(UUID player, Title title) {
-        try(Connection conn = SQLConn.getConnection()) {
+        try (Connection conn = SQLConn.getConnection()) {
             var statement = conn.prepareStatement("SELECT uuid, titleVotedFor FROM playerVotes WHERE uuid = '" + player.toString() + "' AND titleVotedFor = '" + title.toString() + "';");
             var results = statement.executeQuery();
             return results.next();
-        } catch (SQLException e) {}
+        } catch (SQLException e) {
+        }
         return false;
     }
 
@@ -173,25 +193,25 @@ public class ElectionHandler {
      * initializes the current election state, number and candidates/votes if applicable
      */
     public void initialize() {
-        try(Connection conn = SQLConn.getConnection()) {
-            
+        try (Connection conn = SQLConn.getConnection()) {
+
             this.readElectionState();
-            
+
             if (this.currentPhase != null) return;
 
             this.currentElection = new Election();
 
             var statement = conn.prepareStatement("SELECT uuid, username, title, votes, number, phase FROM election;");
             var results = statement.executeQuery();
-            
+
             while (results.next()) {
                 String phase = results.getString("phase");
                 this.currentPhase = phase != null ? ElectionPhase.valueOf(phase) : null;
                 this.electionNum = results.getInt("number");
-                
+
                 UUID uuid = UUID.fromString(results.getString("uuid"));
                 Title title = Title.getTitle(results.getString("title"));
-                
+
                 Candidate candidate = new Candidate(uuid, title);
                 candidate.setVotes(results.getInt("votes"));
                 this.currentElection.addCandidate(candidate);
@@ -201,26 +221,29 @@ public class ElectionHandler {
         }
 
     }
+
     /**
      * reads the current election phase and number from the database
      */
     public void readElectionState() {
         if (true) return;
-        try(Connection conn = SQLConn.getConnection()) {
+        try (Connection conn = SQLConn.getConnection()) {
             var currInfo = conn.prepareStatement("SELECT number, phase FROM election").executeQuery();
             if (currInfo.next()) {
                 this.electionNum = currInfo.getInt("number");
                 String phase = currInfo.getString("phase");
                 this.currentPhase = phase != null ? ElectionPhase.valueOf(phase) : null;
-            } 
-        } catch (SQLException e) {}
+            }
+        } catch (SQLException e) {
+        }
     }
+
     /**
      * updates the electionState table to represent current election number and phase
      */
     public void updateElectionState() {
         if (true) return;
-        try(Connection conn = SQLConn.getConnection()) {
+        try (Connection conn = SQLConn.getConnection()) {
             var statement = conn.prepareStatement("REPLACE INTO election (?, ?)");
             statement.setInt(1, this.electionNum);
             if (this.currentPhase == null) {
@@ -229,12 +252,13 @@ public class ElectionHandler {
                 statement.setString(2, this.currentPhase.toString());
             }
             statement.execute();
-        } catch (SQLException e) {}
+        } catch (SQLException e) {
+        }
     }
 
     /**
      * returns or lazily creates the results from the previous election from the database
-     * 
+     *
      * @return a collection of the previous election's winners
      */
     public Collection<Candidate> getElectionResults() {
@@ -243,7 +267,7 @@ public class ElectionHandler {
         } else {
             Collection<Candidate> readResults = new ArrayList<>();
 
-            try(Connection conn = SQLConn.getConnection()) {
+            try (Connection conn = SQLConn.getConnection()) {
 
                 var statement = conn.prepareStatement("SELECT number, title, uuid, votes FROM electionResults WHERE number = " + (electionNum - 1) + ";");
                 var results = statement.executeQuery();
@@ -268,8 +292,8 @@ public class ElectionHandler {
      * store the current election results into the database
      */
     public void storeElectionResults() {
-        try(Connection conn = SQLConn.getConnection()) {
-            for (Candidate winner: results) {   
+        try (Connection conn = SQLConn.getConnection()) {
+            for (Candidate winner : results) {
                 var statement = conn.prepareStatement("INSERT INTO electionResults VALUES (?, ?, ?, ?);");
                 statement.setInt(1, this.electionNum);
                 statement.setString(2, winner.getTitle().toString());

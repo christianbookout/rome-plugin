@@ -349,8 +349,6 @@ public class LandEventListener implements Listener {
                 });
                 return;
             }
-            //var lockOwner = SQLConn.getLockOwner(e.getClickedBlock()); //TODO this
-            //if (lockOwner != null && lockOwner.equals(e.getPlayer().getUniqueId());
 
             if (!controller.canBreak(e.getPlayer(), newLoc)) {
                 e.getPlayer().sendMessage(ChatColor.RED + "woah that is locked");

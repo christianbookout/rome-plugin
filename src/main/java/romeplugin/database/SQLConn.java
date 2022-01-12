@@ -11,15 +11,9 @@ import java.util.UUID;
 
 public class SQLConn {
     private static DataSource source;
-    private static Connection claimConn;
 
     public static void setSource(DataSource src) {
         source = src;
-        try {
-            claimConn = src.getConnection();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
     }
 
     public static Connection getConnection() throws SQLException {
@@ -37,8 +31,8 @@ public class SQLConn {
     }
 
     public static Title getTitle(UUID who) {
-        try {
-            var stmt = getConnection().prepareStatement("SELECT * FROM players WHERE uuid = ?;");
+        try (var conn = getConnection()) {
+            var stmt = conn.prepareStatement("SELECT * FROM players WHERE uuid = ?;");
             stmt.setString(1, who.toString());
             var res = stmt.executeQuery();
             if (!res.next()) {
@@ -56,8 +50,8 @@ public class SQLConn {
     }
 
     public static Title getTitle(Player p) {
-        try {
-            var stmt = getConnection().prepareStatement("SELECT title FROM players WHERE uuid = ?;");
+        try (var conn = getConnection()) {
+            var stmt = conn.prepareStatement("SELECT title FROM players WHERE uuid = ?;");
             stmt.setString(1, p.getUniqueId().toString());
             var res = stmt.executeQuery();
             if (!res.next()) {
@@ -107,22 +101,30 @@ public class SQLConn {
     }*/
 
     public static ClaimEntry getClaimRect(int x0, int y0, int x1, int y1) {
-        try {
-            var stmt = claimConn.prepareStatement("SELECT * FROM cityClaims WHERE x0 <= ? AND x1 >= ? AND y0 >= ? AND y1 <= ?;");
-            stmt.setInt(1, x1);
-            stmt.setInt(2, x0);
-            stmt.setInt(3, y1);
-            stmt.setInt(4, y0);
-            var res = stmt.executeQuery();
-            if (!res.next()) {
-                return null;
+        ResultSet res = null;
+        try (var conn = getConnection()) {
+            try {
+                var stmt = conn.prepareStatement("SELECT * FROM cityClaims WHERE x0 <= ? AND x1 >= ? AND y0 >= ? AND y1 <= ?;");
+                stmt.setInt(1, x1);
+                stmt.setInt(2, x0);
+                stmt.setInt(3, y1);
+                stmt.setInt(4, y0);
+                res = stmt.executeQuery();
+                stmt.close();
+                if (!res.next()) {
+                    return null;
+                }
+                return new ClaimEntry(
+                        res.getInt("x0"),
+                        res.getInt("y0"),
+                        res.getInt("x1"),
+                        res.getInt("y1"),
+                        UUID.fromString(res.getString("owner_uuid")));
+            } finally {
+                if (res != null) {
+                    res.close();
+                }
             }
-            return new ClaimEntry(
-                    res.getInt("x0"),
-                    res.getInt("y0"),
-                    res.getInt("x1"),
-                    res.getInt("y1"),
-                    UUID.fromString(res.getString("owner_uuid")));
         } catch (SQLException e) {
             e.printStackTrace();
             return null;
@@ -130,29 +132,29 @@ public class SQLConn {
     }
 
     // does not verify the new claim doesn't overlap an existing claim!
-    public static void addClaim(int x0, int y0, int x1, int y1, UUID uniqueId) {
-        try {
-            var stmt = getConnection().prepareStatement("INSERT INTO cityClaims VALUES (?, ?, ?, ?, ?);");
+    public static void addClaim(int x0, int y0, int x1, int y1, UUID uniqueId) throws SQLException {
+        try (Connection conn = getConnection()) {
+            var stmt = conn.prepareStatement("INSERT INTO cityClaims VALUES (?, ?, ?, ?, ?);");
             stmt.setInt(1, x0);
             stmt.setInt(2, y0);
             stmt.setInt(3, x1);
             stmt.setInt(4, y1);
             stmt.setString(5, uniqueId.toString());
             stmt.execute();
-        } catch (SQLException e) {
-            e.printStackTrace();
+            stmt.close();
         }
     }
 
     public static boolean removeClaim(ClaimEntry claim) {
-        try {
-            var stmt = getConnection().prepareStatement("DELETE FROM cityClaims WHERE x0 = ? AND y0 = ? AND x1 = ? AND y1 = ? AND owner_uuid = ?;");
+        try (var conn = getConnection()) {
+            var stmt = conn.prepareStatement("DELETE FROM cityClaims WHERE x0 = ? AND y0 = ? AND x1 = ? AND y1 = ? AND owner_uuid = ?;");
             stmt.setInt(1, claim.x0);
             stmt.setInt(2, claim.y0);
             stmt.setInt(3, claim.x1);
             stmt.setInt(4, claim.y1);
             stmt.setString(5, claim.owner.toString());
             stmt.execute();
+            stmt.close();
             return true;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -161,8 +163,8 @@ public class SQLConn {
     }
 
     public static String getUsername(UUID uuid) {
-        try {
-            var stmt = getConnection().prepareStatement("SELECT username FROM usernames WHERE uuid = ?;");
+        try (var conn = getConnection()) {
+            var stmt = conn.prepareStatement("SELECT username FROM usernames WHERE uuid = ?;");
             stmt.setString(1, uuid.toString());
             var res = stmt.executeQuery();
             if (!res.next()) {
@@ -176,8 +178,8 @@ public class SQLConn {
     }
 
     public static void setUsername(UUID uuid, String name) {
-        try {
-            var stmt = getConnection().prepareStatement("REPLACE INTO usernames VALUES (?, ?);");
+        try (var conn = getConnection()) {
+            var stmt = conn.prepareStatement("REPLACE INTO usernames VALUES (?, ?);");
             stmt.setString(1, uuid.toString());
             stmt.setString(2, name);
             stmt.execute();
@@ -187,10 +189,11 @@ public class SQLConn {
     }
 
     public static UUID getUUIDFromUsername(String target) {
-        try {
-            var stmt = getConnection().prepareStatement("SELECT uuid FROM usernames WHERE username = ?;");
+        try (var conn = getConnection()) {
+            var stmt = conn.prepareStatement("SELECT uuid FROM usernames WHERE username = ?;");
             stmt.setString(1, target);
             var res = stmt.executeQuery();
+            stmt.close();
             if (!res.next()) {
                 return null;
             }
@@ -202,8 +205,8 @@ public class SQLConn {
     }
 
     public static boolean updateClaimOwner(ClaimEntry entry, UUID newOwner) {
-        try {
-            var stmt = getConnection().prepareStatement("UPDATE cityClaims SET owner_uuid = ?" +
+        try (var conn = getConnection()) {
+            var stmt = conn.prepareStatement("UPDATE cityClaims SET owner_uuid = ?" +
                     "WHERE x0 = ? AND y0 = ? AND x1 = ? AND y1 = ?;");
             stmt.setString(1, newOwner.toString());
             stmt.setInt(2, entry.x0);
@@ -211,6 +214,7 @@ public class SQLConn {
             stmt.setInt(4, entry.x1);
             stmt.setInt(5, entry.y1);
             stmt.execute();
+            stmt.close();
             return true;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -219,8 +223,8 @@ public class SQLConn {
     }
 
     public static int getTotalClaimedBlocks(UUID who) {
-        try {
-            var stmt = getConnection().prepareStatement("SELECT SUM((x1 - x0 + 1) * (y0 - y1 + 1)) FROM cityClaims WHERE owner_uuid = ?;");
+        try (var conn = getConnection()) {
+            var stmt = conn.prepareStatement("SELECT SUM((x1 - x0 + 1) * (y0 - y1 + 1)) FROM cityClaims WHERE owner_uuid = ?;");
             stmt.setString(1, who.toString());
             var res = stmt.executeQuery();
             if (!res.next()) {

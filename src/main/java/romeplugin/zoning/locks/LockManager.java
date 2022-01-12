@@ -36,17 +36,21 @@ public class LockManager implements Listener {
     }
 
     public OptionalInt getBlockLockId(Block block) {
-        try {
-            var stmt = SQLConn.getConnection()
-                    .prepareStatement("SELECT keyId FROM lockedBlocks WHERE x = ? AND y = ? AND z = ?;");
+        try (
+                var conn = SQLConn.getConnection();
+                var stmt = conn
+                        .prepareStatement("SELECT keyId FROM lockedBlocks WHERE x = ? AND y = ? AND z = ?;")
+        ) {
             stmt.setInt(1, block.getX());
             stmt.setInt(2, block.getY());
             stmt.setInt(3, block.getZ());
-            var res = stmt.executeQuery();
-            if (!res.next()) {
-                return OptionalInt.empty();
+            try (var res = stmt.executeQuery()) {
+                stmt.close();
+                if (!res.next()) {
+                    return OptionalInt.empty();
+                }
+                return OptionalInt.of(res.getInt("keyId"));
             }
-            return OptionalInt.of(res.getInt("keyId"));
         } catch (SQLException e) {
             e.printStackTrace();
             return OptionalInt.of(-9999); // hopefully this key doesn't exist
@@ -54,8 +58,8 @@ public class LockManager implements Listener {
     }
 
     OptionalInt tryCreateKey(UUID uuid) {
-        try {
-            var stmt = SQLConn.getConnection().prepareStatement("INSERT INTO lockKeys (creator_uuid) VALUES (?);" +
+        try (var conn = SQLConn.getConnection()) {
+            var stmt = conn.prepareStatement("INSERT INTO lockKeys (creator_uuid) VALUES (?);" +
                     "SELECT LAST_INSERT_ID();");
             stmt.setString(1, uuid.toString());
             var res = stmt.executeQuery();
@@ -70,8 +74,8 @@ public class LockManager implements Listener {
     }
 
     public UUID getOwner(int keyId) {
-        try {
-            var stmt = SQLConn.getConnection().prepareStatement("SELECT creator_uuid FROM lockKeys WHERE keyId = ?;");
+        try (var conn = SQLConn.getConnection()) {
+            var stmt = conn.prepareStatement("SELECT creator_uuid FROM lockKeys WHERE keyId = ?;");
             stmt.setInt(1, keyId);
             var res = stmt.executeQuery();
             if (!res.next()) {
@@ -99,8 +103,8 @@ public class LockManager implements Listener {
     }
 
     public boolean lockBlock(Block block, int keyId) {
-        try {
-            var stmt = SQLConn.getConnection()
+        try (var conn = SQLConn.getConnection()) {
+            var stmt = conn
                     .prepareStatement("INSERT INTO lockedBlocks VALUES (?, ?, ?, ?);");
             stmt.setInt(1, block.getX());
             stmt.setInt(2, block.getY());

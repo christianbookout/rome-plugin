@@ -169,7 +169,10 @@ public class LandControl {
             player.sendMessage("land already claimed >:(");
             return false;
         }
-        SQLConn.addClaim(x0, y0, x1, y1, player.getUniqueId());
+        if (!SQLConn.addClaim(x0, y0, x1, y1, player.getUniqueId())) {
+            player.sendMessage(ChatColor.RED + "something went really wrong! tell this to the admins plox uwu");
+            return true;
+        }
         player.sendMessage("successfully claimed " + (x1 - x0 + 1) * (y0 - y1 + 1) + " blocks.");
         return true;
     }

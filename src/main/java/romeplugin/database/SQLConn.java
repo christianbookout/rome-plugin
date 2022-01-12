@@ -132,7 +132,7 @@ public class SQLConn {
     }
 
     // does not verify the new claim doesn't overlap an existing claim!
-    public static void addClaim(int x0, int y0, int x1, int y1, UUID uniqueId) throws SQLException {
+    public static boolean addClaim(int x0, int y0, int x1, int y1, UUID uniqueId) {
         try (Connection conn = getConnection()) {
             var stmt = conn.prepareStatement("INSERT INTO cityClaims VALUES (?, ?, ?, ?, ?);");
             stmt.setInt(1, x0);
@@ -142,6 +142,10 @@ public class SQLConn {
             stmt.setString(5, uniqueId.toString());
             stmt.execute();
             stmt.close();
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
         }
     }
 

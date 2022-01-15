@@ -179,6 +179,12 @@ public class ElectionHandler {
         }
     }
 
+    /**
+     * checks if you've voted for a specific title yet
+     * @param player
+     * @param title
+     * @return
+     */
     private boolean alreadyVoted(UUID player, Title title) {
         try (Connection conn = SQLConn.getConnection()) {
             var statement = conn.prepareStatement("SELECT uuid, titleVotedFor FROM playerVotes WHERE uuid = '" + player.toString() + "' AND titleVotedFor = '" + title.toString() + "';");
@@ -226,7 +232,6 @@ public class ElectionHandler {
      * reads the current election phase and number from the database
      */
     public void readElectionState() {
-        if (true) return;
         try (Connection conn = SQLConn.getConnection()) {
             var currInfo = conn.prepareStatement("SELECT number, phase FROM election").executeQuery();
             if (currInfo.next()) {
@@ -242,7 +247,6 @@ public class ElectionHandler {
      * updates the electionState table to represent current election number and phase
      */
     public void updateElectionState() {
-        if (true) return;
         try (Connection conn = SQLConn.getConnection()) {
             var statement = conn.prepareStatement("REPLACE INTO election (?, ?)");
             statement.setInt(1, this.electionNum);

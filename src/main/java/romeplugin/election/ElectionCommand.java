@@ -30,6 +30,7 @@ public class ElectionCommand implements CommandExecutor {
             String arg = args[0].toLowerCase();
             Title title = null;
             UUID targetedPlayer = null;
+            // like /elections vote (user) or /elections run (title)
             if (args.length >= 2) {
                 targetedPlayer = SQLConn.getUUIDFromUsername(args[1]);
                 if (targetedPlayer != null) {

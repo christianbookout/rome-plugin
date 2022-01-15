@@ -168,6 +168,7 @@ public class RomePlugin extends JavaPlugin {
                 var titles = new TitleHandler(this);
 
                 ElectionHandler electionHandler = new ElectionHandler(this, titles);
+                electionHandler.initialize();
 
                 SwearFilter filter = new SwearFilter(landControl, config.getInt("messages.useSwearFilter"));
                 var peeController = new PeeController(this);

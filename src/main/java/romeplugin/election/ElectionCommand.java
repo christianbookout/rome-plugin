@@ -41,7 +41,7 @@ public class ElectionCommand implements CommandExecutor {
             }
             switch (arg) {
                 case "run":
-                    run(player, title);
+                    run(player, title, playerTitle);
                     break;
                 case "help":
                     help(player);
@@ -95,6 +95,10 @@ public class ElectionCommand implements CommandExecutor {
      * end the election
      */
     private void endElection(Player player) {
+        if (electionHandler.getElectionPhase() != ElectionPhase.VOTING) {
+            player.sendMessage(MessageConstants.NOT_VOTING);
+            return;
+        } 
         electionHandler.endElection();
     }
 
@@ -147,6 +151,9 @@ public class ElectionCommand implements CommandExecutor {
             player.sendMessage(MessageConstants.NO_ELECTION_ERROR);
         } else if (electionHandler.getElectionPhase() != ElectionPhase.RUNNING) {
             player.sendMessage(MessageConstants.ALREADY_VOTING_ERROR);
+        } else if (electionHandler.getCurrentElection().getCandidates().isEmpty()) {
+            player.sendMessage(MessageConstants.NO_CANDIDATES);
+            return;
         } else {
             electionHandler.startVoting();
         }
@@ -179,13 +186,11 @@ public class ElectionCommand implements CommandExecutor {
     }
 
     //title may be null! 
-    private void run(Player player, Title targetTitle) {
+    private void run(Player player, Title targetTitle, Title currentTitle) {
         if (targetTitle == null) {
             player.sendMessage(MessageConstants.CANT_FIND_TITLE);
             return;
         }
-
-        var currentTitle = SQLConn.getTitle(player.getUniqueId());
         if (!isEligibleFor(currentTitle, targetTitle)) {
             player.sendMessage("you can't run for this position!");
             return;

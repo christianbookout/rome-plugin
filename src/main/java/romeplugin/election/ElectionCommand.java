@@ -169,13 +169,13 @@ public class ElectionCommand implements CommandExecutor {
     }
 
     private boolean isEligibleFor(Title current, Title target) {
-        if (target == Title.TRIBUNE && current == null) {
+        if (target == Title.TRIBUNE) {
             return true;
         }
-        if ((target == Title.AEDILE || target == Title.PRAETOR) && current == Title.QUAESTOR) {
+        if ((target == Title.AEDILE || target == Title.PRAETOR) && (current == Title.QUAESTOR || current == Title.CENSOR || current == Title.AEDILE)) {
             return true;
         }
-        return target == Title.CONSUL && (current == Title.QUAESTOR || current == Title.PRAETOR || current == Title.AEDILE);
+        return target == Title.CONSUL && (current == Title.QUAESTOR || current == Title.PRAETOR || current == Title.AEDILE || current == Title.CENSOR);
     }
 
     //title may be null! 
@@ -196,6 +196,9 @@ public class ElectionCommand implements CommandExecutor {
             player.sendMessage(MessageConstants.NO_ELECTION_ERROR);
             return;
         }
-        electionHandler.addCandidate(player.getUniqueId(), targetTitle);
+        electionHandler.removeCandidate(player.getUniqueId()); // just in case the player is currently a candidate in the election and runs for something else
+        if (electionHandler.addCandidate(player.getUniqueId(), targetTitle)) {
+            player.sendMessage(MessageConstants.SUCCESSFUL_RUN);
+        }
     }
 }

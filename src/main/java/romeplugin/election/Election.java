@@ -54,9 +54,12 @@ public class Election {
 
         Collection<Candidate> winners = new ArrayList<>();
 
-        splitCandidates.values().forEach(collection -> 
-            winners.add(Collections.max(collection))
-        );
+        var values = splitCandidates.values();
+        if (values != null) {
+            values.forEach(collection -> 
+                winners.add(Collections.max(collection))
+            );
+        }
 
         return winners;
     }

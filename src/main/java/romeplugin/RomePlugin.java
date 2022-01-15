@@ -126,14 +126,6 @@ public class RomePlugin extends JavaPlugin {
                         conn.prepareStatement("CREATE TABLE IF NOT EXISTS extraClaimBlocks (" +
                                         "uuid CHAR(36) NOT NULL PRIMARY KEY," +
                                         "blocks INT NOT NULL DEFAULT 0);");
-
-                        // table representing current election's candidates and votes
-                        conn.prepareStatement("CREATE TABLE IF NOT EXISTS election (" +
-                                        "uuid CHAR(36) NOT NULL PRIMARY KEY," +
-                                        "username CHAR(32) NOT NULL," +
-                                        "title " + titleEnum + " NOT NULL," +
-                                        "votes INT NOT NULL);").execute();
-
                         // a history of election results
                         conn.prepareStatement("CREATE TABLE IF NOT EXISTS electionResults (" +
                                         "number INT NOT NULL DEFAULT 0 PRIMARY KEY," +

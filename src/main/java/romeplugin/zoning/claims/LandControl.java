@@ -148,7 +148,7 @@ public class LandControl {
             return false;
         }
         var claimed = (x1 - x0) * (y0 - y1);
-        if (getClaimedBlocksInSuburbs(player.getUniqueId()) + claimed <= minBlockLimit + SQLConn.getClaimAmount(player.getUniqueId())) {
+        if (getClaimedBlocksInSuburbs(player.getUniqueId()) + claimed >= minBlockLimit + SQLConn.getClaimAmount(player.getUniqueId())) {
             player.sendMessage(ChatColor.RED + "you have hit your block limit!");
             return false;
         }
@@ -197,13 +197,13 @@ public class LandControl {
     }
 
     public int getClaimedBlocksInSuburbs(UUID who) {
-        try {
-            var stmt = SQLConn.getConnection().prepareStatement("SELECT SUM((x1 - x0 + 1) * (y0 - y1 + 1)) FROM cityClaims WHERE NOT (x0 <= ? AND x1 >= ? AND y0 >= ? AND y1 <= ?) AND owner_uuid = ?");
+        try (var conn = SQLConn.getConnection()) {
+            var stmt = conn.prepareStatement("SELECT SUM((x1 - x0 + 1) * (y0 - y1 + 1)) FROM cityClaims WHERE NOT (x0 <= ? AND x1 >= ? AND y0 >= ? AND y1 <= ?) AND owner_uuid = ?");
             var extents = governmentSize * cityMult;
             stmt.setInt(1, cityX + extents); // x1
             stmt.setInt(2, cityX - extents); // x0
-            stmt.setInt(3, cityY + extents); // y1
-            stmt.setInt(4, cityY - extents); // y0
+            stmt.setInt(3, cityY - extents); // y1
+            stmt.setInt(4, cityY + extents); // y0
             stmt.setString(5, who.toString());
             var res = stmt.executeQuery();
             if (!res.next()) {

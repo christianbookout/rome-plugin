@@ -102,15 +102,14 @@ public class SQLConn {
 
     public static ClaimEntry getClaimRect(int x0, int y0, int x1, int y1) {
         ResultSet res = null;
-        try (var conn = getConnection()) {
+        try (var conn = getConnection();
+             var stmt = conn.prepareStatement("SELECT * FROM cityClaims WHERE x0 <= ? AND x1 >= ? AND y0 >= ? AND y1 <= ?;")) {
             try {
-                var stmt = conn.prepareStatement("SELECT * FROM cityClaims WHERE x0 <= ? AND x1 >= ? AND y0 >= ? AND y1 <= ?;");
                 stmt.setInt(1, x1);
                 stmt.setInt(2, x0);
                 stmt.setInt(3, y1);
                 stmt.setInt(4, y0);
                 res = stmt.executeQuery();
-                stmt.close();
                 if (!res.next()) {
                     return null;
                 }
@@ -197,7 +196,6 @@ public class SQLConn {
             var stmt = conn.prepareStatement("SELECT uuid FROM usernames WHERE username = ?;");
             stmt.setString(1, target);
             var res = stmt.executeQuery();
-            stmt.close();
             if (!res.next()) {
                 return null;
             }

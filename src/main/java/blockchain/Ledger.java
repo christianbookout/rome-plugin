@@ -43,7 +43,6 @@ public class Ledger {
     }
 
     public synchronized void submitValidBlock(Block block) {
-        System.out.println("block mined " + block);
         this.prevBlockHash = block.getHash();
         incrementBalance(block.getMiner());
         for (Transaction transaction : block.getTransactions()) {

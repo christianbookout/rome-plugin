@@ -78,9 +78,10 @@ public class ElectionCommand implements CommandExecutor {
                     break;
                 case "cancel":
                     cancel(player, playerTitle);
-                    break;    
+                    break;
+                default:
+                    return false;    
             }
-            help(player);
             return true;
         }
         return true;
@@ -147,10 +148,10 @@ public class ElectionCommand implements CommandExecutor {
             player.sendMessage(MessageConstants.NO_PAST_ELECTION_RESULTS);
             return;
         }
-        String toSend = ChatColor.GOLD + "<--RESULTS-->" + ChatColor.RESET;
+        String toSend = ChatColor.YELLOW + "\n<-- " + ChatColor.WHITE + "Results" + ChatColor.YELLOW + " -->" + ChatColor.RESET;
         for (Candidate c : results) {
             String username = SQLConn.getUsername(c.getUniqueId());
-            toSend += "\n" + username + ": " + c.getTitle().fancyName + ChatColor.RESET + " with " + c.getVotes() + " votes";
+            toSend += "\n" + c.getTitle().color + c.getTitle().fancyName  + ChatColor.RESET + ": " + username + " with " + c.getVotes() + " votes";
         }
         player.sendMessage(toSend);
     }
@@ -166,7 +167,7 @@ public class ElectionCommand implements CommandExecutor {
         }
 
         var candidates = electionHandler.getCurrentElection().getCandidates();
-        String toSend = ChatColor.YELLOW + "<-- " + ChatColor.WHITE + "Candidates" + ChatColor.YELLOW + " -->" + ChatColor.RESET;
+        String toSend = ChatColor.YELLOW + "\n<-- " + ChatColor.WHITE + "Candidates" + ChatColor.YELLOW + " -->" + ChatColor.RESET;
         
         //concatinate all candidates under their title
         for (Title t: ElectionHandler.RUNNABLE_TITLES) {

@@ -48,6 +48,8 @@ public class RomePlugin extends JavaPlugin {
         // private final String titlesFilename = "rome_titles";
         // TODO: make the ledger persistent
         private final Ledger ledger = new Ledger();
+        
+        public static final String TITLE_ENUM = "ENUM('TRIBUNE', 'QUAESTOR', 'AEDILE', 'PRAETOR', 'CONSUL', 'CENSOR', 'POPE', 'BUILDER', 'CITIZEN')";
 
         // runs when the plugin is enabled on the server startup
         @Override
@@ -98,11 +100,10 @@ public class RomePlugin extends JavaPlugin {
                                 config.getLong("claims.claimTimeoutMS"));
 
                 SQLConn.setSource(dataSource);
-                var titleEnum = "ENUM('TRIBUNE', 'QUAESTOR', 'AEDILE', 'PRAETOR', 'CONSUL', 'CENSOR', 'POPE', 'BUILDER', 'CITIZEN')";
                 try (Connection conn = SQLConn.getConnection()) {
                         conn.prepareStatement("CREATE TABLE IF NOT EXISTS players (" +
                                         "uuid CHAR(36) NOT NULL PRIMARY KEY," +
-                                        "title " + titleEnum + " NOT NULL);")
+                                        "title " + TITLE_ENUM + " NOT NULL);")
                                         .execute();
                         // (x0, y0) must be the top-left point and (x1, y1) must be the bottom-right
                         // point
@@ -126,26 +127,6 @@ public class RomePlugin extends JavaPlugin {
                         conn.prepareStatement("CREATE TABLE IF NOT EXISTS extraClaimBlocks (" +
                                         "uuid CHAR(36) NOT NULL PRIMARY KEY," +
                                         "blocks INT NOT NULL DEFAULT 0);");
-                        // a history of election results
-                        conn.prepareStatement("CREATE TABLE IF NOT EXISTS electionResults (" +
-                                        "number INT NOT NULL DEFAULT 0 PRIMARY KEY," +
-                                        "title " + titleEnum + " NOT NULL," +
-                                        "uuid CHAR(36) NOT NULL," +
-                                        "votes INT NOT NULL);").execute();
-
-                        // all players who have already voted
-                        conn.prepareStatement("CREATE TABLE IF NOT EXISTS playerVotes (" +
-                                        "uuid CHAR(36) NOT NULL PRIMARY KEY," +
-                                        "titleVotedFor " + titleEnum + " NOT NULL);");
-
-                        // represents the current election. cleared after every election
-                        conn.prepareStatement("CREATE TABLE IF NOT EXISTS election (" +
-                                        "uuid CHAR(36) NOT NULL PRIMARY KEY," +
-                                        "username CHAR(32) NOT NULL," +
-                                        "title " + titleEnum + " NOT NULL," +
-                                        "votes INT NOT NULL," +
-                                        "number INT NOT NULL," +
-                                        "phase ENUM('RUNNING', 'VOTING'));").execute();
 
                         // fun lock stuff
                         conn.prepareStatement("CREATE TABLE IF NOT EXISTS lockedBlocks (" +
@@ -167,9 +148,6 @@ public class RomePlugin extends JavaPlugin {
                 }
                 var titles = new TitleHandler(this);
 
-                ElectionHandler electionHandler = new ElectionHandler(this, titles);
-                electionHandler.initialize();
-
                 SwearFilter filter = new SwearFilter(landControl, config.getInt("messages.useSwearFilter"));
                 var peeController = new PeeController(this);
                 getCommand("rome").setExecutor(new LandCommand(landControl));
@@ -187,7 +165,7 @@ public class RomePlugin extends JavaPlugin {
                 getCommand("pee").setExecutor(peeController);
                 getCommand("makekey").setExecutor(new MakeKeyCommand(lockManager));
                 getCommand("getblocks").setExecutor(new GetClaimBlocksCommand(landControl));
-                getCommand("elections").setExecutor(new ElectionCommand(electionHandler));
+                getCommand("elections").setExecutor(new ElectionCommand(new ElectionHandler(this, titles)));
                 getCommand("killallclaims").setExecutor(new RemoveAllClaimsCommand());
                 getServer().getPluginManager().registerEvents(peeController, this);
                 getServer().getPluginManager().registerEvents(new TitleEventListener(titles), this);

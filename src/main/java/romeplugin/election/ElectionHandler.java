@@ -125,7 +125,7 @@ public class ElectionHandler {
         try (Connection conn = SQLConn.getConnection()) {
             this.initCandidatesTable(conn);
 
-            var currInfo = conn.prepareStatement("UPDATE candidates SET votes = votes + 1 WHERE uuid = '" + candidate.toString() + "'").executeQuery();
+            var currInfo = conn.prepareStatement("UPDATE candidates SET votes = votes + 1 WHERE uuid = '" + candidate.toString() + "';").executeQuery();
             return currInfo.next();
         } catch (SQLException e) {}
         return false;

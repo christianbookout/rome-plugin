@@ -169,6 +169,8 @@ public class ElectionHandler {
 
     //TODO: implement electionNum in a good way
     public void clearElectionTable() {
+        this.currentElection = null;
+        this.currentPhase = null;
         try (Connection conn = SQLConn.getConnection()) {
             var results = conn.prepareStatement("SELECT number FROM election;").executeQuery();
             if (results.next())

@@ -14,33 +14,35 @@ public class RemoveAllClaimsCommand implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String s, String[] args) {
-        if (!(sender instanceof Player)) return false;
-        Player player = (Player) sender;
-        UUID target = player.getUniqueId();
+        UUID target;
+        String targetName;
         //if the target is another player check if they're op
         if (args.length == 1) {
-            UUID uuid = SQLConn.getUUIDFromUsername(args[0]);
-            if (uuid == null) {
-                player.sendMessage(MessageConstants.CANT_FIND_PLAYER);
+            target = SQLConn.getUUIDFromUsername(args[0]);
+            if (target == null) {
+                sender.sendMessage(MessageConstants.CANT_FIND_PLAYER);
                 return true;
             }
-            //if the player isn't using the command on themselves
-            if (!uuid.equals(player.getUniqueId())) {
-                //if they don't have permission to use the command on someone else
-                if (!player.isOp()) {
-                    player.sendMessage(MessageConstants.NO_PERMISSION_ERROR);
-                    return true;
-                } else {
-                    target = uuid;
-                }
+            //if they don't have permission to use the command on someone else
+            if (!sender.isOp()) {
+                sender.sendMessage(MessageConstants.NO_PERMISSION_ERROR);
+                return true;
             }
+            targetName = args[0];
+        } else if (sender instanceof Player) {
+            Player player = (Player) sender;
+            target = player.getUniqueId();
+            targetName = player.getName();
+        } else {
+            return false;
         }
 
-        try {
-            var stmt = SQLConn.getConnection().prepareStatement("DELETE FROM cityClaims WHERE owner_uuid = ?;");
+        try (var conn = SQLConn.getConnection()) {
+            var stmt = conn.prepareStatement("DELETE FROM cityClaims WHERE owner_uuid = ?;");
             stmt.setString(1, target.toString());
             stmt.execute();
-            player.sendMessage("Successfully deleted all of " + args[0] + "'s claims");
+            stmt.close();
+            sender.sendMessage("Successfully deleted all of " + targetName + "'s claims");
         } catch (SQLException e) {
             sender.sendMessage("oopsies! we're vewwy sowwy!! o(╥﹏╥)o something went wrong...");
             e.printStackTrace();

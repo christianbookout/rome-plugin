@@ -143,13 +143,11 @@ public class ElectionHandler {
         try (Connection conn = SQLConn.getConnection()) {
             this.initCandidatesTable(conn);
 
-            var preparedStatement = conn.prepareStatement("REPLACE INTO candidates VALUES (?, ?, ?, ?);");
+            var preparedStatement = conn.prepareStatement("REPLACE INTO candidates VALUES (?, ?, ?);");
 
-            //set 1: uuid, 2: username, 3: title, 4: votes
             preparedStatement.setString(1, uuid.toString());
-            preparedStatement.setString(2, SQLConn.getUsername(uuid));
-            preparedStatement.setString(3, title.toString());
-            preparedStatement.setInt(4, 0);
+            preparedStatement.setString(2, title.toString());
+            preparedStatement.setInt(3, 0);
             preparedStatement.execute();
 
         } catch (SQLException e) {}

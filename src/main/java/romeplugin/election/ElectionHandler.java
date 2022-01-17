@@ -159,7 +159,7 @@ public class ElectionHandler {
         try (Connection conn = SQLConn.getConnection()) {
             this.initPhaseTable(conn);
             String phaseStr = phase == null ? "NULL" : phase.toString();
-            conn.prepareStatement("UPDATE electionPhase SET phase = " + phaseStr + ";").execute();
+            conn.prepareStatement("UPDATE electionPhase SET phase = '" + phaseStr + "';").execute();
         } catch (SQLException e) {}
     }
 

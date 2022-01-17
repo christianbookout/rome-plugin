@@ -36,7 +36,7 @@ public class ElectionHandler {
     }
 
     public boolean hasElection() {
-        return this.getElectionPhase() == null;
+        return this.getElectionPhase() != null;
     }
 
     //Initialize all of the tables

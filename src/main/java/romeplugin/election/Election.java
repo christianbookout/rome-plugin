@@ -45,7 +45,7 @@ public class Election {
     public Collection<Candidate> endElection() {
         HashMap<Title, Collection<Candidate>> splitCandidates = new HashMap<>(); 
         
-        for (Title title: Title.values())
+        for (Title title: ElectionHandler.RUNNABLE_TITLES)
             splitCandidates.put(title, new ArrayList<>());
         
         candidates.forEach(c -> 
@@ -55,12 +55,11 @@ public class Election {
         Collection<Candidate> winners = new ArrayList<>();
 
         var values = splitCandidates.values();
-        if (values != null) {
-            values.forEach(collection -> 
-                winners.add(Collections.max(collection))
-            );
-        }
-
+        values.forEach(collection -> {
+            if (!collection.isEmpty())
+                winners.add(Collections.max(collection));
+        });
+        
         return winners;
     }
 }

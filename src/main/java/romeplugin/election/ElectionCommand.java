@@ -57,6 +57,9 @@ public class ElectionCommand implements CommandExecutor {
                 case "vote":
                     vote(player, targetedPlayer);
                     break;
+                case "seevotes":
+                    seevotes(player);
+                    break;
                 default:
                     if (!player.isOp() && playerTitle != Title.CENSOR) {
                         player.sendMessage(MessageConstants.NO_PERMISSION_ERROR);
@@ -76,6 +79,13 @@ public class ElectionCommand implements CommandExecutor {
             }
         }
         return true;
+    }
+
+    /**
+     * see all of the current votes by the player
+     * @param player
+     */
+    private void seevotes(Player player) {
     }
 
     /**

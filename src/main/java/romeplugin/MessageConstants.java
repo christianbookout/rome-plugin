@@ -26,14 +26,18 @@ public class MessageConstants { //TODO transfer all message strings to this file
     public static final String NO_VOTING = ChatColor.RED + "you may not vote for this player";
     public static final String SUCCESSFUL_VOTE = "you successfully voted for ";
     //<vote|run|candidates|results|start|voting|end>
-    public static final String ELECTIONS_HELP_COMMAND = "/elections vote <user>" + ChatColor.BLACK + " | " + ChatColor.ITALIC + ChatColor.GRAY + "vote for a user. you may only vote for each position once.\n" + ChatColor.RESET +
-                                                        "/elections run <title>" + ChatColor.BLACK + " | " + ChatColor.ITALIC + ChatColor.GRAY + "run for a position (permissions: "+ Title.QUAESTOR.color + Title.QUAESTOR.fancyName + ChatColor.ITALIC + ChatColor.GRAY +"+)\n" + ChatColor.RESET +
-                                                        "/elections candidates" + ChatColor.BLACK + " | " + ChatColor.ITALIC + ChatColor.GRAY + "show all running candidates\n" + ChatColor.RESET +
-                                                        "/elections results" + ChatColor.BLACK + " | " + ChatColor.ITALIC + ChatColor.GRAY + "show the results for the previous election\n" + ChatColor.RESET +
-                                                        "/elections start" + ChatColor.BLACK + " | " + ChatColor.ITALIC + ChatColor.GRAY + "start an election (permissions: "+ Title.CONSUL.color + Title.CONSUL.fancyName + ChatColor.ITALIC + ChatColor.GRAY + "/"+ Title.CENSOR.color + Title.CENSOR.fancyName + ChatColor.ITALIC + ChatColor.GRAY + ")\n" + ChatColor.RESET +
-                                                        "/elections voting" + ChatColor.BLACK + " | " + ChatColor.ITALIC + ChatColor.GRAY + "start the voting phase (permissions: "+ Title.CONSUL.color + Title.CONSUL.fancyName + ChatColor.ITALIC + ChatColor.GRAY + "/"+ Title.CENSOR.color +Title.CENSOR.fancyName + ChatColor.ITALIC + ChatColor.GRAY + ")\n" + ChatColor.RESET +
-                                                        "/elections end" + ChatColor.BLACK + " | " + ChatColor.ITALIC + ChatColor.GRAY + "end the current election, granting the winners their roles (permissions: "+ Title.CONSUL.color + Title.CONSUL.fancyName + ChatColor.ITALIC + ChatColor.GRAY + "/"+ Title.CENSOR.color +Title.CENSOR.fancyName + ChatColor.ITALIC + ChatColor.GRAY + ")\n" + ChatColor.RESET +
-                                                        "/elections cancel" + ChatColor.BLACK + " | " + ChatColor.ITALIC + ChatColor.GRAY + "cancel the current election (permissions: "+ Title.CONSUL.color + Title.CONSUL.fancyName + ChatColor.ITALIC + ChatColor.GRAY + "/"+ Title.CENSOR.color +Title.CENSOR.fancyName + ChatColor.ITALIC + ChatColor.GRAY + ")\n";
+    public static final String ELECTIONS_HELP_COMMAND = ChatColor.GOLD + "<--HELP-->\n" + ChatColor.RESET + 
+                                                        "/elections vote <user>" + ChatColor.BLACK + " | " + ChatColor.GRAY + "vote for a user. you may only vote for each position once.\n" + ChatColor.RESET +
+                                                        "/elections candidates" + ChatColor.BLACK + " | " + ChatColor.GRAY + "show all running candidates\n" + ChatColor.RESET +
+                                                        "/elections results" + ChatColor.BLACK + " | " + ChatColor.GRAY + "show the results for the previous election\n" + ChatColor.RESET +
+                                                        Title.QUAESTOR.color + Title.QUAESTOR.fancyName + ChatColor.RESET + "\n" + 
+                                                        "/elections run <title>" + ChatColor.BLACK + " | " + ChatColor.GRAY + "run for a position (permissions: "+ Title.QUAESTOR.color + Title.QUAESTOR.fancyName + ChatColor.GRAY +"+)\n" + ChatColor.RESET +
+                                                        Title.CONSUL.color + Title.CONSUL.fancyName + ChatColor.GOLD + "/" + 
+                                                        Title.CENSOR.color + Title.CENSOR.fancyName + ChatColor.RESET + "\n" + 
+                                                        "/elections start" + ChatColor.BLACK + " | " + ChatColor.GRAY + "start an election\n" + ChatColor.RESET +
+                                                        "/elections voting" + ChatColor.BLACK + " | " + ChatColor.GRAY + "start the voting phase\n" + ChatColor.RESET +
+                                                        "/elections end" + ChatColor.BLACK + " | " + ChatColor.GRAY + "end the current election, granting the winners their roles\n" + ChatColor.RESET +
+                                                        "/elections cancel" + ChatColor.BLACK + " | " + ChatColor.GRAY + "cancel the current election\n";
     public static final String NO_PERMISSION_ERROR = ChatColor.RED + "you do not have permission to do that";
     public static final String ELECTION_CANCELLED = "the election has been cancelled";
     public static final String SUCCESSFUL_RUN = "you are sucessfully running! use /elections candidates to see your competitors";

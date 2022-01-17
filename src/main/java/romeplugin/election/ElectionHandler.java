@@ -14,7 +14,7 @@ import java.util.logging.Level;
 
 public class ElectionHandler {
     // list of every required title
-    private static final Title[] RUNNABLE_TITLES = {
+    public static final Title[] RUNNABLE_TITLES = {
             Title.TRIBUNE,
             Title.AEDILE,
             Title.PRAETOR,
@@ -60,11 +60,15 @@ public class ElectionHandler {
 
     public boolean vote(UUID voter, UUID candidate) {
 
-        Title title = currentElection.getCandidate(candidate).getTitle();
+        if (this.currentPhase != ElectionPhase.VOTING) return false;
+
+        var elecCandidate = currentElection.getCandidate(candidate);
+
+        if (elecCandidate == null) return false;
+
+        Title title = elecCandidate.getTitle();
 
         if (alreadyVoted(voter, title)) return false;
-
-        if (this.currentPhase != ElectionPhase.VOTING) return false;
 
         return currentElection.vote(candidate);
     }
@@ -131,18 +135,6 @@ public class ElectionHandler {
      * begin the voting phase in the election
      */
     public void startVoting() {
-        // verify there is a candidate for every position
-        Set<Title> filledTitles = new HashSet<>();
-        for (var candidate : currentElection.getCandidates()) {
-            filledTitles.add(candidate.getTitle());
-        }
-        for (var title : RUNNABLE_TITLES) {
-            if (!filledTitles.contains(title)) {
-                // TODO: tell the user not all positions are filled.
-                return;
-            }
-        }
-
         this.currentPhase = ElectionPhase.VOTING;
         this.updateElectionState();
         plugin.getServer().broadcastMessage(MessageConstants.SUCCESSFUL_VOTING_START);

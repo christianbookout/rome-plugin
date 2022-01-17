@@ -39,4 +39,5 @@ public class MessageConstants { //TODO transfer all message strings to this file
     public static final String SUCCESSFUL_RUN = "you are sucessfully running! use /elections candidates to see your competitors";
     public static final String NOT_VOTING = ChatColor.RED + "the election is not in a voting phase!";
     public static final String NO_CANDIDATES = ChatColor.RED + "nobody is currently running! use /elections cancel to cancel the election";
+    public static final String TITLES_NOT_FILLED = ChatColor.RED + "the titles aren't filled! starting voting anyway";
 }

@@ -10,6 +10,8 @@ import romeplugin.database.SQLConn;
 import romeplugin.election.ElectionHandler.ElectionPhase;
 import romeplugin.title.Title;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 public class ElectionCommand implements CommandExecutor {
@@ -149,14 +151,26 @@ public class ElectionCommand implements CommandExecutor {
     private void startVoting(Player player) {
         if (!electionHandler.hasElection()) {
             player.sendMessage(MessageConstants.NO_ELECTION_ERROR);
+            return;
         } else if (electionHandler.getElectionPhase() != ElectionPhase.RUNNING) {
             player.sendMessage(MessageConstants.ALREADY_VOTING_ERROR);
+            return;
         } else if (electionHandler.getCurrentElection().getCandidates().isEmpty()) {
             player.sendMessage(MessageConstants.NO_CANDIDATES);
             return;
-        } else {
-            electionHandler.startVoting();
         }
+        
+        Set<Title> filledTitles = new HashSet<>();
+        for (var candidate : electionHandler.getCurrentElection().getCandidates()) {
+            filledTitles.add(candidate.getTitle());
+        }
+        for (var title : ElectionHandler.RUNNABLE_TITLES) {
+            if (!filledTitles.contains(title)) {
+                player.sendMessage(MessageConstants.TITLES_NOT_FILLED);
+                break;
+            }
+        }
+        electionHandler.startVoting();
     }
 
     private void vote(Player player, UUID toVote) {

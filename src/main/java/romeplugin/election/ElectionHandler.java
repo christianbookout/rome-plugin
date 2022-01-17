@@ -54,7 +54,7 @@ public class ElectionHandler {
     }
 
     private void initPhaseTable(Connection conn) throws SQLException{
-        conn.prepareStatement("CREATE TABLE IF NOT EXISTS electionPhase (phase ENUM('RUNNING', 'VOTING') DEFAULT NULL PRIMARY KEY);").execute();
+        conn.prepareStatement("CREATE TABLE IF NOT EXISTS electionPhase (phase ENUM('RUNNING', 'VOTING', 'NULL') DEFAULT 'NULL' PRIMARY KEY);").execute();
         if (!conn.prepareStatement("SELECT * FROM electionPhase").executeQuery().next())
             conn.prepareStatement("INSERT INTO electionPhase VALUES ()");
     }

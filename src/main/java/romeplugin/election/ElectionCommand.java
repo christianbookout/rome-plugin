@@ -164,7 +164,7 @@ public class ElectionCommand implements CommandExecutor {
     private void getResults(Player player, Optional<Integer> number) {
         int num = number.orElse(electionHandler.getElectionNumber()-1);
         var results = electionHandler.getElectionResults(num);
-        if (results == null) {
+        if (results.isEmpty()) {
             player.sendMessage(MessageConstants.NO_PAST_ELECTION_RESULTS);
             return;
         }

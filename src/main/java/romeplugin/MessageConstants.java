@@ -22,10 +22,10 @@ public class MessageConstants {
     public static final String SELF_NOT_RUNNING_ERROR = ChatColor.RED + "you are not running for the election";
     public static final String NO_VOTING = ChatColor.RED + "you may not vote for this player";
     public static final String SUCCESSFUL_VOTE = "you successfully voted for ";
-    public static final String ELECTIONS_HELP_COMMAND = ChatColor.YELLOW + "\n<-- " + ChatColor.RESET + "Elections Help" + ChatColor.YELLOW + " -->\n" + ChatColor.RESET + ChatColor.GOLD +
+    public static final String ELECTIONS_HELP_COMMAND = ChatColor.YELLOW + "\n<-------- " + ChatColor.RESET + "Elections Help" + ChatColor.YELLOW + " ----------->\n" + ChatColor.RESET + ChatColor.GOLD +
                                                         "/elections vote <user>: " + ChatColor.RESET + "vote for a user\n" + ChatColor.GOLD +
                                                         "/elections candidates: " + ChatColor.RESET + "show all running candidates\n" +  ChatColor.GOLD +
-                                                        "/elections results <optional number>: " + ChatColor.RESET + "show past election results\n" + ChatColor.GOLD +
+                                                        "/elections results <number>: " + ChatColor.RESET + "show past election results\n" + ChatColor.GOLD +
                                                         ChatColor.UNDERLINE + Title.QUAESTOR.color + Title.QUAESTOR.fancyName + "\n" +  ChatColor.GOLD +
                                                         "/elections run <title>: " + ChatColor.RESET + "run for a position\n" + ChatColor.GOLD +
                                                         "/elections quit: " + ChatColor.RESET + "stop running\n" + ChatColor.GOLD +

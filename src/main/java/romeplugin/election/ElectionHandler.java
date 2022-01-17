@@ -49,10 +49,14 @@ public class ElectionHandler {
 
     private void initNumberTable(Connection conn) throws SQLException {
         conn.prepareStatement("CREATE TABLE IF NOT EXISTS electionNumber (number INT DEFAULT 1 NOT NULL PRIMARY KEY);").execute();
+        if (!conn.prepareStatement("SELECT * FROM electionNumber").executeQuery().next())
+            conn.prepareStatement("INSERT INTO electionNumber VALUES ()");
     }
 
     private void initPhaseTable(Connection conn) throws SQLException{
         conn.prepareStatement("CREATE TABLE IF NOT EXISTS electionPhase (phase ENUM('RUNNING', 'VOTING') DEFAULT NULL PRIMARY KEY);").execute();
+        if (!conn.prepareStatement("SELECT * FROM electionPhase").executeQuery().next())
+            conn.prepareStatement("INSERT INTO electionPhase VALUES ()");
     }
 
     private void initResultsTable(Connection conn) throws SQLException{

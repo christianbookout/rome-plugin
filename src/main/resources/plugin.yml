@@ -19,6 +19,15 @@ permissions:
   romeplugin.praetor:
     description: "Praetor"
     default: op
+  romeplugin.tribune:
+    description: "Tribune of the Plebs"
+    default: op
+  romeplugin.pope:
+    description: "Pontifex Maximus"
+    default: op
+  romeplugin.builder:
+    description: "Builder"
+    default: op
 commands:
   checktitle:
     description: "SycPrsFacNem"
@@ -48,16 +57,16 @@ commands:
     description: "get information on the claim you are in"
     usage: "/claiminfo"
   getblocks:
-    description: "get blocks owned by a yourself or another player"
+    description: "get blocks owned by yourself"
     usage: "/getblocks [who]"
   killclaim:
     description: "remove a claim at your location"
     usage: "/killclaim"
   killallclaims:
-    description: "remove every existing claim of yours (or another players)"
+    description: "remove all of your claims"
     usage: "/killallclaims <optional user>"
   transferclaim:
-    description: "transfer the claim you are in to someone else"
+    description: "transfer claim to another player"
     usage: "/transferclaim <user>"
   rome:
     description: "do rome related things"

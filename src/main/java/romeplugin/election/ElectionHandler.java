@@ -204,7 +204,7 @@ public class ElectionHandler {
     /**
      * ends the election, adding all titles to the winners and updating the election state/results
      */
-    public void endElection() { //TODO truncate electionResults 
+    public void endElection() {
         var results = this.getWinners(this.getCandidates());
 
         //Apply all titles to each winner

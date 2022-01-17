@@ -191,7 +191,7 @@ public class ElectionCommand implements CommandExecutor {
         
         //concatinate all candidates under their title
         for (Title t: ElectionHandler.RUNNABLE_TITLES) {
-            toSend += "\n" + t.color + t.fancyName + ChatColor.RESET + ":";
+            toSend += "\n" + t.color + t.fancyName + ChatColor.RESET + ": ";
             var printCandidates = new ArrayList<String>();
 
             for (Candidate c : candidates) {

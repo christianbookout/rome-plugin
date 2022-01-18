@@ -45,11 +45,12 @@ public class ElectionHandler {
 
             conn.prepareStatement("CREATE TABLE IF NOT EXISTS electionNumber (number INT DEFAULT 1 NOT NULL PRIMARY KEY);").execute();
             if (!conn.prepareStatement("SELECT * FROM electionNumber;").execute())
-                conn.prepareStatement("INSERT INTO electionNumber VALUES ();").execute();
+                conn.prepareStatement("INSERT INTO electionNumber VALUES (1);").execute();
                 
             conn.prepareStatement("CREATE TABLE IF NOT EXISTS electionPhase (phase ENUM('RUNNING', 'VOTING', 'NULL') DEFAULT 'NULL' PRIMARY KEY);").execute();
+            plugin.getLogger().log(Level.ALL, "the !conn.prepareStatement(\"SELECT * FROM electionNumber;\").execute() is " + !conn.prepareStatement("SELECT * FROM electionNumber;").execute());
             if (!conn.prepareStatement("SELECT * FROM electionPhase;").execute())
-                conn.prepareStatement("INSERT INTO electionPhase VALUES ();").execute();
+                conn.prepareStatement("INSERT INTO electionPhase VALUES ('NULL');").execute();
 
             conn.prepareStatement("CREATE TABLE IF NOT EXISTS electionResults (" +
                 "number INT NOT NULL DEFAULT 0 PRIMARY KEY," +

@@ -18,7 +18,7 @@ public class RemovePopeListener implements Listener {
         if (titleEntry == Title.POPE) {
             try (Connection conn = SQLConn.getConnection()) {
                 PreparedStatement statement = conn.prepareStatement(
-                        "DELETE FROM players WHERE uuid = ?;");
+                        "DELETE FROM titles WHERE uuid = ?;");
                 statement.setString(1, e.getEntity().getUniqueId().toString());
                 statement.execute();
             } catch (SQLException exc) {

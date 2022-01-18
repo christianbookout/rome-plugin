@@ -66,7 +66,7 @@ public class TitleHandler {
     boolean setTitleOffline(UUID uuid, Title title) {
         try (Connection conn = SQLConn.getConnection()) {
             PreparedStatement statement = conn.prepareStatement(
-                    "REPLACE INTO players (uuid, title) values (?, ?);");
+                    "REPLACE INTO titles (uuid, title) values (?, ?);");
             statement.setString(1, uuid.toString());
             statement.setString(2, title.toString());
             statement.execute();
@@ -92,7 +92,7 @@ public class TitleHandler {
     public boolean removeTitleOffline(UUID uuid) {
         try (Connection conn = SQLConn.getConnection()) {
             PreparedStatement statement = conn.prepareStatement(
-                    "DELETE FROM players WHERE uuid = ?;");
+                    "DELETE FROM titles WHERE uuid = ?;");
             statement.setString(1, uuid.toString());
             statement.execute();
             return true;

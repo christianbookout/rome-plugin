@@ -101,7 +101,7 @@ public class RomePlugin extends JavaPlugin {
 
                 SQLConn.setSource(dataSource);
                 try (Connection conn = SQLConn.getConnection()) {
-                        conn.prepareStatement("CREATE TABLE IF NOT EXISTS players (" +
+                        conn.prepareStatement("CREATE TABLE IF NOT EXISTS titles (" +
                                         "uuid CHAR(36) NOT NULL PRIMARY KEY," +
                                         "title " + TITLE_ENUM + " NOT NULL);")
                                         .execute();

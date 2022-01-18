@@ -32,7 +32,7 @@ public class SQLConn {
 
     public static Title getTitle(UUID who) {
         try (var conn = getConnection()) {
-            var stmt = conn.prepareStatement("SELECT * FROM players WHERE uuid = ?;");
+            var stmt = conn.prepareStatement("SELECT * FROM titles WHERE uuid = ?;");
             stmt.setString(1, who.toString());
             var res = stmt.executeQuery();
             if (!res.next()) {
@@ -51,7 +51,7 @@ public class SQLConn {
 
     public static Title getTitle(Player p) {
         try (var conn = getConnection()) {
-            var stmt = conn.prepareStatement("SELECT title FROM players WHERE uuid = ?;");
+            var stmt = conn.prepareStatement("SELECT title FROM titles WHERE uuid = ?;");
             stmt.setString(1, p.getUniqueId().toString());
             var res = stmt.executeQuery();
             if (!res.next()) {

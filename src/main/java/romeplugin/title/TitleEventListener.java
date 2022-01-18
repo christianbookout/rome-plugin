@@ -50,7 +50,7 @@ public class TitleEventListener implements Listener {
     @EventHandler
     public void onPlayerDeath(PlayerDeathEvent event) {
         try {
-            var stmt = SQLConn.getConnection().prepareStatement("DELETE FROM players WHERE uuid = ? AND title = 'POPE';");
+            var stmt = SQLConn.getConnection().prepareStatement("DELETE FROM titles WHERE uuid = ? AND title = 'POPE';");
             stmt.setString(1, event.getEntity().getUniqueId().toString());
             if (stmt.executeUpdate() > 0) {
                 RomePlugin.onlinePlayerTitles.remove(event.getEntity());

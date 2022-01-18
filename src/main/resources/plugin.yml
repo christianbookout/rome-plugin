@@ -88,3 +88,4 @@ commands:
   makekey:
     description: "make a key out of the currently held item"
     usage: "/makekey"
+    permission: op

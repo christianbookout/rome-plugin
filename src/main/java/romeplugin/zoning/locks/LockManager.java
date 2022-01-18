@@ -59,9 +59,11 @@ public class LockManager implements Listener {
 
     OptionalInt tryCreateKey(UUID uuid) {
         try (var conn = SQLConn.getConnection()) {
-            var stmt = conn.prepareStatement("INSERT INTO lockKeys (creator_uuid) VALUES (?);" +
-                    "SELECT LAST_INSERT_ID();");
+            var stmt = conn.prepareStatement("INSERT INTO lockKeys (creator_uuid) VALUES (?);");
             stmt.setString(1, uuid.toString());
+            stmt.execute();
+            stmt.close();
+            stmt = conn.prepareStatement("SELECT LAST_INSERT_ID();");
             var res = stmt.executeQuery();
             if (!res.next()) {
                 return OptionalInt.empty();

@@ -261,7 +261,7 @@ public class SQLConn {
         try (var conn = getConnection()) {
             var stmt = conn.prepareStatement("DELETE FROM builders WHERE uuid = ?;");
             stmt.setString(1, who.toString());
-            return stmt.execute();
+            return stmt.executeUpdate() > 0;
         }
     }
 

@@ -29,6 +29,8 @@ public class BuilderCommand implements CommandExecutor {
             sender.sendMessage("builders: ");
             sender.sendMessage(String.join(", ", builders));
             return true;
+        } else if (args.length < 2) {
+            return false;
         }
         var target = sender.getServer().getPlayer(args[1]);
         if (target == null) {
@@ -37,15 +39,20 @@ public class BuilderCommand implements CommandExecutor {
         }
         switch (args[0]) {
             case "assign":
-                if (SQLConn.isBuilder(target.getUniqueId())) {
-                    sender.sendMessage("they are already a builder, silly!");
-                    return true;
-                }
-                if (!SQLConn.setBuilder(target.getUniqueId())) {
+                try {
+                    if (SQLConn.isBuilder(target.getUniqueId())) {
+                        sender.sendMessage("they are already a builder, silly!");
+                        return true;
+                    }
+                    if (!SQLConn.setBuilder(target.getUniqueId())) {
+                        sender.sendMessage(MessageConstants.UWU_DATABASE_ERROR);
+                        return true;
+                    }
+                    sender.sendMessage("made " + target.getName() + " a builder");
+                } catch (SQLException e) {
+                    e.printStackTrace();
                     sender.sendMessage(MessageConstants.UWU_DATABASE_ERROR);
-                    return true;
                 }
-                sender.sendMessage("made " + target.getName() + " a builder");
                 return true;
             case "revoke":
                 try {

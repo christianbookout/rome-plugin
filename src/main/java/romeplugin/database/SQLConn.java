@@ -241,26 +241,20 @@ public class SQLConn {
         }
     }
 
-    public static boolean isBuilder(UUID who) {
+    public static boolean isBuilder(UUID who) throws SQLException {
         try (var conn = getConnection()) {
             var stmt = conn.prepareStatement("SELECT * FROM builders WHERE uuid = ?;");
             stmt.setString(1, who.toString());
             var res = stmt.executeQuery();
             return res.next();
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
         }
     }
 
-    public static boolean setBuilder(UUID who) {
+    public static boolean setBuilder(UUID who) throws SQLException {
         try (var conn = getConnection()) {
             var stmt = conn.prepareStatement("INSERT INTO builders VALUES (?);");
             stmt.setString(1, who.toString());
             return stmt.execute();
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
         }
     }
 

@@ -33,49 +33,45 @@ public class ElectionHandler {
     public ElectionHandler(Plugin plugin, TitleHandler titleHandler) {
         this.titleHandler = titleHandler;
         this.plugin = plugin;
+        this.initialize();
+    }
+
+    public void initialize() {
+        try(Connection conn = SQLConn.getConnection()) {
+            conn.prepareStatement("CREATE TABLE IF NOT EXISTS candidates (" +
+                            "uuid CHAR(36) NOT NULL PRIMARY KEY," +
+                            "title " + RomePlugin.TITLE_ENUM + " NOT NULL," +
+                            "votes INT NOT NULL DEFAULT 0);").execute();
+            conn.prepareStatement("CREATE TABLE IF NOT EXISTS electionNumber (number INT DEFAULT 1 NOT NULL PRIMARY KEY);").execute();
+            if (!conn.prepareStatement("SELECT * FROM electionNumber;").execute())
+                conn.prepareStatement("INSERT INTO electionNumber VALUES ();");
+                
+            conn.prepareStatement("CREATE TABLE IF NOT EXISTS electionPhase (phase ENUM('RUNNING', 'VOTING', 'NULL') DEFAULT 'NULL' PRIMARY KEY);").execute();
+            if (!conn.prepareStatement("SELECT * FROM electionPhase;").execute())
+                conn.prepareStatement("INSERT INTO electionPhase VALUES ();");
+
+            conn.prepareStatement("CREATE TABLE IF NOT EXISTS electionResults (" +
+                "number INT NOT NULL DEFAULT 0 PRIMARY KEY," +
+                "title " + RomePlugin.TITLE_ENUM + " NOT NULL," +
+                "uuid CHAR(36) NOT NULL," +
+                "votes INT NOT NULL);").execute();
+            
+            
+            conn.prepareStatement("CREATE TABLE IF NOT EXISTS playerVotes (" +
+                "uuid CHAR(36) NOT NULL PRIMARY KEY," +
+                "titleVotedFor " + RomePlugin.TITLE_ENUM + " NOT NULL);");
+
+        } catch (SQLException e) {
+            plugin.getLogger().log(Level.WARNING, e.getMessage());
+        }
     }
 
     public boolean hasElection() {
         return this.getElectionPhase() != null;
     }
 
-    //Initialize all of the tables
-    private void initCandidatesTable(Connection conn) throws SQLException {
-        conn.prepareStatement("CREATE TABLE IF NOT EXISTS candidates (" +
-                        "uuid CHAR(36) NOT NULL PRIMARY KEY," +
-                        "title " + RomePlugin.TITLE_ENUM + " NOT NULL," +
-                        "votes INT NOT NULL DEFAULT 0);").execute();
-    }
-
-    private void initNumberTable(Connection conn) throws SQLException {
-        conn.prepareStatement("CREATE TABLE IF NOT EXISTS electionNumber (number INT DEFAULT 1 NOT NULL PRIMARY KEY);").execute();
-        if (!conn.prepareStatement("SELECT * FROM electionNumber;").execute())
-            conn.prepareStatement("INSERT INTO electionNumber VALUES ();");
-    }
-
-    private void initPhaseTable(Connection conn) throws SQLException{
-        conn.prepareStatement("CREATE TABLE IF NOT EXISTS electionPhase (phase ENUM('RUNNING', 'VOTING', 'NULL') DEFAULT 'NULL' PRIMARY KEY);").execute();
-        if (!conn.prepareStatement("SELECT * FROM electionPhase;").execute())
-            conn.prepareStatement("INSERT INTO electionPhase VALUES ();");
-    }
-
-    private void initResultsTable(Connection conn) throws SQLException{
-        conn.prepareStatement("CREATE TABLE IF NOT EXISTS electionResults (" +
-                        "number INT NOT NULL DEFAULT 0 PRIMARY KEY," +
-                        "title " + RomePlugin.TITLE_ENUM + " NOT NULL," +
-                        "uuid CHAR(36) NOT NULL," +
-                        "votes INT NOT NULL);").execute();
-    }
-
-    private void initVotesTable(Connection conn) throws SQLException{
-        conn.prepareStatement("CREATE TABLE IF NOT EXISTS playerVotes (" +
-                        "uuid CHAR(36) NOT NULL PRIMARY KEY," +
-                        "titleVotedFor " + RomePlugin.TITLE_ENUM + " NOT NULL);");
-    }
-
     public ElectionPhase getElectionPhase() {
         try (Connection conn = SQLConn.getConnection()) {
-            this.initPhaseTable(conn);
             var currInfo = conn.prepareStatement("SELECT phase FROM electionPhase;").executeQuery();
             if (currInfo.next()) {
                 String phase = currInfo.getString("phase");
@@ -87,7 +83,6 @@ public class ElectionHandler {
 
     public int getElectionNumber() {
         try (Connection conn = SQLConn.getConnection()) {
-            this.initNumberTable(conn);
             var currInfo = conn.prepareStatement("SELECT number FROM electionNumber;").executeQuery();
             if (currInfo.next()) {
                 return currInfo.getInt("number");
@@ -98,7 +93,6 @@ public class ElectionHandler {
 
     public void incrementElectionNumber() {
         try (Connection conn = SQLConn.getConnection()) {
-            this.initNumberTable(conn);
             conn.prepareStatement("UPDATE electionNumber SET number = number + 1;").execute();
         } catch (SQLException e) {}
     }
@@ -107,8 +101,6 @@ public class ElectionHandler {
     public Collection<Candidate> getCandidates() {
         var candidates = new ArrayList<Candidate>();
         try (Connection conn = SQLConn.getConnection()) {
-            this.initCandidatesTable(conn);
-
             var currInfo = conn.prepareStatement("SELECT * FROM candidates;").executeQuery();
             while (currInfo.next()) {
                 var uuid = UUID.fromString(currInfo.getString("uuid"));
@@ -123,20 +115,19 @@ public class ElectionHandler {
 
     public boolean vote(UUID voter, UUID candidate) {
         try (Connection conn = SQLConn.getConnection()) {
-            this.initCandidatesTable(conn);
             var title = conn.prepareStatement("SELECT title FROM candidates WHERE uuid = '" + candidate.toString() + "';").executeQuery();
             if (!title.next()) return false;
             var preparedStatement = conn.prepareStatement("REPLACE INTO playerVotes VALUES (?, ?);");
             preparedStatement.setString(1, voter.toString());
             preparedStatement.setString(2, title.getString("title"));
-            return conn.prepareStatement("UPDATE candidates SET votes = votes + 1 WHERE uuid = '" + candidate.toString() + "';").execute();
+            conn.prepareStatement("UPDATE candidates SET votes = votes + 1 WHERE uuid = '" + candidate.toString() + "';").execute();
+            return true;
         } catch (SQLException e) {e.printStackTrace();}
         return false;
     }
 
     public void removeCandidate(UUID uuid) {
         try (Connection conn = SQLConn.getConnection()) {
-            this.initCandidatesTable(conn);
             conn.prepareStatement("DELETE FROM candidates WHERE uuid = '" + uuid.toString() + "';").execute();
         } catch (SQLException e) {}
     }
@@ -144,8 +135,6 @@ public class ElectionHandler {
     public void addCandidate(UUID uuid, Title title) {
 
         try (Connection conn = SQLConn.getConnection()) {
-            this.initCandidatesTable(conn);
-
             var preparedStatement = conn.prepareStatement("REPLACE INTO candidates VALUES (?, ?, ?);");
 
             preparedStatement.setString(1, uuid.toString());
@@ -158,17 +147,13 @@ public class ElectionHandler {
 
     public void setElectionPhase(ElectionPhase phase) {
         try (Connection conn = SQLConn.getConnection()) {
-            this.initPhaseTable(conn);
             String phaseStr = phase == null ? "NULL" : phase.toString();
             conn.prepareStatement("UPDATE electionPhase SET phase = '" + phaseStr + "';").execute();
         } catch (SQLException e) {}
     }
 
     public void startElection() {
-        try (Connection conn = SQLConn.getConnection()) {
-            this.initCandidatesTable(conn);
-            this.setElectionPhase(ElectionPhase.RUNNING);
-        } catch (SQLException e) {}
+        this.setElectionPhase(ElectionPhase.RUNNING);
         plugin.getServer().broadcastMessage(MessageConstants.SUCCESSFUL_ELECTION_START);
     }
 
@@ -176,10 +161,7 @@ public class ElectionHandler {
      * begin the voting phase in the election
      */
     public void startVoting() {
-        try (Connection conn = SQLConn.getConnection()) {
-            this.initVotesTable(conn);
-            this.setElectionPhase(ElectionPhase.VOTING);
-        } catch (SQLException e) {}
+        this.setElectionPhase(ElectionPhase.VOTING);
         plugin.getServer().broadcastMessage(MessageConstants.SUCCESSFUL_VOTING_START);
     }
 
@@ -230,8 +212,6 @@ public class ElectionHandler {
 
     public void clearTempTables() {
         try (Connection conn = SQLConn.getConnection()) {
-            this.initCandidatesTable(conn);
-            this.initVotesTable(conn);
             conn.prepareStatement("TRUNCATE TABLE candidates;").execute();
             conn.prepareStatement("TRUNCATE TABLE playerVotes;").execute();
         } catch (SQLException e) {}
@@ -245,10 +225,7 @@ public class ElectionHandler {
      */
     public boolean alreadyVoted(UUID player, Title title) {
         try (Connection conn = SQLConn.getConnection()) {
-            this.initVotesTable(conn);
-            var statement = conn.prepareStatement("SELECT * FROM playerVotes WHERE uuid = '" + player.toString() + "' AND titleVotedFor = '" + title.toString() + "';");
-            var results = statement.executeQuery();
-            return results.next();
+            return conn.prepareStatement("SELECT * FROM playerVotes WHERE uuid = '" + player.toString() + "' AND titleVotedFor = '" + title.toString() + "';").execute();
         } catch (SQLException e) {}
         return false;
     }
@@ -263,7 +240,6 @@ public class ElectionHandler {
         Collection<Candidate> readResults = new ArrayList<>();
 
         try (Connection conn = SQLConn.getConnection()) {
-            this.initResultsTable(conn);
             var results = conn.prepareStatement("SELECT * FROM electionResults WHERE number = " + number + ";").executeQuery();
 
             //add all winners of the previous election to readResults
@@ -287,7 +263,6 @@ public class ElectionHandler {
     public void storeElectionResults(Collection<Candidate> results) {
         try (Connection conn = SQLConn.getConnection()) {
             for (Candidate winner : results) {
-                this.initResultsTable(conn);
                 var statement = conn.prepareStatement("INSERT INTO electionResults VALUES (?, ?, ?, ?);");
                 statement.setInt(1, this.getElectionNumber());
                 statement.setString(2, winner.getTitle().toString());

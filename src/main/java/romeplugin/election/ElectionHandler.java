@@ -124,8 +124,13 @@ public class ElectionHandler {
     public boolean vote(UUID voter, UUID candidate) {
         try (Connection conn = SQLConn.getConnection()) {
             this.initCandidatesTable(conn);
+            var title = conn.prepareStatement("SELECT title FROM candidates WHERE uuid = '" + candidate.toString() + "';").executeQuery();
+            if (!title.next()) return false;
+            var preparedStatement = conn.prepareStatement("REPLACE INTO playerVotes VALUES (?, ?);");
+            preparedStatement.setString(1, voter.toString());
+            preparedStatement.setString(2, title.getString("title"));
             return conn.prepareStatement("UPDATE candidates SET votes = votes + 1 WHERE uuid = '" + candidate.toString() + "';").execute();
-        } catch (SQLException e) {}
+        } catch (SQLException e) {e.printStackTrace();}
         return false;
     }
 

@@ -120,6 +120,7 @@ public class ElectionHandler {
             var preparedStatement = conn.prepareStatement("REPLACE INTO playerVotes VALUES (?, ?);");
             preparedStatement.setString(1, voter.toString());
             preparedStatement.setString(2, title.getString("title"));
+            preparedStatement.execute();
             conn.prepareStatement("UPDATE candidates SET votes = votes + 1 WHERE uuid = '" + candidate.toString() + "';").execute();
             return true;
         } catch (SQLException e) {e.printStackTrace();}

@@ -44,10 +44,7 @@ public class BuilderCommand implements CommandExecutor {
                         sender.sendMessage("they are already a builder, silly!");
                         return true;
                     }
-                    if (!SQLConn.setBuilder(target.getUniqueId())) {
-                        sender.sendMessage(MessageConstants.UWU_DATABASE_ERROR);
-                        return true;
-                    }
+                    SQLConn.setBuilder(target.getUniqueId());
                     sender.sendMessage("made " + target.getName() + " a builder");
                 } catch (SQLException e) {
                     e.printStackTrace();

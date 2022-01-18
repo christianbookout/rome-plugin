@@ -250,11 +250,10 @@ public class SQLConn {
         }
     }
 
-    public static boolean setBuilder(UUID who) throws SQLException {
+    public static void setBuilder(UUID who) throws SQLException {
         try (var conn = getConnection()) {
             var stmt = conn.prepareStatement("INSERT INTO builders VALUES (?);");
             stmt.setString(1, who.toString());
-            return stmt.execute();
         }
     }
 

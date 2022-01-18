@@ -108,8 +108,12 @@ public class LandControl {
             }
             return claim.owner.equals(player.getUniqueId());
         }
-        if (area.getType() == GOVERNMENT && SQLConn.isBuilder(player.getUniqueId())) {
-            return true;
+        try {
+            if (area.getType() == GOVERNMENT && SQLConn.isBuilder(player.getUniqueId()) ) {
+                return true;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
         if (area.getType().canBuild(title)) {
             return true;

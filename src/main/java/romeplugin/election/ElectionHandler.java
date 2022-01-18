@@ -42,13 +42,14 @@ public class ElectionHandler {
                             "uuid CHAR(36) NOT NULL PRIMARY KEY," +
                             "title " + RomePlugin.TITLE_ENUM + " NOT NULL," +
                             "votes INT NOT NULL DEFAULT 0);").execute();
+
             conn.prepareStatement("CREATE TABLE IF NOT EXISTS electionNumber (number INT DEFAULT 1 NOT NULL PRIMARY KEY);").execute();
             if (!conn.prepareStatement("SELECT * FROM electionNumber;").execute())
-                conn.prepareStatement("INSERT INTO electionNumber VALUES ();");
+                conn.prepareStatement("INSERT INTO electionNumber VALUES ();").execute();
                 
             conn.prepareStatement("CREATE TABLE IF NOT EXISTS electionPhase (phase ENUM('RUNNING', 'VOTING', 'NULL') DEFAULT 'NULL' PRIMARY KEY);").execute();
             if (!conn.prepareStatement("SELECT * FROM electionPhase;").execute())
-                conn.prepareStatement("INSERT INTO electionPhase VALUES ();");
+                conn.prepareStatement("INSERT INTO electionPhase VALUES ();").execute();
 
             conn.prepareStatement("CREATE TABLE IF NOT EXISTS electionResults (" +
                 "number INT NOT NULL DEFAULT 0 PRIMARY KEY," +
@@ -56,10 +57,9 @@ public class ElectionHandler {
                 "uuid CHAR(36) NOT NULL," +
                 "votes INT NOT NULL);").execute();
             
-            
             conn.prepareStatement("CREATE TABLE IF NOT EXISTS playerVotes (" +
                 "uuid CHAR(36) NOT NULL PRIMARY KEY," +
-                "titleVotedFor " + RomePlugin.TITLE_ENUM + " NOT NULL);");
+                "titleVotedFor " + RomePlugin.TITLE_ENUM + " NOT NULL);").execute();
 
         } catch (SQLException e) {
             plugin.getLogger().log(Level.WARNING, e.getMessage());

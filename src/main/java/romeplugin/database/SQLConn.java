@@ -6,6 +6,8 @@ import romeplugin.title.Title;
 
 import javax.sql.DataSource;
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 
@@ -236,6 +238,52 @@ public class SQLConn {
         } catch (SQLException e) {
             e.printStackTrace();
             return 9999;
+        }
+    }
+
+    public static boolean isBuilder(UUID who) {
+        try (var conn = getConnection()) {
+            var stmt = conn.prepareStatement("SELECT * FROM builders WHERE uuid = ?;");
+            stmt.setString(1, who.toString());
+            var res = stmt.executeQuery();
+            return res.next();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public static boolean setBuilder(UUID who) {
+        try (var conn = getConnection()) {
+            var stmt = conn.prepareStatement("INSERT INTO builders VALUES (?);");
+            stmt.setString(1, who.toString());
+            return stmt.execute();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public static boolean removeBuilder(UUID who) throws SQLException {
+        try (var conn = getConnection()) {
+            var stmt = conn.prepareStatement("DELETE FROM builders WHERE uuid = ?;");
+            stmt.setString(1, who.toString());
+            return stmt.execute();
+        }
+    }
+
+    public static List<String> getBuilders() {
+        try (var conn = getConnection()) {
+            var stmt = conn.prepareStatement("SELECT username FROM usernames WHERE uuid IN (SELECT uuid FROM builders);");
+            var res = stmt.executeQuery();
+            var names = new ArrayList<String>();
+            while (res.next()) {
+                names.add(res.getString("username"));
+            }
+            return names;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
         }
     }
 }

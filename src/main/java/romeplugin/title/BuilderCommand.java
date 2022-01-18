@@ -3,7 +3,10 @@ package romeplugin.title;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import romeplugin.MessageConstants;
 import romeplugin.database.SQLConn;
+
+import java.sql.SQLException;
 
 public class BuilderCommand implements CommandExecutor {
     private final TitleHandler titles;
@@ -14,8 +17,18 @@ public class BuilderCommand implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String s, String[] args) {
-        if (args.length < 2) {
+        if (args.length < 1) {
             return false;
+        }
+        if (args.length == 1 && args[0].equals("list")) {
+            var builders = SQLConn.getBuilders();
+            if (builders == null) {
+                sender.sendMessage(MessageConstants.UWU_DATABASE_ERROR);
+                return true;
+            }
+            sender.sendMessage("builders: ");
+            sender.sendMessage(String.join(", ", builders));
+            return true;
         }
         var target = sender.getServer().getPlayer(args[1]);
         if (target == null) {
@@ -24,19 +37,27 @@ public class BuilderCommand implements CommandExecutor {
         }
         switch (args[0]) {
             case "assign":
-                if (SQLConn.getTitle(target.getUniqueId()) != null) {
-                    sender.sendMessage("they already have a job silly!");
-                    return false;
+                if (SQLConn.isBuilder(target.getUniqueId())) {
+                    sender.sendMessage("they are already a builder, silly!");
+                    return true;
                 }
-                titles.setTitle(target, Title.BUILDER);
+                if (!SQLConn.setBuilder(target.getUniqueId())) {
+                    sender.sendMessage(MessageConstants.UWU_DATABASE_ERROR);
+                    return true;
+                }
                 sender.sendMessage("made " + target.getName() + " a builder");
                 return true;
             case "revoke":
-                var title = SQLConn.getTitle(target.getUniqueId());
-                if (title == Title.BUILDER) {
-                    titles.removeTitle(target);
+                try {
+                    if (SQLConn.removeBuilder(target.getUniqueId())) {
+                        sender.sendMessage("made " + target.getName() + " not a builder");
+                    } else {
+                        sender.sendMessage("this person wasn't even a builder!");
+                    }
+                } catch (SQLException e) {
+                    sender.sendMessage(MessageConstants.UWU_DATABASE_ERROR);
+                    e.printStackTrace();
                 }
-                sender.sendMessage("made " + target.getName() + " not a builder");
                 return true;
         }
         return false;

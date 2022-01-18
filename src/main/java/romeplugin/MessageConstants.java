@@ -43,4 +43,5 @@ public class MessageConstants {
     public static final String NOT_VOTING = ChatColor.RED + "the election is not in a voting phase!";
     public static final String NO_CANDIDATES = ChatColor.RED + "nobody is currently running! use /elections cancel to cancel the election";
     public static final String TITLES_NOT_FILLED = ChatColor.RED + "the titles aren't filled! starting voting anyway";
+    public static final String UWU_DATABASE_ERROR = ChatColor.RED + "somewwing went reawwy wrong!! uwu pwease tell uws devs!!";
 }

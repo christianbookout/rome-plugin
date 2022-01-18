@@ -225,7 +225,7 @@ public class ElectionHandler {
      */
     public boolean alreadyVoted(UUID player, Title title) {
         try (Connection conn = SQLConn.getConnection()) {
-            return conn.prepareStatement("SELECT * FROM playerVotes WHERE uuid = '" + player.toString() + "' AND titleVotedFor = '" + title.toString() + "';").execute();
+            return conn.prepareStatement("SELECT * FROM playerVotes WHERE uuid = '" + player.toString() + "' AND titleVotedFor = '" + title.toString() + "';").executeQuery().next();
         } catch (SQLException e) {}
         return false;
     }

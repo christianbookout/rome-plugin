@@ -52,6 +52,7 @@ public class ElectionCommand implements CommandExecutor {
                     break;
                 case "quit":
                     quit(player);
+                    break;
                 case "help":
                     help(player);
                     break;

@@ -49,13 +49,13 @@ public class ElectionHandler {
 
     private void initNumberTable(Connection conn) throws SQLException {
         conn.prepareStatement("CREATE TABLE IF NOT EXISTS electionNumber (number INT DEFAULT 1 NOT NULL PRIMARY KEY);").execute();
-        if (!conn.prepareStatement("SELECT * FROM electionNumber;").executeQuery().next())
+        if (!conn.prepareStatement("SELECT * FROM electionNumber;").execute())
             conn.prepareStatement("INSERT INTO electionNumber VALUES ();");
     }
 
     private void initPhaseTable(Connection conn) throws SQLException{
         conn.prepareStatement("CREATE TABLE IF NOT EXISTS electionPhase (phase ENUM('RUNNING', 'VOTING', 'NULL') DEFAULT 'NULL' PRIMARY KEY);").execute();
-        if (!conn.prepareStatement("SELECT * FROM electionPhase;").executeQuery().next())
+        if (!conn.prepareStatement("SELECT * FROM electionPhase;").execute())
             conn.prepareStatement("INSERT INTO electionPhase VALUES ();");
     }
 
@@ -124,9 +124,7 @@ public class ElectionHandler {
     public boolean vote(UUID voter, UUID candidate) {
         try (Connection conn = SQLConn.getConnection()) {
             this.initCandidatesTable(conn);
-
-            var currInfo = conn.prepareStatement("UPDATE candidates SET votes = votes + 1 WHERE uuid = '" + candidate.toString() + "';").executeQuery();
-            return currInfo.next();
+            return conn.prepareStatement("UPDATE candidates SET votes = votes + 1 WHERE uuid = '" + candidate.toString() + "';").execute();
         } catch (SQLException e) {}
         return false;
     }

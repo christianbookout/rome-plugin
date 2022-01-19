@@ -254,6 +254,7 @@ public class SQLConn {
         try (var conn = getConnection()) {
             var stmt = conn.prepareStatement("INSERT INTO builders VALUES (?);");
             stmt.setString(1, who.toString());
+            stmt.execute();
         }
     }
 

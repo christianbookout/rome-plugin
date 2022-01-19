@@ -2,6 +2,7 @@ package romeplugin;
 
 import org.bukkit.ChatColor;
 
+import org.bukkit.command.CommandSender;
 import romeplugin.title.Title;
 
 public class MessageConstants { 
@@ -44,4 +45,17 @@ public class MessageConstants {
     public static final String NO_CANDIDATES = ChatColor.RED + "nobody is currently running! use /elections cancel to cancel the election";
     public static final String TITLES_NOT_FILLED = ChatColor.RED + "the titles aren't filled! starting voting anyway";
     public static final String UWU_DATABASE_ERROR = ChatColor.RED + "somewwing went reawwy wrong!! uwu pwease tell uws devs!!";
+
+    /**
+     * @param cond sends successMessage on true, database error on false
+     * @param sender who to send the message to
+     * @param successMessage the message to send when cond is true
+     */
+    public static void sendOnSuccess(boolean cond, CommandSender sender, String successMessage) {
+        if (cond) {
+            sender.sendMessage(successMessage);
+        } else {
+            sender.sendMessage(UWU_DATABASE_ERROR);
+        }
+    }
 }

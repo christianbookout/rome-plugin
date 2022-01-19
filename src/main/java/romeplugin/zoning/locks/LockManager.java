@@ -9,6 +9,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.Plugin;
+import romeplugin.MessageConstants;
 import romeplugin.database.SQLConn;
 
 import java.sql.SQLException;
@@ -45,7 +46,6 @@ public class LockManager implements Listener {
             stmt.setInt(2, block.getY());
             stmt.setInt(3, block.getZ());
             try (var res = stmt.executeQuery()) {
-                stmt.close();
                 if (!res.next()) {
                     return OptionalInt.empty();
                 }
@@ -151,11 +151,17 @@ public class LockManager implements Listener {
                 }
                 // TODO: remove the lock when the block is already locked
                 if (getBlockLockId(block).isEmpty()) {
-                    if (lockBlock(block, keyId)) {
-                        event.getPlayer().sendMessage("locked your " + block);
-                    } else {
-                        event.getPlayer().sendMessage("something went wrong!");
-                    }
+                    MessageConstants.sendOnSuccess(
+                            lockBlock(block, keyId),
+                            event.getPlayer(),
+                            "locked your " + block.getType().name()
+                    );
+                } else {
+                    MessageConstants.sendOnSuccess(
+                            removeLock(block),
+                            event.getPlayer(),
+                            "unlocked the block"
+                    );
                 }
             }
         });

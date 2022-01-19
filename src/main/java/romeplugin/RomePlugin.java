@@ -159,7 +159,7 @@ public class RomePlugin extends JavaPlugin {
         getCommand("settitle").setExecutor(new SetTitleCommand(titles));
         getCommand("bal").setExecutor(new BalanceCommand(ledger));
         getServer().getPluginManager().registerEvents(new RemovePopeListener(), this);
-        getCommand("builder").setExecutor(new BuilderCommand(titles));
+        getCommand("builder").setExecutor(new BuilderCommand());
         getCommand("shout").setExecutor(new ShoutCommand());
         getCommand("pee").setExecutor(peeController);
         getCommand("makekey").setExecutor(new MakeKeyCommand(lockManager));

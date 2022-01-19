@@ -120,6 +120,21 @@ public class LockManager implements Listener {
         }
     }
 
+    public boolean removeLock(Block block) {
+        try (var conn = SQLConn.getConnection()) {
+            var stmt = conn
+                    .prepareStatement("DELETE FROM lockedBlocks WHERE x = ? AND y = ? AND z = ?;");
+            stmt.setInt(1, block.getX());
+            stmt.setInt(2, block.getY());
+            stmt.setInt(3, block.getZ());
+            stmt.execute();
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
     @EventHandler
     public void onPlayerInteract(PlayerInteractEvent event) {
         var item = event.getItem();
@@ -130,6 +145,7 @@ public class LockManager implements Listener {
         maybeKey.ifPresent(keyId -> {
             if (event.getPlayer().isSneaking()) {
                 var block = event.getClickedBlock();
+                // FIXME: check if block is in claim
                 if (block == null) {
                     return;
                 }

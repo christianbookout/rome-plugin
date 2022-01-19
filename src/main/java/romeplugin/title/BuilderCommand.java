@@ -9,11 +9,6 @@ import romeplugin.database.SQLConn;
 import java.sql.SQLException;
 
 public class BuilderCommand implements CommandExecutor {
-    private final TitleHandler titles;
-
-    public BuilderCommand(TitleHandler titles) {
-        this.titles = titles;
-    }
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String s, String[] args) {
@@ -26,8 +21,7 @@ public class BuilderCommand implements CommandExecutor {
                 sender.sendMessage(MessageConstants.UWU_DATABASE_ERROR);
                 return true;
             }
-            sender.sendMessage("builders: ");
-            sender.sendMessage(String.join(", ", builders));
+            sender.sendMessage("builders: " + String.join(", ", builders));
             return true;
         } else if (args.length < 2) {
             return false;
@@ -59,8 +53,8 @@ public class BuilderCommand implements CommandExecutor {
                         sender.sendMessage("this person wasn't even a builder!");
                     }
                 } catch (SQLException e) {
-                    sender.sendMessage(MessageConstants.UWU_DATABASE_ERROR);
                     e.printStackTrace();
+                    sender.sendMessage(MessageConstants.UWU_DATABASE_ERROR);
                 }
                 return true;
         }

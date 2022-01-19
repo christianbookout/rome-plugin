@@ -59,7 +59,7 @@ public class ElectionCommand implements CommandExecutor {
                 case "results":
                     if (args.length >= 2) {
                         try {
-                            int number = Integer.valueOf(args[1]);
+                            int number = Integer.parseInt(args[1]);
                             getResults(player, Optional.of(number));
                         } catch (NumberFormatException e) {
                             help(player);

@@ -166,6 +166,7 @@ public class RomePlugin extends JavaPlugin {
         getCommand("getblocks").setExecutor(new GetClaimBlocksCommand(landControl));
         getCommand("elections").setExecutor(new ElectionCommand(new ElectionHandler(this, titles)));
         getCommand("killallclaims").setExecutor(new RemoveAllClaimsCommand());
+        getCommand("titles").setExecutor(new TitlesCommand());
         getServer().getPluginManager().registerEvents(peeController, this);
         getServer().getPluginManager().registerEvents(new TitleEventListener(titles), this);
         getServer().getPluginManager().registerEvents(

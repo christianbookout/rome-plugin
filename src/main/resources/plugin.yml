@@ -89,3 +89,6 @@ commands:
     description: "make a key out of the currently held item"
     usage: "/makekey"
     permission: op
+  titles:
+    description: "get a list of all titles"
+    usage: "/titles"

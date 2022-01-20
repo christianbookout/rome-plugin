@@ -23,16 +23,6 @@ public class SQLConn {
         return source.getConnection();
     }
 
-    public static ResultSet read(String SQLCode) throws SQLException {
-        try (Connection conn = getConnection()) {
-            PreparedStatement statement = conn.prepareStatement(SQLCode);
-            return statement.executeQuery();
-        } catch (SQLTimeoutException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
     public static Title getTitle(UUID who) {
         try (var conn = getConnection()) {
             var stmt = conn.prepareStatement("SELECT * FROM titles WHERE uuid = ?;");
@@ -84,14 +74,15 @@ public class SQLConn {
      * @return the amount of extra blocks the user can claim (granted by whatever)
      */
     public static int getClaimAmount(UUID uuid) {
-        try {
-            var stmt = getConnection().prepareStatement("SELECT * FROM extraClaimBlocks WHERE uuid = ?");
+        try (var conn = getConnection()){
+            var stmt = conn.prepareStatement("SELECT * FROM extraClaimBlocks WHERE uuid = ?");
             stmt.setString(1, uuid.toString());
             var results = stmt.executeQuery();
             if (results.next()) {
                 return results.getInt("claimBlocks");
             }
         } catch (SQLException e) {
+            e.printStackTrace();
         }
         return 0;
     }

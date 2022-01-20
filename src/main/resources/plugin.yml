@@ -75,7 +75,6 @@ commands:
   builder:
     description: "deal with builders"
     usage: "/builder list|assign <who>|revoke <who>"
-    permission: romeplugin.aedile
   shout:
     description: "broadcast message globally"
     usage: "/shout [message]"

@@ -38,11 +38,6 @@ import java.util.logging.Level;
 
 public class RomePlugin extends JavaPlugin {
     public static final HashMap<Player, Title> onlinePlayerTitles = new HashMap<>();
-    // Hashmap of players who joined the server and don't exist in the database
-    // TODO: store these players when the server closes (and/or over a timed
-    // interval)
-    public static final HashMap<Player, Title> toStore = new HashMap<>();
-    // private final String titlesFilename = "rome_titles";
     // TODO: make the ledger persistent
     private final Ledger ledger = new Ledger();
 
@@ -51,13 +46,6 @@ public class RomePlugin extends JavaPlugin {
     // runs when the plugin is enabled on the server startup
     @Override
     public void onEnable() {
-        // registering the eventlistener
-        // try {
-        // titles.loadData(new DataInputStream(new FileInputStream(titlesFilename)));
-        // } catch (FileNotFoundException e) {
-        // getLogger().fine("could not find " + titlesFilename);
-        // }
-
         this.saveDefaultConfig();
         FileConfiguration config = this.getConfig();
 
@@ -75,6 +63,7 @@ public class RomePlugin extends JavaPlugin {
         dataSource.setDatabaseName(config.getString("database.database"));
         dataSource.setUser(config.getString("database.username"));
         dataSource.setPassword(config.getString("database.password"));
+
         Material claimMaterial;
         String claimMaterialStr = config.getString("claims.claimMaterial");
         var protectedMaterialStrings = config.getStringList("claims.autoLockedBlocks");

@@ -27,7 +27,7 @@ public class ElectionHandler {
         VOTING
     }
 
-    private TitleHandler titleHandler;
+    private final TitleHandler titleHandler;
     private final Plugin plugin;
 
     public ElectionHandler(Plugin plugin, TitleHandler titleHandler) {
@@ -207,6 +207,28 @@ public class ElectionHandler {
      */
     public void endElection() {
         var results = this.getWinners(this.getCandidates());
+
+        for (var uuid : SQLConn.getUUIDsWithTitle(Title.CONSUL)) {
+            titleHandler.setTitle(uuid, Title.CENSOR);
+        }
+
+        for (var uuid : SQLConn.getUUIDsWithTitle(Title.CENSOR)) {
+            if (results.stream().noneMatch(winner -> winner.getUniqueId().equals(uuid))) {
+                titleHandler.setTitle(uuid, Title.QUAESTOR);
+            }
+        }
+
+        for (var uuid : SQLConn.getUUIDsWithTitle(Title.TRIBUNE)) {
+            titleHandler.setTitle(uuid, Title.QUAESTOR);
+        }
+
+        for (var uuid : SQLConn.getUUIDsWithTitle(Title.PRAETOR)) {
+            titleHandler.setTitle(uuid, Title.QUAESTOR);
+        }
+
+        for (var uuid : SQLConn.getUUIDsWithTitle(Title.AEDILE)) {
+            titleHandler.setTitle(uuid, Title.QUAESTOR);
+        }
 
         //Apply all titles to each winner
         results.forEach(winner -> titleHandler.setTitle(winner.getUniqueId(), winner.getTitle()));

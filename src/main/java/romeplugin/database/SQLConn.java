@@ -7,6 +7,7 @@ import romeplugin.title.Title;
 import javax.sql.DataSource;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -278,6 +279,22 @@ public class SQLConn {
         } catch (SQLException e) {
             e.printStackTrace();
             return null;
+        }
+    }
+
+    public static List<UUID> getUUIDsWithTitle(Title title) {
+        try (var conn = getConnection()) {
+            var stmt = conn.prepareStatement("SELECT uuid FROM titles WHERE title = ?;");
+            stmt.setString(1, title.toString());
+            var res = stmt.executeQuery();
+            var names = new ArrayList<UUID>();
+            while (res.next()) {
+                names.add(UUID.fromString(res.getString("uuid")));
+            }
+            return names;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return Collections.emptyList();
         }
     }
 }

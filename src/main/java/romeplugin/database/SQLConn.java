@@ -5,7 +5,8 @@ import org.bukkit.entity.Player;
 import romeplugin.title.Title;
 
 import javax.sql.DataSource;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -61,8 +62,53 @@ public class SQLConn {
         }
     }
 
+    public static List<ClaimEntry> getIntersectingClaims(int x0, int y0, int x1, int y1) {
+        try (var conn = getConnection();
+             var stmt = conn.prepareStatement("SELECT * FROM cityClaims WHERE x0 <= ? AND x1 >= ? AND y0 >= ? AND y1 <= ?;")) {
+            stmt.setInt(1, x1);
+            stmt.setInt(2, x0);
+            stmt.setInt(3, y1);
+            stmt.setInt(4, y0);
+            try (var res = stmt.executeQuery()) {
+                var claims = new ArrayList<ClaimEntry>();
+                while (res.next()) {
+                    claims.add(new ClaimEntry(
+                            res.getInt("x0"),
+                            res.getInt("y0"),
+                            res.getInt("x1"),
+                            res.getInt("y1"),
+                            UUID.fromString(res.getString("owner_uuid"))
+                    ));
+                }
+                return claims;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
     public static ClaimEntry getClaim(int x, int y) {
-        return getClaimRect(x, y, x, y);
+        try (var conn = getConnection();
+             var stmt = conn.prepareStatement("SELECT * FROM cityClaims WHERE x0 <= ? AND x1 >= ? AND y0 >= ? AND y1 <= ?;")) {
+            stmt.setInt(1, x);
+            stmt.setInt(2, x);
+            stmt.setInt(3, y);
+            stmt.setInt(4, y);
+            var res = stmt.executeQuery();
+            if (!res.next()) {
+                return null;
+            }
+            return new ClaimEntry(
+                    res.getInt("x0"),
+                    res.getInt("y0"),
+                    res.getInt("x1"),
+                    res.getInt("y1"),
+                    UUID.fromString(res.getString("owner_uuid")));
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     public static ClaimEntry getClaim(Location loc) {
@@ -74,7 +120,7 @@ public class SQLConn {
      * @return the amount of extra blocks the user can claim (granted by whatever)
      */
     public static int getClaimAmount(UUID uuid) {
-        try (var conn = getConnection()){
+        try (var conn = getConnection()) {
             var stmt = conn.prepareStatement("SELECT * FROM extraClaimBlocks WHERE uuid = ?");
             stmt.setString(1, uuid.toString());
             var results = stmt.executeQuery();
@@ -93,36 +139,6 @@ public class SQLConn {
             var stmt = getConnection().prepareStatement("");
         } catch (SQLException e) {}
     }*/
-
-    public static ClaimEntry getClaimRect(int x0, int y0, int x1, int y1) {
-        ResultSet res = null;
-        try (var conn = getConnection();
-             var stmt = conn.prepareStatement("SELECT * FROM cityClaims WHERE x0 <= ? AND x1 >= ? AND y0 >= ? AND y1 <= ?;")) {
-            try {
-                stmt.setInt(1, x1);
-                stmt.setInt(2, x0);
-                stmt.setInt(3, y1);
-                stmt.setInt(4, y0);
-                res = stmt.executeQuery();
-                if (!res.next()) {
-                    return null;
-                }
-                return new ClaimEntry(
-                        res.getInt("x0"),
-                        res.getInt("y0"),
-                        res.getInt("x1"),
-                        res.getInt("y1"),
-                        UUID.fromString(res.getString("owner_uuid")));
-            } finally {
-                if (res != null) {
-                    res.close();
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
 
     // does not verify the new claim doesn't overlap an existing claim!
     public static boolean addClaim(int x0, int y0, int x1, int y1, UUID uniqueId) {

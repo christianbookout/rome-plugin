@@ -171,8 +171,8 @@ public class LandControl {
         if (!canClaim(player, x0, y0, x1, y1)) {
             return false;
         }
-        var claim = SQLConn.getClaimRect(x0, y0, x1, y1);
-        if (claim != null) {
+        var claims = SQLConn.getIntersectingClaims(x0, y0, x1, y1);
+        if (claims == null || !claims.isEmpty()) {
             player.sendMessage("land already claimed >:(");
             return false;
         }

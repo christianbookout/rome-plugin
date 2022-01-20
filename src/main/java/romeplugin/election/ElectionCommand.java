@@ -283,10 +283,10 @@ public class ElectionCommand implements CommandExecutor {
         if (target == Title.TRIBUNE) {
             return true;
         }
-        if ((target == Title.AEDILE || target == Title.PRAETOR) && (current == Title.QUAESTOR || current == Title.CENSOR || current == Title.AEDILE)) {
+        if ((target == Title.AEDILE || target == Title.PRAETOR) && (current == Title.QUAESTOR || current == Title.CENSOR || current == Title.AEDILE || current == Title.TRIBUNE)) {
             return true;
         }
-        return target == Title.CONSUL && (current == Title.QUAESTOR || current == Title.PRAETOR || current == Title.AEDILE || current == Title.CENSOR);
+        return target == Title.CONSUL && (current == Title.QUAESTOR || current == Title.PRAETOR || current == Title.AEDILE || current == Title.CENSOR || current == Title.TRIBUNE);
     }
 
     //title may be null! 

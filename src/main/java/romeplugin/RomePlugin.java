@@ -19,6 +19,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import romeplugin.database.SQLConn;
 import romeplugin.election.ElectionCommand;
 import romeplugin.election.ElectionHandler;
+import romeplugin.election.ElectionTabCompleter;
 import romeplugin.messageIntercepter.DistanceListener;
 import romeplugin.messageIntercepter.ShoutCommand;
 import romeplugin.messageIntercepter.SwearFilter;
@@ -165,6 +166,7 @@ public class RomePlugin extends JavaPlugin {
         getCommand("makekey").setExecutor(new MakeKeyCommand(lockManager));
         getCommand("getblocks").setExecutor(new GetClaimBlocksCommand(landControl));
         getCommand("elections").setExecutor(new ElectionCommand(new ElectionHandler(this, titles)));
+        getCommand("elections").setTabCompleter(new ElectionTabCompleter());
         getCommand("killallclaims").setExecutor(new RemoveAllClaimsCommand());
         getCommand("titles").setExecutor(new TitlesCommand());
         getServer().getPluginManager().registerEvents(peeController, this);

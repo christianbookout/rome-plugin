@@ -5,6 +5,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import romeplugin.title.Title;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -31,7 +32,7 @@ public class ElectionTabCompleter implements TabCompleter {
         if (args.length == 0) {
             return Arrays.asList(subCommands);
         } else if (args.length == 1) {
-            var complete = Arrays.asList(subCommands);
+            var complete = new ArrayList<>(Arrays.asList(subCommands));
             complete.removeIf(str -> !str.startsWith(args[0]));
             return complete;
         } else if (args.length == 3) {

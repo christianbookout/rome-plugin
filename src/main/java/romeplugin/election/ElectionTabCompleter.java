@@ -35,12 +35,12 @@ public class ElectionTabCompleter implements TabCompleter {
             var complete = new ArrayList<>(Arrays.asList(subCommands));
             complete.removeIf(str -> !str.startsWith(args[0]));
             return complete;
-        } else if (args.length == 3) {
-            switch (args[1]) {
+        } else if (args.length == 2) {
+            switch (args[0]) {
                 case "run":
                     return Arrays.stream(Title.values())
                             .map(Enum::toString)
-                            .filter(title -> title.startsWith(args[2]))
+                            .filter(title -> title.startsWith(args[1]))
                             .collect(Collectors.toList());
                 case "vote":
                     // return default list of online players

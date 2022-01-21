@@ -205,7 +205,7 @@ public class LandControl {
 
     public int getClaimedBlocksInSuburbs(UUID who) {
         try (var conn = SQLConn.getConnection()) {
-            var stmt = conn.prepareStatement("SELECT SUM((x1 - x0 + 1) * (y0 - y1 + 1)) FROM cityClaims WHERE NOT (x0 <= ? AND x1 >= ? AND y0 >= ? AND y1 <= ?) AND owner_uuid = ?");
+            var stmt = conn.prepareStatement("SELECT SUM((x1 - x0 + 1) * (y0 - y1 + 1)) FROM cityClaims WHERE NOT (x0 <= ? AND x1 >= ? AND y0 >= ? AND y1 <= ?) AND owner_uuid = ?;");
             var extents = governmentSize * cityMult;
             stmt.setInt(1, cityX + extents); // x1
             stmt.setInt(2, cityX - extents); // x0

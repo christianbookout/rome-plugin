@@ -46,7 +46,10 @@ public class ClaimLandCommand implements CommandExecutor, TabCompleter {
             return shareClaim(player, args[1]);
         } else if (args[0].equals("remove")) {
             return removeClaim(player);
-        } else if (args[0].equals("transfer") && args.length >= 2) {
+        } else if (args[0].equals("removeall")) {
+            return removeAllClaims(player, args[1]);
+        }
+        else if (args[0].equals("transfer") && args.length >= 2) {
             return transferClaim(player, args[1]);
         } else if (args[0].equals("unshare") && args.length >= 2) {
             return unshareClaim(player, args[1]);
@@ -99,10 +102,12 @@ public class ClaimLandCommand implements CommandExecutor, TabCompleter {
     // actually do the removing
     private boolean removeAllClaims(CommandSender sender, UUID target, String targetName) {
         try (var conn = SQLConn.getConnection()) {
-            var stmt = conn.prepareStatement("DELETE FROM cityClaims WHERE owner_uuid = ?;");
-            stmt.setString(1, target.toString());
-            stmt.execute();
-            stmt.close();
+            var stmt2 = conn.prepareStatement("DELETE FROM cityClaims WHERE owner_uuid = ?;");
+
+            stmt2.setString(1, target.toString());
+            stmt2.execute();
+            stmt2.close();
+            SQLConn.removeAllShared(target);
             sender.sendMessage("Successfully deleted all of " + targetName + "'s claims");
         } catch (SQLException e) {
             sender.sendMessage("oopsies! we're vewwy sowwy!! o(╥﹏╥)o something went wrong...");
@@ -151,6 +156,7 @@ public class ClaimLandCommand implements CommandExecutor, TabCompleter {
             player.sendMessage("database error!");
             return false;
         }
+        SQLConn.unshareClaim(claim, Optional.empty());
         player.sendMessage("successfully removed claim");
         return true;
     }
@@ -198,7 +204,7 @@ public class ClaimLandCommand implements CommandExecutor, TabCompleter {
             player.sendMessage("not your claim");
             return false;
         }
-        if (!SQLConn.unshareClaim(claim, targetUUID)) {
+        if (!SQLConn.unshareClaim(claim, Optional.of(targetUUID))) {
             player.sendMessage("database error!");
             return false;
         }

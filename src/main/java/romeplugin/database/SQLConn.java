@@ -10,6 +10,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 
@@ -157,6 +158,28 @@ public class SQLConn {
         }
     }
 
+    /**
+     * remove all shared claims owned by target
+     * @param target owner of the claims
+     */
+    public static void removeAllShared(UUID target) {
+        try (var conn = SQLConn.getConnection()) {
+            var stmt = conn.prepareStatement("SELECT * FROM cityClaims WHERE owner_uuid = ?;");
+            stmt.setString(1, target.toString());
+            var results = stmt.executeQuery();
+            while (results.next()) {
+                var stmt2 = conn.prepareStatement("DELETE FROM strawberry WHERE x0 = ? AND y0 = ? AND x1 = ? AND y1 = ?;");
+                stmt2.setInt(1, results.getInt(1));
+                stmt2.setInt(2, results.getInt(2));
+                stmt2.setInt(3, results.getInt(3));
+                stmt2.setInt(4, results.getInt(4));
+                stmt2.execute();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
     public static boolean removeClaim(ClaimEntry claim) {
         try (var conn = getConnection()) {
             var stmt = conn.prepareStatement("DELETE FROM cityClaims WHERE x0 = ? AND y0 = ? AND x1 = ? AND y1 = ? AND owner_uuid = ?;");
@@ -249,14 +272,21 @@ public class SQLConn {
         }
     }
 
-    public static boolean unshareClaim(ClaimEntry entry, UUID toRemove) {
+    /**
+     * unshare claim with someone or everyone
+     * @param entry
+     * @param toRemove if not exists then remove all players
+     * @return
+     */
+    public static boolean unshareClaim(ClaimEntry entry, Optional<UUID> toRemove) {
         try (var conn = getConnection()) {
-            var stmt = conn.prepareStatement("DELETE FROM strawberry WHERE x0 = ? AND y0 = ? AND x1 = ? AND y1 = ? AND added_player_uuid = ?;");
+            String name = toRemove.isPresent() ? " AND added_player_uuid = ?" +  toRemove.get().toString() : "";
+            var stmt = conn.prepareStatement("DELETE FROM strawberry WHERE x0 = ? AND y0 = ? AND x1 = ? AND y1 = ?" + name + ";");
             stmt.setInt(1, entry.x0);
             stmt.setInt(2, entry.y0);
             stmt.setInt(3, entry.x1);
             stmt.setInt(4, entry.y1);
-            stmt.setString(5, toRemove.toString());
+            if (toRemove.isPresent()) stmt.setString(5, toRemove.toString());
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();

@@ -341,7 +341,7 @@ public class LandEventListener implements Listener {
             if (maybeLocked.isPresent()) {
                 if (e.getItem() != null) {
                     var maybeKey = lockManager.getKey(e.getItem());
-                    if (maybeKey.equals(maybeLocked)) {
+                    if (maybeKey.isPresent() && maybeKey.getAsInt() == maybeLocked.getAsInt()) {
                         e.setCancelled(false);
                         return;
                     }

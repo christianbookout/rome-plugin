@@ -102,6 +102,13 @@ public class RomePlugin extends JavaPlugin {
                     "x1 INT NOT NULL," +
                     "y1 INT NOT NULL," +
                     "owner_uuid CHAR(36) NOT NULL);").execute();
+            
+            conn.prepareStatement("CREATE TABLE IF NOT EXISTS strawberry (" +
+                    "x0 INT NOT NULL," +
+                    "y0 INT NOT NULL," +
+                    "x1 INT NOT NULL," +
+                    "y1 INT NOT NULL," +
+                    "added_player_uuid CHAR(36) NOT NULL);").execute();
             // overkill
             conn.prepareStatement("CREATE TABLE IF NOT EXISTS cityInfo (" +
                     "type TINYINT NOT NULL PRIMARY KEY," +
@@ -115,7 +122,7 @@ public class RomePlugin extends JavaPlugin {
             // all players extra claim blocks
             conn.prepareStatement("CREATE TABLE IF NOT EXISTS extraClaimBlocks (" +
                     "uuid CHAR(36) NOT NULL PRIMARY KEY," +
-                    "blocks INT NOT NULL DEFAULT 0);");
+                    "blocks INT NOT NULL DEFAULT 0);").execute();
 
             // fun lock stuff
             conn.prepareStatement("CREATE TABLE IF NOT EXISTS lockedBlocks (" +
@@ -141,9 +148,7 @@ public class RomePlugin extends JavaPlugin {
         var peeController = new PeeController(this);
         getCommand("rome").setExecutor(new LandCommand(landControl));
         getCommand("claim").setExecutor(new ClaimLandCommand(landControl));
-        getCommand("transferclaim").setExecutor(new TransferClaimCommand());
         getCommand("claiminfo").setExecutor(new ClaimInfoCommand());
-        getCommand("killclaim").setExecutor(new RemoveClaimCommand());
         getCommand("removetitle").setExecutor(new RemoveTitleCommand(titles));
         getCommand("foundrome").setExecutor(new FoundCityCommand(landControl));
         getCommand("settitle").setExecutor(new SetTitleCommand(titles));
@@ -156,7 +161,6 @@ public class RomePlugin extends JavaPlugin {
         getCommand("getblocks").setExecutor(new GetClaimBlocksCommand(landControl));
         getCommand("elections").setExecutor(new ElectionCommand(new ElectionHandler(this, titles)));
         getCommand("elections").setTabCompleter(new ElectionTabCompleter());
-        getCommand("killallclaims").setExecutor(new RemoveAllClaimsCommand());
         getCommand("titles").setExecutor(new TitlesCommand());
         getServer().getPluginManager().registerEvents(peeController, this);
         getServer().getPluginManager().registerEvents(new TitleEventListener(titles), this);
@@ -168,7 +172,6 @@ public class RomePlugin extends JavaPlugin {
         getServer().getPluginManager().registerEvents(lockManager, this);
         getServer().getPluginManager().registerEvents(new LandEnterListener(landControl), this);
     }
-
     // true/false if it worked or didnt work
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] arguments) {

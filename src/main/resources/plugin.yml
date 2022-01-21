@@ -59,9 +59,6 @@ commands:
   getblocks:
     description: "get blocks owned by yourself"
     usage: "/getblocks [who]"
-  killclaim:
-    description: "remove a claim at your location"
-    usage: "/killclaim"
   killallclaims:
     description: "remove all of your claims"
     usage: "/killallclaims <optional user>"

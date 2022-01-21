@@ -36,7 +36,14 @@ public class MessageConstants {
                                                         "/elections voting: " + ChatColor.RESET + "start the voting phase\n" + ChatColor.GOLD +
                                                         "/elections end: " + ChatColor.RESET + "end the current election\n" + ChatColor.GOLD +
                                                         "/elections cancel: " + ChatColor.RESET + "cancel the current election\n";
-    
+    public static final String CLAIMS_HELP_COMMAND = ChatColor.YELLOW + "\n<-------- " + ChatColor.RESET + "Claim Help" + ChatColor.YELLOW + " ----------->\n" + ChatColor.RESET + ChatColor.GOLD +
+                                                        "/claim <radius>: " + ChatColor.RESET + "claim in a radius around you\n" + ChatColor.GOLD +
+                                                        "/claim x0 y0 x1 y1: " + ChatColor.RESET + "claim area from x0 to x1 and y0 to y1\n" + ChatColor.GOLD +
+                                                        "/claim remove: " + ChatColor.RESET + "remove the claim you're standing on\n" +ChatColor.GOLD +
+                                                        "/claim removeall <op only: user>: " + ChatColor.RESET + "remove all claims\n" +ChatColor.GOLD +
+                                                        "/claim transfer: " + ChatColor.RESET +  "transfer your claim to another user\n" +ChatColor.GOLD +
+                                                        "/claim share <user>: " + ChatColor.RESET + "add another user to your claim\n" + ChatColor.GOLD + 
+                                                        "/claim unshare <user>: " + ChatColor.RESET + "unshare your claim with user\n";
     public static final String NO_LONGER_RUNNING = "you are no longer running for the election";
     public static final String NO_PERMISSION_ERROR = ChatColor.RED + "you do not have permission to do that";
     public static final String ELECTION_CANCELLED = "the election has been cancelled";

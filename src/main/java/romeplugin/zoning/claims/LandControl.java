@@ -106,7 +106,7 @@ public class LandControl {
             if (claim == null) {
                 return true;
             }
-            return claim.owner.equals(player.getUniqueId());
+            return claim.owner.equals(player.getUniqueId()) || SQLConn.claimShared(claim, player.getUniqueId());
         }
         try {
             if (area.getType() == GOVERNMENT && SQLConn.isBuilder(player.getUniqueId()) ) {
@@ -119,7 +119,7 @@ public class LandControl {
             return true;
         }
         var claim = SQLConn.getClaim(x, y);
-        return claim != null && claim.owner.equals(player.getUniqueId());
+        return claim != null && (claim.owner.equals(player.getUniqueId()) || SQLConn.claimShared(claim, player.getUniqueId()));
     }
 
     private static boolean rectIntersects(int x0, int y0, int x1, int y1,

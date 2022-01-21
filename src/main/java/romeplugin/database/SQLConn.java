@@ -134,7 +134,6 @@ public class SQLConn {
             stmt.setInt(4, y1);
             stmt.setString(5, uniqueId.toString());
             stmt.execute();
-            stmt.close();
             return true;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -151,7 +150,6 @@ public class SQLConn {
             stmt.setInt(4, claim.y1);
             stmt.setString(5, claim.owner.toString());
             stmt.execute();
-            stmt.close();
             return true;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -210,8 +208,57 @@ public class SQLConn {
             stmt.setInt(4, entry.x1);
             stmt.setInt(5, entry.y1);
             stmt.execute();
-            stmt.close();
             return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public static boolean shareClaim(ClaimEntry entry, UUID toAdd) {
+        try (var conn = getConnection()) {
+            var exists = conn.prepareStatement("SELECT * FROM strawberry WHERE x0 = " + entry.x0 + " AND y0 = " + entry.y0 + " AND x1 = " + entry.x1 + " AND y1 = " + entry.y1 + " AND added_player_uuid = '" + toAdd.toString() + "';").executeQuery().next();
+            if (exists) return false;
+            var stmt = conn.prepareStatement("REPLACE INTO strawberry VALUES (?, ?, ?, ?, ?);");
+            stmt.setInt(1, entry.x0);
+            stmt.setInt(2, entry.y0);
+            stmt.setInt(3, entry.x1);
+            stmt.setInt(4, entry.y1);
+            stmt.setString(5, toAdd.toString());
+            stmt.execute();
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public static boolean unshareClaim(ClaimEntry entry, UUID toRemove) {
+        try (var conn = getConnection()) {
+            var stmt = conn.prepareStatement("DELETE FROM strawberry WHERE x0 = ? AND y0 = ? AND x1 = ? AND y1 = ? AND added_player_uuid = ?;");
+            stmt.setInt(1, entry.x0);
+            stmt.setInt(2, entry.y0);
+            stmt.setInt(3, entry.x1);
+            stmt.setInt(4, entry.y1);
+            stmt.setString(5, toRemove.toString());
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public static boolean claimShared(ClaimEntry entry, UUID sharedWith) {
+        try (var conn = getConnection()) {
+            var stmt = conn.prepareStatement("SELECT * FROM strawberry " +
+                    "WHERE x0 = ? AND y0 = ? AND x1 = ? AND y1 = ? AND added_player_uuid = ?;");
+            stmt.setInt(1, entry.x0);
+            stmt.setInt(2, entry.y0);
+            stmt.setInt(3, entry.x1);
+            stmt.setInt(4, entry.y1);
+            stmt.setString(5, sharedWith.toString());
+            var result = stmt.executeQuery();
+            return result.next();
         } catch (SQLException e) {
             e.printStackTrace();
             return false;

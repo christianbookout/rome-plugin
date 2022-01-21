@@ -58,7 +58,7 @@ public class ElectionHandler {
                     "votes INT NOT NULL);").execute();
 
             conn.prepareStatement("CREATE TABLE IF NOT EXISTS playerVotes (" +
-                    "uuid CHAR(36) NOT NULL PRIMARY KEY," +
+                    "uuid CHAR(36) NOT NULL," +
                     "titleVotedFor " + RomePlugin.TITLE_ENUM + " NOT NULL);").execute();
 
         } catch (SQLException e) {

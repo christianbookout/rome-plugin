@@ -4,7 +4,9 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
@@ -141,22 +143,30 @@ public class LockManager implements Listener {
         if (item == null) {
             return;
         }
-        var maybeKey = getKey(item);
-        maybeKey.ifPresent(keyId -> {
+        getKey(item).ifPresent(keyId -> {
+            event.setCancelled(true);
             if (event.getPlayer().isSneaking()) {
                 var block = event.getClickedBlock();
-                // FIXME: check if block is in claim
                 if (block == null) {
                     return;
                 }
-                // TODO: remove the lock when the block is already locked
-                if (getBlockLockId(block).isEmpty()) {
+                var claim = SQLConn.getClaim(block.getX(), block.getZ());
+                if (claim == null || !claim.owner.equals(event.getPlayer().getUniqueId())) {
+                    event.getPlayer().sendMessage("you can only lock blocks in your claim");
+                    return;
+                }
+                var maybeLock = getBlockLockId(block);
+                if (maybeLock.isEmpty()) {
                     MessageConstants.sendOnSuccess(
                             lockBlock(block, keyId),
                             event.getPlayer(),
                             "locked your " + block.getType().name()
                     );
                 } else {
+                    if (!maybeLock.equals(OptionalInt.of(keyId))) {
+                        event.getPlayer().sendMessage("le do ckiku ku na ckiku le ti stela (this is locked with a different key)");
+                        return;
+                    }
                     MessageConstants.sendOnSuccess(
                             removeLock(block),
                             event.getPlayer(),
@@ -165,5 +175,10 @@ public class LockManager implements Listener {
                 }
             }
         });
+    }
+
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.LOW)
+    public void onBlockBreak(BlockBreakEvent event) {
+        removeLock(event.getBlock());
     }
 }

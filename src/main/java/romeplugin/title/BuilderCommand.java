@@ -3,7 +3,9 @@ package romeplugin.title;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 import romeplugin.MessageConstants;
+import romeplugin.RomePlugin;
 import romeplugin.database.SQLConn;
 
 import java.sql.SQLException;
@@ -31,6 +33,18 @@ public class BuilderCommand implements CommandExecutor {
             sender.sendMessage("player not found");
             return false;
         }
+        if (!sender.isOp()) {
+            if (!(sender instanceof Player)) {
+                sender.sendMessage(MessageConstants.NO_PERMISSION_ERROR);
+                return true;
+            }
+            var title = RomePlugin.onlinePlayerTitles.get(sender);
+            if (title != Title.AEDILE) {
+                sender.sendMessage(MessageConstants.NO_PERMISSION_ERROR);
+                return true;
+            }
+        }
+
         switch (args[0]) {
             case "assign":
                 try {

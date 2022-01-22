@@ -239,7 +239,8 @@ public class ClaimLandCommand implements CommandExecutor, TabCompleter {
             "remove",
             "transfer",
             "unshare",
-            "help"
+            "help",
+            "list"
     );
 
     @Override

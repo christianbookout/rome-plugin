@@ -30,7 +30,7 @@ public class ClaimLandCommand implements CommandExecutor, TabCompleter {
             help(sender);
             return true;
         }
-        if (args[0].equals("removeall") && sender.isOp()) return removeAllClaims(sender, args[1]);
+        if (args[0].equals("removeall") && sender.isOp() && args.length >= 2) return removeAllClaims(sender, args[1]);
         if (!(sender instanceof Player)) return false;
         Player player = (Player) sender;
 
@@ -47,7 +47,7 @@ public class ClaimLandCommand implements CommandExecutor, TabCompleter {
         } else if (args[0].equals("remove")) {
             return removeClaim(player);
         } else if (args[0].equals("removeall")) {
-            return removeAllClaims(player, args[1]);
+            return removeAllClaims(player, player.getUniqueId(), "you");
         }
         else if (args[0].equals("transfer") && args.length >= 2) {
             return transferClaim(player, args[1]);
@@ -81,33 +81,22 @@ public class ClaimLandCommand implements CommandExecutor, TabCompleter {
      */
     private boolean removeAllClaims(CommandSender sender, String arg) {
         var target = SQLConn.getUUIDFromUsername(arg);
-        String targetName = SQLConn.getUsername(target);
         if (target == null) {
             sender.sendMessage(MessageConstants.CANT_FIND_PLAYER);
             return true;
         }
+        String targetName = SQLConn.getUsername(target);
         return removeAllClaims(sender, target, targetName);
     }
-    //test if it is possible for the player
-    private boolean removeAllClaims(Player player, String arg) {
-        var target = SQLConn.getUUIDFromUsername(arg);
-        String targetName = SQLConn.getUsername(target);
-        if (!player.isOp() && !player.getUniqueId().equals(target)) {
-            player.sendMessage(MessageConstants.NO_PERMISSION_ERROR);
-            return true;
-        }
-        return removeAllClaims(player, target, targetName);
-    }
-
     // actually do the removing
     private boolean removeAllClaims(CommandSender sender, UUID target, String targetName) {
         try (var conn = SQLConn.getConnection()) {
+            SQLConn.removeAllShared(target);
             var stmt2 = conn.prepareStatement("DELETE FROM cityClaims WHERE owner_uuid = ?;");
 
             stmt2.setString(1, target.toString());
             stmt2.execute();
             stmt2.close();
-            SQLConn.removeAllShared(target);
             sender.sendMessage("Successfully deleted all of " + targetName + "'s claims");
         } catch (SQLException e) {
             sender.sendMessage("oopsies! we're vewwy sowwy!! o(╥﹏╥)o something went wrong...");

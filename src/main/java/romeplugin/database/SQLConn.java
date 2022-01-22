@@ -159,7 +159,7 @@ public class SQLConn {
     }
 
     /**
-     * remove all shared claims owned by target
+     * remove all shared claims owned by target MUST BE CALLED BEFORE owner_uuid IS REMOVED FROM cityClaims
      * @param target owner of the claims
      */
     public static void removeAllShared(UUID target) {
@@ -286,7 +286,7 @@ public class SQLConn {
             stmt.setInt(2, entry.y0);
             stmt.setInt(3, entry.x1);
             stmt.setInt(4, entry.y1);
-            if (toRemove.isPresent()) stmt.setString(5, toRemove.toString());
+            if (toRemove.isPresent()) stmt.setString(5, toRemove.get().toString());
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();

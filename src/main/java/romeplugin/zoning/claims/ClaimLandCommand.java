@@ -42,13 +42,15 @@ public class ClaimLandCommand implements CommandExecutor, TabCompleter {
             return removeClaim(player);
         } else if (args[0].equals("removeall")) {
             return removeAllClaims(player, player.getUniqueId(), "you");
-        }
-        else if (args[0].equals("transfer") && args.length >= 2) {
+        } else if (args[0].equals("transfer") && args.length >= 2) {
             return transferClaim(player, args[1]);
         } else if (args[0].equals("unshare") && args.length >= 2) {
             return unshareClaim(player, args[1]);
         } else if (args[0].equals("help")) {
             help(player);
+            return true;
+        } else if (args[0].equals("list")) {
+            listClaims(player);
             return true;
         }
         if (args.length < 4) {
@@ -63,6 +65,39 @@ public class ClaimLandCommand implements CommandExecutor, TabCompleter {
         } catch (NumberFormatException e) {
             return false;
         }
+    }
+
+    private void listClaims(Player player) {
+        var claims = SQLConn.getClaimsBy(player.getUniqueId());
+        if (claims == null) {
+            player.sendMessage(MessageConstants.UWU_DATABASE_ERROR);
+            return;
+        } else if (claims.isEmpty()) {
+            player.sendMessage("you don't have any claims!");
+            return;
+        }
+
+        var sb = new StringBuilder();
+        for (var claim : claims) {
+            sb.append("claim from (")
+                    .append(claim.x0)
+                    .append(", ")
+                    .append(claim.y0)
+                    .append(") to (")
+                    .append(claim.x1)
+                    .append(", ")
+                    .append(claim.y1)
+                    .append(")\n");
+            var sharedWith = SQLConn.claimSharedWithUsernames(claim);
+            if (sharedWith == null) {
+                player.sendMessage(MessageConstants.UWU_DATABASE_ERROR);
+                return;
+            }
+            if (!sharedWith.isEmpty()) {
+                sb.append("shared with: ").append(String.join(", ", sharedWith));
+            }
+        }
+        player.sendMessage(sb.toString());
     }
 
     private void help(CommandSender sender) {
@@ -85,12 +120,12 @@ public class ClaimLandCommand implements CommandExecutor, TabCompleter {
         String targetName = SQLConn.getUsername(target);
         return removeAllClaims(sender, target, targetName);
     }
+
     // actually do the removing
     private boolean removeAllClaims(CommandSender sender, UUID target, String targetName) {
         try (var conn = SQLConn.getConnection()) {
             SQLConn.removeAllShared(target);
             var stmt2 = conn.prepareStatement("DELETE FROM cityClaims WHERE owner_uuid = ?;");
-
             stmt2.setString(1, target.toString());
             stmt2.execute();
             stmt2.close();

@@ -7,11 +7,7 @@ import romeplugin.title.Title;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 
 public class SQLConn {
@@ -160,6 +156,7 @@ public class SQLConn {
 
     /**
      * remove all shared claims owned by target MUST BE CALLED BEFORE owner_uuid IS REMOVED FROM cityClaims
+     *
      * @param target owner of the claims
      */
     public static void removeAllShared(UUID target) {
@@ -274,13 +271,14 @@ public class SQLConn {
 
     /**
      * unshare claim with someone or everyone
+     *
      * @param entry
      * @param toRemove if not exists then remove all players
      * @return
      */
     public static boolean unshareClaim(ClaimEntry entry, Optional<UUID> toRemove) {
         try (var conn = getConnection()) {
-            String name = toRemove.isPresent() ? " AND added_player_uuid = ?" +  toRemove.get().toString() : "";
+            String name = toRemove.isPresent() ? " AND added_player_uuid = ?" + toRemove.get().toString() : "";
             var stmt = conn.prepareStatement("DELETE FROM strawberry WHERE x0 = ? AND y0 = ? AND x1 = ? AND y1 = ?" + name + ";");
             stmt.setInt(1, entry.x0);
             stmt.setInt(2, entry.y0);
@@ -308,6 +306,27 @@ public class SQLConn {
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
+        }
+    }
+
+    public static List<String> claimSharedWithUsernames(ClaimEntry entry) {
+        try (var conn = getConnection()) {
+            var stmt = conn.prepareStatement("SELECT username FROM usernames WHERE " +
+                    "uuid = (SELECT added_player_uuid FROM strawberry WHERE x0 = ? AND y0 = ? AND x1 = ? AND y1 = ?);");
+            stmt.setInt(1, entry.x0);
+            stmt.setInt(2, entry.y0);
+            stmt.setInt(3, entry.x1);
+            stmt.setInt(4, entry.y1);
+            try (var res = stmt.executeQuery()) {
+                var claims = new ArrayList<String>();
+                while (res.next()) {
+                    claims.add(res.getString("username"));
+                }
+                return claims;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
         }
     }
 
@@ -379,6 +398,29 @@ public class SQLConn {
         } catch (SQLException e) {
             e.printStackTrace();
             return Collections.emptyList();
+        }
+    }
+
+    public static List<ClaimEntry> getClaimsBy(UUID uuid) {
+        try (var conn = getConnection();
+             var stmt = conn.prepareStatement("SELECT * FROM cityClaims WHERE owner_uuid = ?;")) {
+            stmt.setString(1, uuid.toString());
+            try (var res = stmt.executeQuery()) {
+                var claims = new ArrayList<ClaimEntry>();
+                while (res.next()) {
+                    claims.add(new ClaimEntry(
+                            res.getInt("x0"),
+                            res.getInt("y0"),
+                            res.getInt("x1"),
+                            res.getInt("y1"),
+                            UUID.fromString(res.getString("owner_uuid"))
+                    ));
+                }
+                return claims;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
         }
     }
 }

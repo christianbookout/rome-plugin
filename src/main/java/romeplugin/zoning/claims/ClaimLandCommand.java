@@ -1,21 +1,15 @@
 package romeplugin.zoning.claims;
 
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-
-
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
-
 import romeplugin.MessageConstants;
 import romeplugin.database.SQLConn;
+
+import java.sql.SQLException;
+import java.util.*;
 
 public class ClaimLandCommand implements CommandExecutor, TabCompleter {
     private final LandControl landControl;
@@ -70,17 +64,20 @@ public class ClaimLandCommand implements CommandExecutor, TabCompleter {
             return false;
         }
     }
+
     private void help(CommandSender sender) {
         sender.sendMessage(MessageConstants.CLAIMS_HELP_COMMAND);
     }
+
     /**
      * Force remove all claims for player with name arg
-     * @param sender
-     * @param arg
+     *
+     * @param sender         sender trying to remove claims
+     * @param targetUsername username of owner of the claims to remove
      * @return if it worked
      */
-    private boolean removeAllClaims(CommandSender sender, String arg) {
-        var target = SQLConn.getUUIDFromUsername(arg);
+    private boolean removeAllClaims(CommandSender sender, String targetUsername) {
+        var target = SQLConn.getUUIDFromUsername(targetUsername);
         if (target == null) {
             sender.sendMessage(MessageConstants.CANT_FIND_PLAYER);
             return true;
@@ -105,10 +102,9 @@ public class ClaimLandCommand implements CommandExecutor, TabCompleter {
         return true;
     }
 
-    private boolean transferClaim(Player player, String arg) {
+    private boolean transferClaim(Player player, String targetUsername) {
         var loc = player.getLocation();
-        var target = arg;
-        var targetUUID = SQLConn.getUUIDFromUsername(target);
+        var targetUUID = SQLConn.getUUIDFromUsername(targetUsername);
         if (targetUUID == null) {
             player.sendMessage("invalid username");
             return false;
@@ -126,7 +122,7 @@ public class ClaimLandCommand implements CommandExecutor, TabCompleter {
             player.sendMessage("database error!");
             return false;
         }
-        player.sendMessage("transferred claim to " + target);
+        player.sendMessage("transferred claim to " + targetUsername);
         return true;
     }
 
@@ -151,10 +147,9 @@ public class ClaimLandCommand implements CommandExecutor, TabCompleter {
     }
 
     //TODO make a method that makes it so we arent copy-pasting shareClaim into unshareClaim
-    private boolean shareClaim(Player player, String arg) {
+    private boolean shareClaim(Player player, String targetUsername) {
         var loc = player.getLocation();
-        var target = arg;
-        var targetUUID = SQLConn.getUUIDFromUsername(target);
+        var targetUUID = SQLConn.getUUIDFromUsername(targetUsername);
         if (targetUUID == null) {
             player.sendMessage("invalid username");
             return false;
@@ -172,14 +167,13 @@ public class ClaimLandCommand implements CommandExecutor, TabCompleter {
             player.sendMessage("already shared with this player");
             return true;
         }
-        player.sendMessage("added " + target + " to your claim");
+        player.sendMessage("added " + targetUsername + " to your claim");
         return true;
     }
 
-    private boolean unshareClaim(Player player, String arg) {
+    private boolean unshareClaim(Player player, String targetUsername) {
         var loc = player.getLocation();
-        var target = arg;
-        var targetUUID = SQLConn.getUUIDFromUsername(target);
+        var targetUUID = SQLConn.getUUIDFromUsername(targetUsername);
         if (targetUUID == null) {
             player.sendMessage("invalid username");
             return false;
@@ -197,12 +191,38 @@ public class ClaimLandCommand implements CommandExecutor, TabCompleter {
             player.sendMessage("database error!");
             return false;
         }
-        player.sendMessage("removed " + target + " from your claim");
+        player.sendMessage("removed " + targetUsername + " from your claim");
         return true;
     }
 
+    private final List<String> subcommands = Arrays.asList(
+            "radius",
+            "share",
+            "remove",
+            "transfer",
+            "unshare",
+            "help"
+    );
+
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
-        return Arrays.asList("owned");
+        if (args.length == 0) {
+            return subcommands;
+        } else if (args.length == 1) {
+            var started = new ArrayList<>(subcommands);
+            if (sender.isOp()) {
+                started.add("removeall");
+            }
+            started.removeIf(str -> !str.startsWith(args[0]));
+            return started;
+        } else if (args.length == 2) {
+            switch (args[1]) {
+                case "transfer":
+                case "share":
+                case "removeall":
+                    return null;
+            }
+        }
+        return Collections.emptyList();
     }
 }

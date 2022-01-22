@@ -25,6 +25,7 @@ import org.bukkit.event.player.PlayerBucketFillEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
+import romeplugin.MessageConstants;
 import romeplugin.database.ClaimEntry;
 import romeplugin.database.SQLConn;
 import romeplugin.zoning.claims.LandControl;
@@ -341,9 +342,15 @@ public class LandEventListener implements Listener {
             if (maybeLocked.isPresent()) {
                 if (e.getItem() != null) {
                     var maybeKey = lockManager.getKey(e.getItem());
-                    if (maybeKey.equals(maybeLocked)) {
-                        e.setCancelled(false);
-                        return;
+                    if (maybeKey.isPresent()) {
+                        if (maybeKey.getAsInt() == maybeLocked.getAsInt()) {
+                            e.setCancelled(false);
+                            return;
+                        } else {
+                            e.getPlayer().sendMessage("wrong key!");
+                        }
+                    } else {
+                        e.getPlayer().sendMessage("thats locked silly!");
                     }
                 }
                 // check if the lock's owner is the player who is trying to open it

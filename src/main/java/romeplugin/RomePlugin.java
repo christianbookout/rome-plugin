@@ -25,15 +25,21 @@ import romeplugin.messageIntercepter.ShoutCommand;
 import romeplugin.messageIntercepter.SwearFilter;
 import romeplugin.misc.PeeController;
 import romeplugin.title.*;
-import romeplugin.zoning.*;
-import romeplugin.zoning.claims.*;
+import romeplugin.zoning.FoundCityCommand;
+import romeplugin.zoning.LandCommand;
+import romeplugin.zoning.LandEnterListener;
+import romeplugin.zoning.LandEventListener;
+import romeplugin.zoning.claims.ClaimInfoCommand;
+import romeplugin.zoning.claims.ClaimLandCommand;
+import romeplugin.zoning.claims.GetClaimBlocksCommand;
+import romeplugin.zoning.claims.LandControl;
 import romeplugin.zoning.locks.LockManager;
 import romeplugin.zoning.locks.MakeKeyCommand;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.logging.Level;
 
 public class RomePlugin extends JavaPlugin {
@@ -74,7 +80,7 @@ public class RomePlugin extends JavaPlugin {
                     "error getting minecraft material from " + claimMaterialStr);
             claimMaterial = LandEventListener.DEFAULT_MATERIAL;
         }
-        var protectedMaterials = new ArrayList<Material>();
+        var protectedMaterials = new HashSet<Material>();
         protectedMaterialStrings.forEach(matStr -> protectedMaterials.add(Material.valueOf(matStr)));
 
         var lockManager = new LockManager(this);
@@ -102,7 +108,7 @@ public class RomePlugin extends JavaPlugin {
                     "x1 INT NOT NULL," +
                     "y1 INT NOT NULL," +
                     "owner_uuid CHAR(36) NOT NULL);").execute();
-            
+
             conn.prepareStatement("CREATE TABLE IF NOT EXISTS strawberry (" +
                     "x0 INT NOT NULL," +
                     "y0 INT NOT NULL," +
@@ -172,6 +178,7 @@ public class RomePlugin extends JavaPlugin {
         getServer().getPluginManager().registerEvents(lockManager, this);
         getServer().getPluginManager().registerEvents(new LandEnterListener(landControl), this);
     }
+
     // true/false if it worked or didnt work
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] arguments) {

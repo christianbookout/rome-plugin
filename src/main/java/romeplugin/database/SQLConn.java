@@ -7,7 +7,10 @@ import romeplugin.title.Title;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
 
 
 public class SQLConn {
@@ -272,20 +275,34 @@ public class SQLConn {
     /**
      * unshare claim with someone or everyone
      *
-     * @param entry
+     * @param entry claimEntry to un-share from
      * @param toRemove if not exists then remove all players
-     * @return
+     * @return returns true if the sql query removed any rows and false otherwise
      */
-    public static boolean unshareClaim(ClaimEntry entry, Optional<UUID> toRemove) {
+    public static boolean unshareClaim(ClaimEntry entry, UUID toRemove) {
         try (var conn = getConnection()) {
-            String name = toRemove.isPresent() ? " AND added_player_uuid = ?" + toRemove.get().toString() : "";
-            var stmt = conn.prepareStatement("DELETE FROM strawberry WHERE x0 = ? AND y0 = ? AND x1 = ? AND y1 = ?" + name + ";");
+            var stmt = conn.prepareStatement("DELETE FROM strawberry WHERE x0 = ? AND y0 = ? AND x1 = ? AND y1 = ? AND added_player_uuid = ?;");
             stmt.setInt(1, entry.x0);
             stmt.setInt(2, entry.y0);
             stmt.setInt(3, entry.x1);
             stmt.setInt(4, entry.y1);
-            if (toRemove.isPresent()) stmt.setString(5, toRemove.get().toString());
+            stmt.setString(5, toRemove.toString());
             return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public static boolean unshareClaim(ClaimEntry entry) {
+        try (var conn = getConnection()) {
+            var stmt = conn.prepareStatement("DELETE FROM strawberry WHERE x0 = ? AND y0 = ? AND x1 = ? AND y1 = ?;");
+            stmt.setInt(1, entry.x0);
+            stmt.setInt(2, entry.y0);
+            stmt.setInt(3, entry.x1);
+            stmt.setInt(4, entry.y1);
+            stmt.execute();
+            return true;
         } catch (SQLException e) {
             e.printStackTrace();
             return false;

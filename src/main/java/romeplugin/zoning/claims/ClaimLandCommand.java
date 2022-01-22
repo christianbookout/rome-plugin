@@ -166,17 +166,20 @@ public class ClaimLandCommand implements CommandExecutor, TabCompleter {
         var claim = SQLConn.getClaim(loc.getBlockX(), loc.getBlockZ());
         if (claim == null) {
             player.sendMessage("no claim here");
-            return false;
+            return true;
         }
         if (!player.isOp() && !claim.owner.equals(player.getUniqueId())) {
             player.sendMessage("insufficient permissions");
-            return false;
+            return true;
         }
         if (!SQLConn.removeClaim(claim)) {
             player.sendMessage("database error!");
-            return false;
+            return true;
         }
-        SQLConn.unshareClaim(claim, Optional.empty());
+        if (!SQLConn.unshareClaim(claim)) {
+            player.sendMessage(MessageConstants.UWU_DATABASE_ERROR);
+            return true;
+        }
         player.sendMessage("successfully removed claim");
         return true;
     }
@@ -222,7 +225,7 @@ public class ClaimLandCommand implements CommandExecutor, TabCompleter {
             player.sendMessage("not your claim");
             return false;
         }
-        if (!SQLConn.unshareClaim(claim, Optional.of(targetUUID))) {
+        if (!SQLConn.unshareClaim(claim, targetUUID)) {
             player.sendMessage("database error!");
             return false;
         }

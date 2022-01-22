@@ -1,6 +1,6 @@
 name: romeplugin
 author: gose
-version: 1.0
+version: 1.1.1
 main: romeplugin.RomePlugin
 api-version: 1.16
 permissions:

@@ -52,6 +52,9 @@ public class ClaimLandCommand implements CommandExecutor, TabCompleter {
         } else if (args[0].equals("list")) {
             listClaims(player);
             return true;
+        } else if (args[0].equals("info")) {
+            claimInfo(player);
+            return true;
         }
         if (args.length < 4) {
             return false;
@@ -65,6 +68,29 @@ public class ClaimLandCommand implements CommandExecutor, TabCompleter {
         } catch (NumberFormatException e) {
             return false;
         }
+    }
+
+    static void claimInfo(Player player) {
+        var loc = player.getLocation();
+        var claim = SQLConn.getClaim(loc.getBlockX(), loc.getBlockZ());
+        if (claim == null) {
+            player.sendMessage("no claim here!");
+            return;
+        }
+        var owner_username = SQLConn.getUsername(claim.owner);
+        if (owner_username == null) {
+            owner_username = claim.owner.toString();
+        }
+        var msg = "claim owner: " + owner_username +
+                "\narea: " + claim.getArea() + " blocks" +
+                "\nfrom (" + claim.x0 + ", " + claim.y0 + ") to (" + claim.x1 + ", " + claim.y1 + ")";
+
+        var shared = SQLConn.claimSharedWithUsernames(claim);
+        if (shared != null && !shared.isEmpty()) {
+            msg += "\nshared with: " + String.join(", ", shared);
+        }
+
+        player.sendMessage(msg);
     }
 
     private void listClaims(Player player) {
@@ -240,6 +266,7 @@ public class ClaimLandCommand implements CommandExecutor, TabCompleter {
             "transfer",
             "unshare",
             "help",
+            "info",
             "list"
     );
 

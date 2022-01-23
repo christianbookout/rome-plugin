@@ -44,7 +44,8 @@ public class MessageConstants {
                                                         "/claim transfer: " + ChatColor.RESET +  "transfer your claim to another user\n" +ChatColor.GOLD +
                                                         "/claim share <user>: " + ChatColor.RESET + "add another user to your claim\n" + ChatColor.GOLD +
                                                         "/claim unshare <user>: " + ChatColor.RESET + "unshare your claim with user\n" + ChatColor.GOLD +
-                                                        "/claim list: " + ChatColor.RESET + "list claims you own";
+                                                        "/claim list: " + ChatColor.RESET + "list claims you own\n" + ChatColor.GOLD +
+                                                        "/claim info: " + ChatColor.RESET + "get info about the claim you are in";
     public static final String NO_LONGER_RUNNING = "you are no longer running for the election";
     public static final String NO_PERMISSION_ERROR = ChatColor.RED + "you do not have permission to do that";
     public static final String ELECTION_CANCELLED = "the election has been cancelled";

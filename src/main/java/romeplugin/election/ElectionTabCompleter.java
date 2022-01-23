@@ -38,7 +38,7 @@ public class ElectionTabCompleter implements TabCompleter {
         } else if (args.length == 2) {
             switch (args[0]) {
                 case "run":
-                    return Arrays.stream(Title.values())
+                    return Arrays.stream(ElectionHandler.RUNNABLE_TITLES)
                             .map(Enum::toString)
                             .filter(title -> title.startsWith(args[1]))
                             .collect(Collectors.toList());

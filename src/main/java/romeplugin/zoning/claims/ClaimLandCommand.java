@@ -94,7 +94,7 @@ public class ClaimLandCommand implements CommandExecutor, TabCompleter {
                 return;
             }
             if (!sharedWith.isEmpty()) {
-                sb.append("shared with: ").append(String.join(", ", sharedWith));
+                sb.append("shared with: ").append(String.join(", ", sharedWith)).append('\n');
             }
         }
         player.sendMessage(sb.toString());

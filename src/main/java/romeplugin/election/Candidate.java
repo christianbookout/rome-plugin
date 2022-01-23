@@ -37,7 +37,7 @@ public class Candidate implements Comparable<Candidate> {
 
     @Override
     public int compareTo(Candidate o) {
-        return o.votes - this.votes;
+        return this.votes - o.votes;
     }
 
 }

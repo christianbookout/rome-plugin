@@ -31,10 +31,7 @@ import romeplugin.database.SQLConn;
 import romeplugin.zoning.claims.LandControl;
 import romeplugin.zoning.locks.LockManager;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 
 public class LandEventListener implements Listener {
     private final LockManager lockManager;
@@ -50,7 +47,7 @@ public class LandEventListener implements Listener {
     private final HashMap<Player, Location> players = new HashMap<>();
 
     //the materials people can't right-click in a claim/the city
-    private final List<Material> nonClickables;
+    private final Set<Material> nonClickables;
 
     //note last player who places sponge to make sure they arent tryna destroy water in someone else's claim
     //there will be a bug if someone who can build in the city places a sponge and then water flows from the city into the suburbs and someone already has
@@ -61,7 +58,7 @@ public class LandEventListener implements Listener {
             LandControl controller,
             LockManager lockManager,
             Material claimMaterial,
-            List<Material> autoLockedBlocks,
+            Set<Material> autoLockedBlocks,
             long claimTimeoutMS
     ) {
         this.controller = controller;

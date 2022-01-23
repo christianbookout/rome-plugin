@@ -5,7 +5,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import romeplugin.title.Title;
 
-public class MessageConstants { 
+public class MessageConstants {
 
     /****************************************** ELECTIONS ******************************************/
 
@@ -30,7 +30,7 @@ public class MessageConstants {
                                                         ChatColor.UNDERLINE + Title.QUAESTOR.color + Title.QUAESTOR.fancyName + "\n" +  ChatColor.GOLD +
                                                         "/elections run <title>: " + ChatColor.RESET + "run for a position\n" + ChatColor.GOLD +
                                                         "/elections quit: " + ChatColor.RESET + "stop running\n" + ChatColor.GOLD +
-                                                        ChatColor.UNDERLINE + Title.CONSUL.color + Title.CONSUL.fancyName + ChatColor.GOLD + "/" + 
+                                                        ChatColor.UNDERLINE + Title.CONSUL.color + Title.CONSUL.fancyName + ChatColor.GOLD + "/" +
                                                         Title.CENSOR.color + Title.CENSOR.fancyName + ChatColor.RESET + "\n" +  ChatColor.GOLD +
                                                         "/elections start: " + ChatColor.RESET + "start an election\n" +  ChatColor.GOLD +
                                                         "/elections voting: " + ChatColor.RESET + "start the voting phase\n" + ChatColor.GOLD +
@@ -42,8 +42,9 @@ public class MessageConstants {
                                                         "/claim remove: " + ChatColor.RESET + "remove the claim you're standing on\n" +ChatColor.GOLD +
                                                         "/claim removeall <op only: user>: " + ChatColor.RESET + "remove all claims\n" +ChatColor.GOLD +
                                                         "/claim transfer: " + ChatColor.RESET +  "transfer your claim to another user\n" +ChatColor.GOLD +
-                                                        "/claim share <user>: " + ChatColor.RESET + "add another user to your claim\n" + ChatColor.GOLD + 
-                                                        "/claim unshare <user>: " + ChatColor.RESET + "unshare your claim with user\n";
+                                                        "/claim share <user>: " + ChatColor.RESET + "add another user to your claim\n" + ChatColor.GOLD +
+                                                        "/claim unshare <user>: " + ChatColor.RESET + "unshare your claim with user\n" + ChatColor.GOLD +
+                                                        "/claim list: " + ChatColor.RESET + "list claims you own";
     public static final String NO_LONGER_RUNNING = "you are no longer running for the election";
     public static final String NO_PERMISSION_ERROR = ChatColor.RED + "you do not have permission to do that";
     public static final String ELECTION_CANCELLED = "the election has been cancelled";

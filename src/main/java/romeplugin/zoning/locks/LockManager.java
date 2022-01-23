@@ -145,11 +145,11 @@ public class LockManager implements Listener {
         }
         getKey(item).ifPresent(keyId -> {
             event.setCancelled(true);
+            var block = event.getClickedBlock();
+            if (block == null) {
+                return;
+            }
             if (event.getPlayer().isSneaking()) {
-                var block = event.getClickedBlock();
-                if (block == null) {
-                    return;
-                }
                 var claim = SQLConn.getClaim(block.getX(), block.getZ());
                 if (claim == null || !claim.owner.equals(event.getPlayer().getUniqueId())) {
                     event.getPlayer().sendMessage("you can only lock blocks in your claim");
@@ -173,6 +173,13 @@ public class LockManager implements Listener {
                             "unlocked the block"
                     );
                 }
+            } else {
+                var maybeLock = getBlockLockId(block);
+                maybeLock.ifPresent(lockId -> {
+                    if (lockId == keyId) {
+                        event.setCancelled(false);
+                    }
+                });
             }
         });
     }

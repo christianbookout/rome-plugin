@@ -13,7 +13,7 @@ import java.sql.SQLException;
 public class RemovePopeListener implements Listener {
 
     @EventHandler
-    public boolean onDeathEvent(PlayerDeathEvent e) {
+    public void onDeathEvent(PlayerDeathEvent e) {
         Title titleEntry = SQLConn.getTitle(e.getEntity().getUniqueId());
         if (titleEntry == Title.POPE) {
             try (Connection conn = SQLConn.getConnection()) {
@@ -23,10 +23,9 @@ public class RemovePopeListener implements Listener {
                 statement.execute();
             } catch (SQLException exc) {
                 exc.printStackTrace();
-                return false;
+                return;
             }
             RomePlugin.onlinePlayerTitles.remove(e.getEntity());
         }
-        return true;
     }
 }

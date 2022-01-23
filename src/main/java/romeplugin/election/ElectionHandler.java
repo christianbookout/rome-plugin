@@ -9,7 +9,10 @@ import romeplugin.title.TitleHandler;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.logging.Level;
 
 public class ElectionHandler {
@@ -182,22 +185,14 @@ public class ElectionHandler {
     }
 
     private Collection<Candidate> getWinners(Collection<Candidate> candidates) {
-        HashMap<Title, Collection<Candidate>> splitCandidates = new HashMap<>();
-
-        for (Title title : ElectionHandler.RUNNABLE_TITLES)
-            splitCandidates.put(title, new ArrayList<>());
-
-        candidates.forEach(c ->
-                splitCandidates.get(c.getTitle()).add(c)
-        );
-
         Collection<Candidate> winners = new ArrayList<>();
 
-        var values = splitCandidates.values();
-        values.forEach(collection -> {
-            if (!collection.isEmpty())
-                winners.add(Collections.max(collection));
-        });
+        for (Title title : ElectionHandler.RUNNABLE_TITLES) {
+            candidates.stream()
+                    .filter(c -> c.getTitle() == title)
+                    .max(Candidate::compareTo)
+                    .ifPresent(winners::add);
+        }
 
         return winners;
     }

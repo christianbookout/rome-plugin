@@ -39,6 +39,10 @@ public class LandControl {
         this.cityY = y;
     }
 
+    public int[] getCenter() {
+        return new int[]{cityX, cityY};
+    }
+
     public void setGovernmentSize(int governmentSize) {
         this.governmentSize = governmentSize;
         this.areas = new CityArea[]{

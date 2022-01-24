@@ -54,6 +54,18 @@ public class MessageConstants {
     public static final String NO_CANDIDATES = ChatColor.RED + "nobody is currently running! use /elections cancel to cancel the election";
     public static final String TITLES_NOT_FILLED = ChatColor.RED + "the titles aren't filled! starting voting anyway";
     public static final String UWU_DATABASE_ERROR = ChatColor.RED + "somewwing went reawwy wrong!! uwu pwease tell uws devs!!";
+    public static final String PARTIES_HELP_COMMAND = ChatColor.YELLOW + "\n<-------- " + ChatColor.RESET + "Claim Help" + ChatColor.YELLOW + " ----------->\n" + ChatColor.RESET + ChatColor.GOLD +
+                                                        "/parties create <name> <acronym>: " + ChatColor.RESET + "create a political party" + ChatColor.GOLD + 
+                                                        "/parties disband: " + ChatColor.RESET + "disband your party" + ChatColor.GOLD + 
+                                                        "/parties setowner <player>: " + ChatColor.RESET + "transfer ownership of your party n" + ChatColor.GOLD + 
+                                                        "/parties invite <player>: " + ChatColor.RESET + "invite a player to your party" + ChatColor.GOLD + 
+                                                        "/parties accept: " + ChatColor.RESET + "accept a party invite" + ChatColor.GOLD + 
+                                                        "/parties deny: " + ChatColor.RESET + "deny a party invite" + ChatColor.GOLD + 
+                                                        "/parties leave: " + ChatColor.RESET + "leave your current party" + ChatColor.GOLD + 
+                                                        "/parties description <description>: " + ChatColor.RESET + "" + ChatColor.GOLD + 
+                                                        "/parties rename <name> <acronym>: ";
+    public static final String NOT_IN_PARTY = ChatColor.RED + "you aren't currently in a party";
+    public static final String CANT_FIND_PARTY = null;
 
     /**
      * @param cond sends successMessage on true, database error on false

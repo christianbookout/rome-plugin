@@ -51,8 +51,8 @@ commands:
     description: "get balance"
     usage: "/bal"
   claim:
-    description: "claim land in the city :)"
-    usage: "/claim radius <r> | /claim <x0> <y0> <x1> <y1>"
+    description: "type /claim help for help"
+    usage: "/claim help"
   claiminfo:
     description: "get information on the claim you are in"
     usage: "/claiminfo"
@@ -88,3 +88,6 @@ commands:
   titles:
     description: "get a list of all titles"
     usage: "/titles"
+  parties:
+    description: "type /parties help for help"
+    usage: /parties help

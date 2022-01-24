@@ -295,6 +295,7 @@ public class ClaimLandCommand implements CommandExecutor, TabCompleter {
             switch (args[1]) {
                 case "transfer":
                 case "share":
+                case "unshare":
                     return players;
                 case "removeall":
                     if (sender.isOp()) return players;

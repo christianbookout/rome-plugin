@@ -5,17 +5,22 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
+
 import romeplugin.MessageConstants;
 import romeplugin.database.SQLConn;
 
 import java.sql.SQLException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class ClaimLandCommand implements CommandExecutor, TabCompleter {
     private final LandControl landControl;
+    private final Plugin plugin;
 
-    public ClaimLandCommand(LandControl landControl) {
+    public ClaimLandCommand(LandControl landControl, Plugin plugin) {
         this.landControl = landControl;
+        this.plugin = plugin;
     }
 
     @Override
@@ -282,11 +287,18 @@ public class ClaimLandCommand implements CommandExecutor, TabCompleter {
             started.removeIf(str -> !str.startsWith(args[0]));
             return started;
         } else if (args.length == 2) {
+            var players = plugin.getServer()
+                            .getOnlinePlayers()
+                            .stream()
+                            .map(Player::getName)
+                            .collect(Collectors.toList());
             switch (args[1]) {
                 case "transfer":
                 case "share":
+                    return players;
                 case "removeall":
-                    return null;
+                    if (sender.isOp()) return players;
+                    break;
             }
         }
         return Collections.emptyList();

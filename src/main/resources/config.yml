@@ -62,3 +62,8 @@ claims:
 messages:
   useSwearFilter: 1 # 0 for no filter, 1 for only city/government, and 2 for global
   messageDistance: 150 # distance to broadcast messages locally (0 for infinite distance)
+
+webhooks:
+  webhookurl: '' # replace with discord webhook URL for election announcements
+  title: romeplugin # webhook title
+  avatar_url: ~ # replace ~ with webhook avatar (if you want to)

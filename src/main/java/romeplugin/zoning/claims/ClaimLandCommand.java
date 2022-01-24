@@ -282,9 +282,10 @@ public class ClaimLandCommand implements CommandExecutor, TabCompleter {
             started.removeIf(str -> !str.startsWith(args[0]));
             return started;
         } else if (args.length == 2) {
-            switch (args[1]) {
+            switch (args[0]) {
                 case "transfer":
                 case "share":
+                case "unshare":
                 case "removeall":
                     return null;
             }

@@ -23,6 +23,7 @@ public class LandControl {
     private final int cityMult;
     private final int suburbsMult;
     private final int minBlockLimit;
+    private final ClaimCache claimCache = new ClaimCache(100);
 
     public LandControl(int cityX, int cityY, int governmentSize, int cityMult, int suburbsMult, int minBlockLimit) {
         this.minBlockLimit = minBlockLimit;
@@ -106,10 +107,11 @@ public class LandControl {
         var title = RomePlugin.onlinePlayerTitles.get(player);
         var area = getArea(x, y);
         if (area.getType() == SUBURB) {
-            var claim = SQLConn.getClaim(x, y);
-            if (claim == null) {
+            var maybeClaim = claimCache.getOrQuery(x, y);
+            if (maybeClaim.isEmpty()) {
                 return true;
             }
+            var claim = maybeClaim.get();
             return claim.owner.equals(player.getUniqueId()) || SQLConn.claimShared(claim, player.getUniqueId());
         }
         try {
@@ -122,7 +124,7 @@ public class LandControl {
         if (area.getType().canBuild(title)) {
             return true;
         }
-        var claim = SQLConn.getClaim(x, y);
+        var claim = claimCache.getOrQuery(x, y).orElse(null);
         return claim != null && (claim.owner.equals(player.getUniqueId()) || SQLConn.claimShared(claim, player.getUniqueId()));
     }
 

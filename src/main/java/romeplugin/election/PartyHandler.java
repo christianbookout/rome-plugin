@@ -228,4 +228,17 @@ public class PartyHandler {
             return Optional.empty();
         }
     }
+
+    public boolean rename(UUID uuid, String newAcronym, String newName) {
+        try (Connection conn = SQLConn.getConnection()) {
+            var stmt = conn.prepareStatement("UPDATE parties SET acronym=?, name=? WHERE owner_uuid=?;");
+            stmt.setString(1, newAcronym);
+            stmt.setString(2, newName);
+            stmt.setString(3, uuid.toString());
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
 }

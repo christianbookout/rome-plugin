@@ -66,6 +66,11 @@ public class MessageConstants {
                                                         "/parties rename <name> <acronym>: " + ChatColor.RESET + "change your party's name and acronym";
     public static final String NOT_IN_PARTY = ChatColor.RED + "you aren't currently in a party";
     public static final String CANT_FIND_PARTY = null;
+    public static final String OWNER_OF_PARTY_ERROR = null;
+    public static final String PARTY_PRIVATE_ERROR = null;
+    public static final String IN_PARTY_ERROR = null;
+    public static final String SUCCESSFUL_PARTY_CREATE = null;
+    public static final String SUCCESSFUL_PARTY_RENAME = null;
 
     /**
      * @param cond sends successMessage on true, database error on false

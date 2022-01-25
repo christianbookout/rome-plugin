@@ -71,6 +71,10 @@ public class MessageConstants {
     public static final String IN_PARTY_ERROR = null;
     public static final String SUCCESSFUL_PARTY_CREATE = null;
     public static final String SUCCESSFUL_PARTY_RENAME = null;
+    public static final String NO_INVITE_ERROR = null;
+    public static final String SUCCESSFULL_INVITE_DENY = null;
+    public static final String SUCCESSFULL_INVITE_ACCEPT = null;
+    public static final String SUCCESSFULL_INVITE_SEND = null;
 
     /**
      * @param cond sends successMessage on true, database error on false

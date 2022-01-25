@@ -10,12 +10,14 @@ import romeplugin.MessageConstants;
 import romeplugin.database.SQLConn;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class PartyCommand implements CommandExecutor, TabCompleter {
     private final PartyHandler partyHandler;
+    private final HashMap<UUID, String> invitations = new HashMap<>();
 
     public PartyCommand(PartyHandler partyHandler) {
         this.partyHandler = partyHandler;
@@ -63,6 +65,9 @@ public class PartyCommand implements CommandExecutor, TabCompleter {
             case "accept":
                 accept(player);
                 return true;
+            case "deny":
+                deny(player);
+                return true;
             case "info":
                 info(player, args[1]);
                 return true;
@@ -107,7 +112,22 @@ public class PartyCommand implements CommandExecutor, TabCompleter {
     }
 
     private void accept(Player player) {
-        // TODO: implement me!
+        var invite = invitations.remove(player.getUniqueId());
+        if (invite == null) {
+            player.sendMessage(MessageConstants.NO_INVITE_ERROR);
+            return;
+        }
+        if (partyHandler.joinParty(player.getUniqueId(), invite)) {
+            player.sendMessage(MessageConstants.SUCCESSFULL_INVITE_ACCEPT);
+        }
+    }
+
+    private void deny(Player player) {
+        if (invitations.remove(player.getUniqueId()) == null) {
+            player.sendMessage(MessageConstants.NO_INVITE_ERROR);
+            return;
+        }
+        player.sendMessage(MessageConstants.SUCCESSFULL_INVITE_DENY);
     }
 
     private void invite(Player player, String invitedStr) {
@@ -122,7 +142,8 @@ public class PartyCommand implements CommandExecutor, TabCompleter {
             player.sendMessage(MessageConstants.NOT_IN_PARTY);
             return;
         }
-        partyHandler.invite(invitedPlayer, partyName);
+        invitations.put(invitedPlayer, partyName);
+        player.sendMessage(MessageConstants.SUCCESSFULL_INVITE_SEND);
     }
 
     private void rename(Player player, String acronym, String name) {

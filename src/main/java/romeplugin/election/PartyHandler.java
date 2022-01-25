@@ -9,7 +9,6 @@ import romeplugin.database.SQLConn;
 public class PartyHandler {
     //DB: table 1 - players, their respective party name
     //    table 2 - party name
-    private HashMap<UUID, String> invitations = new HashMap<>();
     public PartyHandler() {
         this.initializedb();
     }
@@ -200,18 +199,6 @@ public class PartyHandler {
             e.printStackTrace();
         }
         return false;
-    }
-
-    public void invite(UUID player, String party) {
-        this.invitations.put(player, party);
-    }
-
-    public boolean deny(UUID player) {
-        return invitations.remove(player) != null;
-    }
-
-    public boolean accept (UUID player) {
-        return this.joinParty(player, invitations.get(player));
     }
 
     public Optional<Boolean> isPartyPublic(String acronym) {

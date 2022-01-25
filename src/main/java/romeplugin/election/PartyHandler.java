@@ -22,14 +22,14 @@ public class PartyHandler {
     private void initializedb() {
         try (Connection conn = SQLConn.getConnection()) {
             conn.prepareStatement("CREATE TABLE IF NOT EXISTS parties (" +
-                                  "title VARCHAR(1) NOT NULL UNIQUE," +
-                                  "acronym VARCHAR(1) NOT NULL UNIQUE," +
+                                  "name VARCHAR(50) NOT NULL UNIQUE," +
+                                  "acronym CHAR(4) NOT NULL UNIQUE," +
                                   "owner_uuid CHAR(36) NOT NULL UNIQUE PRIMARY KEY," + 
                                   "is_public BOOLEAN," +
-                                  "description VARCHAR(1));" +
+                                  "description VARCHAR(250));" +
                                   "CREATE TABLE IF NOT EXISTS partyMembers (" +
                                   "uuid CHAR(36) UNIQUE PRIMARY KEY NOT NULL," +
-                                  "acronym VARCHAR(1) NOT NULL);").executeBatch();
+                                  "acronym CHAR(4) NOT NULL);").executeBatch();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -37,9 +37,9 @@ public class PartyHandler {
     public Collection<String> getParties() {
         var parties = new ArrayList<String>();
         try (Connection conn = SQLConn.getConnection()) {
-            var results = conn.prepareStatement("SELECT * FROM parties;").executeQuery();
+            var results = conn.prepareStatement("SELECT name, acronym FROM parties;").executeQuery();
             while (results.next()) {
-                parties.add(results.getString("title") + " (" + results.getString("acronym") + ")");
+                parties.add(results.getString("name") + " (" + results.getString("acronym") + ")");
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -134,9 +134,9 @@ public class PartyHandler {
         return false;
     }
 
-    public String getFullTitle(String acronym) {
+    public String getName(String acronym) {
         try (Connection conn = SQLConn.getConnection()) {
-            var stmt = conn.prepareStatement("SELECT title FROM parties WHERE acronym=?;");
+            var stmt = conn.prepareStatement("SELECT name FROM parties WHERE acronym=?;");
             stmt.setString(1, acronym);
             var results = stmt.executeQuery();
             if (results.next()) {

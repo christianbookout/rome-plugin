@@ -10,11 +10,7 @@ import romeplugin.database.SQLConn;
 import romeplugin.election.ElectionHandler.ElectionPhase;
 import romeplugin.title.Title;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 public class ElectionCommand implements CommandExecutor {
 
@@ -64,8 +60,7 @@ public class ElectionCommand implements CommandExecutor {
                         } catch (NumberFormatException e) {
                             help(player);
                         }
-                    }
-                    else getResults(player, Optional.empty());
+                    } else getResults(player, Optional.empty());
                     break;
                 case "candidates":
                     getCandidates(player);
@@ -92,7 +87,7 @@ public class ElectionCommand implements CommandExecutor {
                     cancel(player, playerTitle);
                     break;
                 default:
-                    return false;    
+                    return false;
             }
             return true;
         }
@@ -100,7 +95,7 @@ public class ElectionCommand implements CommandExecutor {
     }
 
     private void quit(Player player) {
-        if(!electionHandler.hasCandidate(player.getUniqueId())) {
+        if (!electionHandler.hasCandidate(player.getUniqueId())) {
             player.sendMessage(MessageConstants.SELF_NOT_RUNNING_ERROR);
             return;
         }
@@ -110,6 +105,7 @@ public class ElectionCommand implements CommandExecutor {
 
     /**
      * show the player the current election phase
+     *
      * @param player
      */
     private void getPhase(Player player) {
@@ -121,6 +117,7 @@ public class ElectionCommand implements CommandExecutor {
 
     /**
      * see all of the current votes by the player
+     *
      * @param player
      */
     private void seeVotes(Player player) {
@@ -155,7 +152,7 @@ public class ElectionCommand implements CommandExecutor {
         if (electionHandler.getElectionPhase() != ElectionPhase.VOTING) {
             player.sendMessage(MessageConstants.NOT_VOTING);
             return;
-        } 
+        }
         electionHandler.endElection();
     }
 
@@ -163,7 +160,7 @@ public class ElectionCommand implements CommandExecutor {
      * get the results of the last election
      */
     private void getResults(Player player, Optional<Integer> number) {
-        int num = number.orElse(electionHandler.getElectionNumber()-1);
+        int num = number.orElse(electionHandler.getElectionNumber() - 1);
         var results = electionHandler.getElectionResults(num);
         if (results.isEmpty()) {
             player.sendMessage(MessageConstants.NO_PAST_ELECTION_RESULTS);
@@ -172,7 +169,7 @@ public class ElectionCommand implements CommandExecutor {
         String toSend = ChatColor.YELLOW + "\n<-- " + ChatColor.WHITE + "Results" + ChatColor.YELLOW + " -->" + ChatColor.RESET;
         for (Candidate c : results) {
             String username = SQLConn.getUsername(c.getUniqueId());
-            toSend += "\n" + c.getTitle().color + c.getTitle().fancyName  + ChatColor.RESET + ": " + username + " with " + c.getVotes() + " votes";
+            toSend += "\n" + c.getTitle().color + c.getTitle().fancyName + ChatColor.RESET + ": " + username + " with " + c.getVotes() + " votes";
         }
         player.sendMessage(toSend);
     }
@@ -189,9 +186,9 @@ public class ElectionCommand implements CommandExecutor {
 
         var candidates = electionHandler.getCandidates();
         String toSend = ChatColor.YELLOW + "\n<-- " + ChatColor.WHITE + "Candidates" + ChatColor.YELLOW + " -->" + ChatColor.RESET;
-        
+
         //concatinate all candidates under their title
-        for (Title t: ElectionHandler.RUNNABLE_TITLES) {
+        for (Title t : ElectionHandler.RUNNABLE_TITLES) {
             toSend += "\n" + t.color + t.fancyName + ChatColor.RESET + ": ";
             var printCandidates = new ArrayList<String>();
 
@@ -233,7 +230,7 @@ public class ElectionCommand implements CommandExecutor {
             player.sendMessage(MessageConstants.NO_CANDIDATES);
             return;
         }
-        
+
         Set<Title> filledTitles = new HashSet<>();
         for (var candidate : electionHandler.getCandidates()) {
             filledTitles.add(candidate.getTitle());
@@ -260,7 +257,7 @@ public class ElectionCommand implements CommandExecutor {
             player.sendMessage(MessageConstants.CANT_FIND_PLAYER);
             return;
         }
-        
+
         Optional<Candidate> candidate = electionHandler.getCandidate(toVote);
         if (candidate.isPresent()) {
             Title title = candidate.get().getTitle();
@@ -275,8 +272,6 @@ public class ElectionCommand implements CommandExecutor {
             }
         }
         player.sendMessage(MessageConstants.NO_VOTING);
-            
-        
     }
 
     private boolean isEligibleFor(Title current, Title target) {
@@ -308,6 +303,5 @@ public class ElectionCommand implements CommandExecutor {
         electionHandler.removeCandidate(player.getUniqueId());
         electionHandler.addCandidate(player.getUniqueId(), targetTitle);
         player.sendMessage(MessageConstants.SUCCESSFUL_RUN);
-        
     }
 }

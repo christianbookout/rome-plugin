@@ -287,18 +287,13 @@ public class ClaimLandCommand implements CommandExecutor, TabCompleter {
             started.removeIf(str -> !str.startsWith(args[0]));
             return started;
         } else if (args.length == 2) {
-            var players = plugin.getServer()
-                            .getOnlinePlayers()
-                            .stream()
-                            .map(Player::getName)
-                            .collect(Collectors.toList());
             switch (args[1]) {
                 case "transfer":
                 case "share":
                 case "unshare":
-                    return players;
+                    return null;
                 case "removeall":
-                    if (sender.isOp()) return players;
+                    if (sender.isOp()) return null;
                     break;
             }
         }

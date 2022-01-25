@@ -97,7 +97,7 @@ public class PartyCommand implements CommandExecutor, TabCompleter {
 
     private void info(Player player, String acronym) {
         Collection<String> members = partyHandler.getMembers(acronym);
-        String title = partyHandler.getFullTitle(acronym);
+        String title = partyHandler.getName(acronym);
         String description = partyHandler.getDescription(acronym);
         if (title == null || description == null || members.isEmpty()) {
             player.sendMessage(MessageConstants.CANT_FIND_PARTY);
@@ -121,7 +121,6 @@ public class PartyCommand implements CommandExecutor, TabCompleter {
     }
 
     private void invite(Player player, String invitedStr) {
-        // if player is not in a party then
         UUID invitedPlayer = SQLConn.getUUIDFromUsername(invitedStr);
         if (invitedPlayer == null) {
             player.sendMessage(MessageConstants.CANT_FIND_PLAYER);
@@ -147,6 +146,20 @@ public class PartyCommand implements CommandExecutor, TabCompleter {
     }
 
     private void join(Player player, String party) {
+        String partyName = partyHandler.getParty(player.getUniqueId());
+        if (partyName == null) {
+            player.sendMessage(MessageConstants.NOT_IN_PARTY);
+            return;
+        }
+        if (partyHandler.isPublic(party)) {
+            partyHandler.joinParty(player.getUniqueId(), party);
+        } else {
+            if (partyHandler.accept(player.getUniqueId())) {
+                player.sendMessage(MessageConstants.SUCCESSFUL_PARTY_JOIN);
+            } else {
+                player.sendMessage(MessageConstants.PRIVATE_PARTY_ERROR);
+            }
+        }
     }
 
     private void create(Player player, String acronym, String name) {

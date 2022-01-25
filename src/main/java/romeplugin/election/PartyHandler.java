@@ -200,6 +200,21 @@ public class PartyHandler {
         return false;
     }
 
+    public boolean isPublic(String acronym) {
+        try (Connection conn = SQLConn.getConnection()) {
+            var stmt = conn.prepareStatement("SELECT is_public FROM parties WHERE LOWER(acronym)=?;");
+            stmt.setString(1, acronym.toLowerCase());
+            var results = stmt.executeQuery();
+            if (results.next()) {
+                return results.getBoolean("is_public");
+            }
+            return false;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
     public void invite(UUID player, String party) {
         this.invitations.put(player, party);
     }

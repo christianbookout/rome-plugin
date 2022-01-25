@@ -2,10 +2,7 @@ package romeplugin.election;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.UUID;
+import java.util.*;
 
 import romeplugin.database.SQLConn;
 
@@ -21,6 +18,7 @@ public class PartyHandler {
      */
     private void initializedb() {
         try (Connection conn = SQLConn.getConnection()) {
+            // TODO: make acronym all uppercase, always
             conn.prepareStatement("CREATE TABLE IF NOT EXISTS parties (" +
                                   "name VARCHAR(50) NOT NULL UNIQUE," +
                                   "acronym CHAR(4) NOT NULL UNIQUE," +
@@ -76,19 +74,23 @@ public class PartyHandler {
         return false;
     }
 
-    public boolean createParty(UUID owner, String party, String acronym) {
+    public boolean createParty(UUID owner, String acronym, String name) {
+        var acronym_canon = acronym.toUpperCase();
         try (Connection conn = SQLConn.getConnection()) {
             var stmt = conn.prepareStatement("INSERT INTO parties VALUES (?, ?, ?, ?, ?);");
-            stmt.setString(1, party);
-            stmt.setString(2, acronym);
+            stmt.setString(1, name);
+            stmt.setString(2, acronym_canon);
             stmt.setString(3, owner.toString());
             stmt.setBoolean(4, false);
             stmt.setString(5, "This is a political party.");
-            var results = stmt.executeQuery();
-            if (results.next()) {
-                this.joinParty(owner, party);
-                return true;
+            if (stmt.executeUpdate() < 1) {
+                return false;
             }
+            stmt.close();
+            stmt = conn.prepareStatement("REPLACE INTO partyMembers VALUES (?, ?);");
+            stmt.setString(1, owner.toString());
+            stmt.setString(2, acronym_canon);
+            return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -210,5 +212,20 @@ public class PartyHandler {
 
     public boolean accept (UUID player) {
         return this.joinParty(player, invitations.get(player));
+    }
+
+    public Optional<Boolean> isPartyPublic(String acronym) {
+        try (Connection conn = SQLConn.getConnection()) {
+            var stmt = conn.prepareStatement("SELECT is_public FROM parties WHERE acronym=?");
+            stmt.setString(1, acronym);
+            var res = stmt.executeQuery();
+            if (res.next()) {
+                return Optional.of(res.getBoolean("is_public"));
+            }
+            return Optional.empty();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return Optional.empty();
+        }
     }
 }

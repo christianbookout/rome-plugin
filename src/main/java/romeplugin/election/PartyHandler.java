@@ -112,11 +112,12 @@ public class PartyHandler {
             var party = this.getParty(player);
             var stmt = conn.prepareStatement("DELETE FROM parties WHERE owner_uuid=?;");
             stmt.setString(1, player.toString());
-            if (stmt.executeUpdate() > 0) {
-                var players = this.getMembers(party);
-                players.forEach(p -> this.leaveParty(player));
-                return true;
-            }
+            stmt.executeUpdate();
+            stmt.close();
+            stmt = conn.prepareStatement("DELETE FROM partyMembers WHERE acronym=?;");
+            stmt.setString(1, party);
+            stmt.executeUpdate();
+            return true;
         } catch (SQLException e) {
             e.printStackTrace();
         }

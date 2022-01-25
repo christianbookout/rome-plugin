@@ -55,14 +55,14 @@ public class MessageConstants {
     public static final String TITLES_NOT_FILLED = ChatColor.RED + "the titles aren't filled! starting voting anyway";
     public static final String UWU_DATABASE_ERROR = ChatColor.RED + "somewwing went reawwy wrong!! uwu pwease tell uws devs!!";
     public static final String PARTIES_HELP_COMMAND = ChatColor.YELLOW + "\n<-------- " + ChatColor.RESET + "Claim Help" + ChatColor.YELLOW + " ----------->\n" + ChatColor.RESET + ChatColor.GOLD +
-                                                        "/parties create <name> <acronym>: " + ChatColor.RESET + "create a political party\n" + ChatColor.GOLD + 
-                                                        "/parties disband: " + ChatColor.RESET + "disband your party\n" + ChatColor.GOLD + 
-                                                        "/parties setowner <player>: " + ChatColor.RESET + "transfer ownership of your party \n" + ChatColor.GOLD + 
-                                                        "/parties invite <player>: " + ChatColor.RESET + "invite a player to your party\n" + ChatColor.GOLD + 
-                                                        "/parties accept: " + ChatColor.RESET + "accept a party invite\n" + ChatColor.GOLD + 
-                                                        "/parties deny: " + ChatColor.RESET + "deny a party invite\n" + ChatColor.GOLD + 
-                                                        "/parties leave: " + ChatColor.RESET + "leave your current party\n" + ChatColor.GOLD + 
-                                                        "/parties description <description>: " + ChatColor.RESET + "set your party description\n" + ChatColor.GOLD + 
+                                                        "/parties create <name> <acronym>: " + ChatColor.RESET + "create a political party\n" + ChatColor.GOLD +
+                                                        "/parties disband: " + ChatColor.RESET + "disband your party\n" + ChatColor.GOLD +
+                                                        "/parties setowner <player>: " + ChatColor.RESET + "transfer ownership of your party \n" + ChatColor.GOLD +
+                                                        "/parties invite <player>: " + ChatColor.RESET + "invite a player to your party\n" + ChatColor.GOLD +
+                                                        "/parties accept: " + ChatColor.RESET + "accept a party invite\n" + ChatColor.GOLD +
+                                                        "/parties deny: " + ChatColor.RESET + "deny a party invite\n" + ChatColor.GOLD +
+                                                        "/parties leave: " + ChatColor.RESET + "leave your current party\n" + ChatColor.GOLD +
+                                                        "/parties description <description>: " + ChatColor.RESET + "set your party description\n" + ChatColor.GOLD +
                                                         "/parties rename <name> <acronym>: " + ChatColor.RESET + "change your party's name and acronym";
     public static final String NOT_IN_PARTY = ChatColor.RED + "you aren't currently in a party";
     public static final String CANT_FIND_PARTY = null;
@@ -71,6 +71,7 @@ public class MessageConstants {
     public static final String IN_PARTY_ERROR = null;
     public static final String SUCCESSFUL_PARTY_CREATE = null;
     public static final String SUCCESSFUL_PARTY_RENAME = null;
+    public static final String SUCCESSFUL_PARTY_DISBAND = null;
     public static final String NO_INVITE_ERROR = null;
     public static final String SUCCESSFULL_INVITE_DENY = null;
     public static final String SUCCESSFULL_INVITE_ACCEPT = null;

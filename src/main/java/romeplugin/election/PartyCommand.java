@@ -88,7 +88,7 @@ public class PartyCommand implements CommandExecutor, TabCompleter {
             return;
         }
         arg = arg.toLowerCase();
-        partyHandler.setPublic(player.getUniqueId(), arg.equals("true") || arg.equals("yes"));
+        partyHandler.setPublic(player.getUniqueId(), arg.equals("true") || arg.equals("yes") || arg.equals("yeah"));
     }
 
     private void list(Player player) {
@@ -161,7 +161,11 @@ public class PartyCommand implements CommandExecutor, TabCompleter {
         if (!partyHandler.isOwner(player.getUniqueId())) {
             player.sendMessage(MessageConstants.NO_PERMISSION_ERROR);
         }
-
+        MessageConstants.sendOnSuccess(
+                partyHandler.disbandParty(player.getUniqueId()),
+                player,
+                MessageConstants.SUCCESSFUL_PARTY_DISBAND
+        );
     }
 
     private void join(Player player, String party) {

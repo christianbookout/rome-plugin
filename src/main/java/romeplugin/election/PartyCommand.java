@@ -112,7 +112,12 @@ public class PartyCommand implements CommandExecutor, TabCompleter {
     }
 
     private void accept(Player player) {
-        return;
+        if (partyHandler.getParty(player.getUniqueId()) != null) {
+            player.sendMessage(MessageConstants.ALREADY_IN_PARTY_ERROR);
+        }
+        if (!partyHandler.accept(player.getUniqueId())) {
+            player.sendMessage(MessageConstants.NO_INVITE_ERROR);
+        }
     }
 
     private void invite(Player player, String invitedStr) {

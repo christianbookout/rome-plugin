@@ -117,8 +117,11 @@ public class PartyCommand implements CommandExecutor, TabCompleter {
             player.sendMessage(MessageConstants.NO_INVITE_ERROR);
             return;
         }
+        if (partyHandler.getParty(player.getUniqueId()) != null) {
+            player.sendMessage(MessageConstants.ALREADY_IN_PARTY_ERROR);
+        }
         if (partyHandler.joinParty(player.getUniqueId(), invite)) {
-            player.sendMessage(MessageConstants.SUCCESSFULL_INVITE_ACCEPT);
+            player.sendMessage(MessageConstants.SUCCESSFUL_INVITE_ACCEPT);
         }
     }
 
@@ -127,11 +130,10 @@ public class PartyCommand implements CommandExecutor, TabCompleter {
             player.sendMessage(MessageConstants.NO_INVITE_ERROR);
             return;
         }
-        player.sendMessage(MessageConstants.SUCCESSFULL_INVITE_DENY);
+        player.sendMessage(MessageConstants.SUCCESSFUL_INVITE_DENY);
     }
 
     private void invite(Player player, String invitedStr) {
-        // if player is not in a party then
         UUID invitedPlayer = SQLConn.getUUIDFromUsername(invitedStr);
         if (invitedPlayer == null) {
             player.sendMessage(MessageConstants.CANT_FIND_PLAYER);
@@ -143,7 +145,7 @@ public class PartyCommand implements CommandExecutor, TabCompleter {
             return;
         }
         invitations.put(invitedPlayer, partyName);
-        player.sendMessage(MessageConstants.SUCCESSFULL_INVITE_SEND);
+        player.sendMessage(MessageConstants.SUCCESSFUL_INVITE_SEND);
     }
 
     private void rename(Player player, String acronym, String name) {
@@ -178,13 +180,14 @@ public class PartyCommand implements CommandExecutor, TabCompleter {
                     }
                     partyHandler.joinParty(player.getUniqueId(), party_canon);
                 },
+                // FIXME: check if this player has an invite to a party before failing
                 () -> player.sendMessage(MessageConstants.CANT_FIND_PARTY)
         );
     }
 
     private void create(Player player, String acronym, String name) {
         if (partyHandler.getParty(player.getUniqueId()) != null) {
-            player.sendMessage(MessageConstants.IN_PARTY_ERROR);
+            player.sendMessage(MessageConstants.ALREADY_IN_PARTY_ERROR);
             return;
         }
         MessageConstants.sendOnSuccess(

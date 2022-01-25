@@ -42,7 +42,7 @@ public class PartyCommand implements CommandExecutor, TabCompleter {
             case "create":
                 if (args.length < 4)
                     return false;
-                create(player, args[2], args[3]);
+                create(player, args[2], getName(args, 3));
                 return true;
             case "join":
                 if (args.length < 3)
@@ -55,7 +55,7 @@ public class PartyCommand implements CommandExecutor, TabCompleter {
             case "rename":
                 if (args.length < 4)
                     return false;
-                rename(player, args[2], args[3]);
+                rename(player, args[2], getName(args, 3));
                 return true;
             case "invite":
                 if (args.length < 3)
@@ -130,7 +130,7 @@ public class PartyCommand implements CommandExecutor, TabCompleter {
         partyHandler.invite(invitedPlayer, partyName);
     }
 
-    private void rename(Player player, String acronym, String... titles) {
+    private void rename(Player player, String acronym, String name) {
     }
 
     private void delete(Player player) {
@@ -144,7 +144,7 @@ public class PartyCommand implements CommandExecutor, TabCompleter {
     private void join(Player player, String party) {
     }
 
-    private void create(Player player, String acronym, String... titles) {
+    private void create(Player player, String acronym, String name) {
     }
 
     private void leave(Player player) {
@@ -152,6 +152,20 @@ public class PartyCommand implements CommandExecutor, TabCompleter {
 
     private void help(CommandSender player) {
         player.sendMessage(MessageConstants.PARTIES_HELP_COMMAND);
+    }
+
+    /**
+     * get title from array of args past certain index
+     * @param args passed into command
+     * @param pastIndex index where title starts 
+     * @return combined title
+     */
+    private String getName(String[] args, int pastIndex) {
+        String str = args[pastIndex];
+        for (int i = pastIndex+1; i < args.length-1; i++) {
+            str += " " + args[i];
+        }
+        return str;
     }
 
     @Override

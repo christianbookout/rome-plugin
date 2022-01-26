@@ -267,13 +267,21 @@ public class PartyCommand implements CommandExecutor, TabCompleter {
             player.sendMessage(MessageConstants.NO_PERMISSION_ERROR);
             return;
         }
+        var acronymOptional = partyHandler.getMemberAcronym(player.getUniqueId());
+        if (acronymOptional.isEmpty()) {
+            player.sendMessage(MessageConstants.UWU_DATABASE_ERROR);
+            return;
+        }
+        var partyAcronym = acronymOptional.get();
         var disbandedParty = partyHandler.disbandParty(player.getUniqueId());
         MessageConstants.sendOnSuccess(
                 disbandedParty,
                 player,
                 MessageConstants.SUCCESSFUL_PARTY_DISBAND
         );
-        if (disbandedParty) ; //FIXME remove all invited players from the party when it's disbanded
+        if (disbandedParty) {
+            invitations.values().removeIf(acronym -> acronym.str.equals(partyAcronym.str));
+        }
     }
 
     private void join(Player player, String partyAcronym) {

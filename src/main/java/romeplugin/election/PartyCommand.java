@@ -8,6 +8,7 @@ import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import romeplugin.MessageConstants;
 import romeplugin.database.SQLConn;
+import romeplugin.election.PartyHandler.PartyAcronym;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -17,7 +18,7 @@ import java.util.stream.Collectors;
 
 public class PartyCommand implements CommandExecutor, TabCompleter {
     private final PartyHandler partyHandler;
-    private final HashMap<UUID, String> invitations = new HashMap<>();
+    private final HashMap<UUID, PartyAcronym> invitations = new HashMap<>();
 
     public PartyCommand(PartyHandler partyHandler) {
         this.partyHandler = partyHandler;
@@ -96,15 +97,15 @@ public class PartyCommand implements CommandExecutor, TabCompleter {
     }
 
     private void info(Player player, String acronym) {
-        Collection<String> members = partyHandler.getMembers(acronym);
-        String name = partyHandler.getName(acronym);
-        String description = partyHandler.getDescription(acronym);
+        var acronym_canon = PartyAcronym.make(acronym);
+        Collection<String> members = partyHandler.getMembersUsernames(acronym_canon);
+        String name = partyHandler.getName(acronym_canon);
+        String description = partyHandler.getDescription(acronym_canon);
         if (name == null || description == null || members.isEmpty()) {
             player.sendMessage(MessageConstants.CANT_FIND_PARTY);
             return;
         }
-        Collection<String> shortenedMembers = members.stream().limit(10).collect(Collectors.toList());
-        String membersStr = String.join(", ", shortenedMembers);
+        String membersStr = members.stream().limit(10).collect(Collectors.joining(", "));
         player.sendMessage(
                 ChatColor.YELLOW + "<-- " + ChatColor.RESET + name + ChatColor.YELLOW + " -->\n" + ChatColor.GOLD +
                         "Description: " + ChatColor.RESET + description + "\n" + ChatColor.GOLD +
@@ -139,7 +140,7 @@ public class PartyCommand implements CommandExecutor, TabCompleter {
             player.sendMessage(MessageConstants.CANT_FIND_PLAYER);
             return;
         }
-        String partyName = partyHandler.getParty(player.getUniqueId());
+        var partyName = partyHandler.getParty(player.getUniqueId());
         if (partyName == null) {
             player.sendMessage(MessageConstants.NOT_IN_PARTY);
             return;
@@ -153,7 +154,7 @@ public class PartyCommand implements CommandExecutor, TabCompleter {
             player.sendMessage(MessageConstants.NO_PERMISSION_ERROR);
         }
         MessageConstants.sendOnSuccess(
-                partyHandler.rename(player.getUniqueId(), acronym, name),
+                partyHandler.rename(player.getUniqueId(), PartyAcronym.make(acronym), name),
                 player,
                 MessageConstants.SUCCESSFUL_PARTY_RENAME
         );
@@ -170,15 +171,15 @@ public class PartyCommand implements CommandExecutor, TabCompleter {
         );
     }
 
-    private void join(Player player, String party) {
-        var party_canon = party.toLowerCase();
-        partyHandler.isPartyPublic(party_canon).ifPresentOrElse(
+    private void join(Player player, String partyAcronym) {
+        var acronym = PartyAcronym.make(partyAcronym);
+        partyHandler.isPartyPublic(acronym).ifPresentOrElse(
                 is_public -> {
                     if (!is_public) {
                         player.sendMessage(MessageConstants.PARTY_PRIVATE_ERROR);
                         return;
                     }
-                    partyHandler.joinParty(player.getUniqueId(), party_canon);
+                    partyHandler.joinParty(player.getUniqueId(), acronym);
                 },
                 // FIXME: check if this player has an invite to a party before failing
                 () -> player.sendMessage(MessageConstants.CANT_FIND_PARTY)
@@ -191,7 +192,7 @@ public class PartyCommand implements CommandExecutor, TabCompleter {
             return;
         }
         MessageConstants.sendOnSuccess(
-                partyHandler.createParty(player.getUniqueId(), acronym, name),
+                partyHandler.createParty(player.getUniqueId(), PartyAcronym.make(acronym), name),
                 player,
                 MessageConstants.SUCCESSFUL_PARTY_CREATE
         );

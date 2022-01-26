@@ -51,6 +51,7 @@ public class MessageConstants {
                                                         "/claim unshare <user>: " + ChatColor.RESET + "unshare your claim with user\n" + ChatColor.GOLD +
                                                         "/claim list: " + ChatColor.RESET + "list claims you own\n" + ChatColor.GOLD +
                                                         "/claim info: " + ChatColor.RESET + "get info about the claim you are in";
+<<<<<<< HEAD
     public static final String NO_LONGER_RUNNING = POLITICS_COLOR + "you are no longer running for the election";
     public static final String NO_PERMISSION_ERROR = ERROR_COLOR + "you do not have permission to do that";
     public static final String ELECTION_CANCELLED = POLITICS_COLOR  + "the election has been cancelled";
@@ -97,6 +98,39 @@ public class MessageConstants {
                                              ChatColor.RED + "&c" + ChatColor.LIGHT_PURPLE + "&d" + ChatColor.YELLOW + "&e" + ChatColor.WHITE + "&f";
     public static final String SUCCESSFUL_COLOR_SET = SUCCESS_COLOR + "you have changed the color.";
     public static final String COLOR_SET_ERROR = ERROR_COLOR + "didnt work";
+=======
+    public static final String NO_LONGER_RUNNING = "you are no longer running for the election";
+    public static final String NO_PERMISSION_ERROR = ChatColor.RED + "you do not have permission to do that";
+    public static final String ELECTION_CANCELLED = "the election has been cancelled";
+    public static final String SUCCESSFUL_RUN = "you are sucessfully running! use /elections candidates to see your competitors";
+    public static final String NOT_VOTING = ChatColor.RED + "the election is not in a voting phase!";
+    public static final String NO_CANDIDATES = ChatColor.RED + "nobody is currently running! use /elections cancel to cancel the election";
+    public static final String TITLES_NOT_FILLED = ChatColor.RED + "the titles aren't filled! starting voting anyway";
+    public static final String UWU_DATABASE_ERROR = ChatColor.RED + "somewwing went reawwy wrong!! uwu pwease tell uws devs!!";
+    public static final String PARTIES_HELP_COMMAND = ChatColor.YELLOW + "\n<-------- " + ChatColor.RESET + "Claim Help" + ChatColor.YELLOW + " ----------->\n" + ChatColor.RESET + ChatColor.GOLD +
+                                                        "/parties create <name> <acronym>: " + ChatColor.RESET + "create a political party\n" + ChatColor.GOLD +
+                                                        "/parties disband: " + ChatColor.RESET + "disband your party\n" + ChatColor.GOLD +
+                                                        "/parties setowner <player>: " + ChatColor.RESET + "transfer ownership of your party \n" + ChatColor.GOLD +
+                                                        "/parties invite <player>: " + ChatColor.RESET + "invite a player to your party\n" + ChatColor.GOLD +
+                                                        "/parties accept: " + ChatColor.RESET + "accept a party invite\n" + ChatColor.GOLD +
+                                                        "/parties deny: " + ChatColor.RESET + "deny a party invite\n" + ChatColor.GOLD +
+                                                        "/parties leave: " + ChatColor.RESET + "leave your current party\n" + ChatColor.GOLD +
+                                                        "/parties description <description>: " + ChatColor.RESET + "set your party description\n" + ChatColor.GOLD +
+                                                        "/parties rename <name> <acronym>: " + ChatColor.RESET + "change your party's name and acronym";
+    public static final String NOT_IN_PARTY = ChatColor.RED + "you aren't currently in a party";
+    public static final String CANT_FIND_PARTY = ChatColor.RED + "can't find that party";
+    public static final String NO_INVITE_ERROR = null;
+    public static final String ALREADY_IN_PARTY_ERROR = null;
+    public static final String OWNER_OF_PARTY_ERROR = null;
+    public static final String PARTY_PRIVATE_ERROR = null;
+    public static final String SUCCESSFUL_PARTY_CREATE = null;
+    public static final String SUCCESSFUL_PARTY_RENAME = null;
+    public static final String SUCCESSFUL_PARTY_DISBAND = null;
+    public static final String SUCCESSFUL_INVITE_DENY = null;
+    public static final String SUCCESSFUL_INVITE_ACCEPT = null;
+    public static final String SUCCESSFUL_INVITE_SEND = null;
+    public static final String PARTY_NAME_COLLISION_ERROR = null;
+>>>>>>> 0c6eb0199913de620d4170cacc7a88da1f75ebe0
 
     /**
      * @param cond sends successMessage on true, database error on false

@@ -272,11 +272,11 @@ public class PartyCommand implements CommandExecutor, TabCompleter {
             player.sendMessage(MessageConstants.ALREADY_IN_PARTY_ERROR);
             return;
         }
-        MessageConstants.sendOnSuccess(
-                partyHandler.createParty(player.getUniqueId(), PartyAcronym.make(acronym), name),
-                player,
-                MessageConstants.SUCCESSFUL_PARTY_CREATE
-        );
+        if (!partyHandler.createParty(player.getUniqueId(), PartyAcronym.make(acronym), name)) {
+            player.sendMessage(MessageConstants.PARTY_NAME_COLLISION_ERROR);
+            return;
+        }
+        player.sendMessage(MessageConstants.SUCCESSFUL_PARTY_CREATE);
     }
 
     private void leave(Player player) {

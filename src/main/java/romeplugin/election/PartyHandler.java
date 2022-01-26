@@ -88,7 +88,7 @@ public class PartyHandler {
     public Collection<String> getMembersUsernames(PartyAcronym acronym) {
         var members = new ArrayList<String>();
         try (Connection conn = SQLConn.getConnection()) {
-            var stmt = conn.prepareStatement("SELECT username FROM usernames WHERE uuid = (SELECT uuid FROM partyMembers WHERE acronym=?);");
+            var stmt = conn.prepareStatement("SELECT usernames.username FROM partyMembers INNER JOIN usernames ON partyMembers.uuid = usernames.uuid WHERE acronym=?;");
             stmt.setString(1, acronym.str);
             var results = stmt.executeQuery();
             while (results.next()) {

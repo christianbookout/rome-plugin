@@ -97,6 +97,7 @@ public class MessageConstants {
                                              ChatColor.RED + "&c" + ChatColor.LIGHT_PURPLE + "&d" + ChatColor.YELLOW + "&e" + ChatColor.WHITE + "&f";
     public static final String SUCCESSFUL_COLOR_SET = SUCCESS_COLOR + "you have changed the color.";
     public static final String COLOR_SET_ERROR = ERROR_COLOR + "didnt work";
+    public static final String PARTY_NAME_COLLISION_ERROR = "that name already exists";
 
     /**
      * @param cond sends successMessage on true, database error on false

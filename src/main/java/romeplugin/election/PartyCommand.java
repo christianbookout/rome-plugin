@@ -335,11 +335,11 @@ public class PartyCommand implements CommandExecutor, TabCompleter {
      * @return combined title
      */
     private String getName(String[] args, int pastIndex) {
-        String str = args[pastIndex];
+        StringBuilder str = new StringBuilder(args[pastIndex]);
         for (int i = pastIndex + 1; i < args.length; i++) {
-            str += " " + args[i];
+            str.append(" ").append(args[i]);
         }
-        return str;
+        return str.toString();
     }
 
     private static final Stream<String> SUBCOMMANDS = Arrays.stream(new String[]{

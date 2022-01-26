@@ -1,5 +1,6 @@
 package romeplugin.election;
 
+import org.bukkit.ChatColor;
 import romeplugin.database.SQLConn;
 
 import java.sql.Connection;
@@ -8,8 +9,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.UUID;
-
-import org.bukkit.ChatColor;
 
 public class PartyHandler {
     //DB: table 1 - players, their respective party name
@@ -28,7 +27,7 @@ public class PartyHandler {
                     "acronym CHAR(4) NOT NULL UNIQUE," +
                     "owner_uuid CHAR(36) NOT NULL PRIMARY KEY," +
                     "is_public BOOLEAN," +
-                    "color CHAR(1)," + 
+                    "color CHAR(1)," +
                     "description VARCHAR(250));").execute();
             conn.prepareStatement("CREATE TABLE IF NOT EXISTS partyMembers (" +
                     "uuid CHAR(36) PRIMARY KEY NOT NULL," +
@@ -51,17 +50,19 @@ public class PartyHandler {
         public static PartyAcronym make(String input) {
             return new PartyAcronym(input.toUpperCase());
         }
+
         @Override
         public String toString() {
             return this.str;
         }
+
         @Override
         public boolean equals(Object other) {
             if (other instanceof PartyAcronym) {
-                return ((PartyAcronym)other).str == this.str;
+                return ((PartyAcronym) other).str == this.str;
             }
             if (other instanceof String) {
-                return ((String)other).equals(str);
+                return ((String) other).equals(str);
             }
             return false;
         }
@@ -259,10 +260,10 @@ public class PartyHandler {
         return null;
     }
 
-    public boolean setColor(PartyAcronym acronym, String color) {
+    public boolean setColor(PartyAcronym acronym, char color) {
         try (Connection conn = SQLConn.getConnection()) {
             var stmt = conn.prepareStatement("UPDATE parties SET color=? WHERE acronym=?;");
-            stmt.setString(1, color);
+            stmt.setString(1, String.valueOf(color));
             stmt.setString(2, acronym.toString());
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -326,13 +327,14 @@ public class PartyHandler {
         }
         return false;
     }
-    
+
     public class Party {
         public final String name, description, owner;
         public final PartyAcronym acronym;
         public final boolean isPublic;
         public final ChatColor color;
         private static final int cutoffInt = 50;
+
         public Party(String name, PartyAcronym acronym, String description, boolean isPublic, String owner, char color) {
             this.name = name;
             this.acronym = acronym;

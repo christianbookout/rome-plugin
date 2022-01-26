@@ -7,17 +7,14 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
-
 import romeplugin.MessageConstants;
 import romeplugin.database.SQLConn;
 import romeplugin.election.PartyHandler.Party;
 import romeplugin.election.PartyHandler.PartyAcronym;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class PartyCommand implements CommandExecutor, TabCompleter {
     private final PartyHandler partyHandler;
@@ -116,7 +113,13 @@ public class PartyCommand implements CommandExecutor, TabCompleter {
 
     private void color(Player player, String col) {
         Party party = partyHandler.getParty(player.getUniqueId());
-        String color = col.substring(col.length()-1);
+        char color;
+        try {
+            color = ChatColor.valueOf(col).getChar();
+        } catch (IllegalArgumentException e) {
+            color = col.charAt(col.length() - 1);
+        }
+
         if (!partyHandler.isOwner(player.getUniqueId()) || party == null) {
             player.sendMessage(MessageConstants.NO_PERMISSION_ERROR);
             return;
@@ -147,7 +150,7 @@ public class PartyCommand implements CommandExecutor, TabCompleter {
             return;
         }
         arg = arg.toLowerCase();
-        if (partyHandler.setPublic(player.getUniqueId(), arg.equals("true") || arg.equals("yes") || arg.equals("yeah"))){ 
+        if (partyHandler.setPublic(player.getUniqueId(), arg.equals("true") || arg.equals("yes") || arg.equals("yeah"))) {
             player.sendMessage(MessageConstants.SUCCESSFUL_PUBLIC_SET);
         }
         player.sendMessage(MessageConstants.PUBLIC_SET_ERROR);
@@ -169,19 +172,19 @@ public class PartyCommand implements CommandExecutor, TabCompleter {
         }
         String membersStr = members.stream().limit(10).collect(Collectors.joining(", "));
         player.sendMessage(
-                ChatColor.YELLOW + "<-- " + ChatColor.RESET + "Party: " + name + " (" + acronym.toUpperCase() + ")"+ ChatColor.YELLOW + " -->\n" + ChatColor.GOLD +
+                ChatColor.YELLOW + "<-- " + ChatColor.RESET + "Party: " + name + " (" + acronym.toUpperCase() + ")" + ChatColor.YELLOW + " -->\n" + ChatColor.GOLD +
                         "Description: " + ChatColor.RESET + description + "\n" + ChatColor.GOLD +
                         "Members: " + ChatColor.RESET + membersStr);
     }
 
     private void accept(Player player) {
         var invite = invitations.remove(player.getUniqueId());
-        if (partyHandler.getName(invite) == null) {
-            player.sendMessage(MessageConstants.CANT_FIND_PARTY);
-            return;
-        }
         if (invite == null) {
             player.sendMessage(MessageConstants.NO_INVITE_ERROR);
+            return;
+        }
+        if (partyHandler.getName(invite) == null) {
+            player.sendMessage(MessageConstants.CANT_FIND_PARTY);
             return;
         }
         if (partyHandler.getParty(player.getUniqueId()) != null) {
@@ -245,7 +248,7 @@ public class PartyCommand implements CommandExecutor, TabCompleter {
                 player,
                 MessageConstants.SUCCESSFUL_PARTY_DISBAND
         );
-        if (disbandedParty); //FIXME remove all invited players from the party when it's disbanded 
+        if (disbandedParty) ; //FIXME remove all invited players from the party when it's disbanded
     }
 
     private void join(Player player, String partyAcronym) {
@@ -306,10 +309,61 @@ public class PartyCommand implements CommandExecutor, TabCompleter {
         return str;
     }
 
+    private static final Stream<String> SUBCOMMANDS = Arrays.stream(new String[]{
+            "help",
+            "setowner",
+            "kick",
+            "color",
+            "colors",
+            "description",
+            "leave",
+            "create",
+            "join",
+            "disband",
+            "rename",
+            "invite",
+            "accept",
+            "deny",
+            "info",
+            "list",
+            "public"
+    });
+
+    private static final String[] TRUE_STRINGS = {
+            "true",
+            "yes",
+            "yeah"
+    };
+
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
-        // TODO: implement me!
-        return null;
+        if (args.length == 0) {
+            return SUBCOMMANDS.collect(Collectors.toList());
+        } else if (args.length == 1) {
+            return SUBCOMMANDS.filter(cmd -> cmd.startsWith(args[0])).collect(Collectors.toList());
+        } else if (args.length == 2) {
+            switch (args[0]) {
+                case "invite":
+                case "kick":
+                case "setowner":
+                    return null;
+                case "public":
+                    return Arrays.stream(TRUE_STRINGS)
+                            .filter(str -> str.startsWith(args[1]))
+                            .collect(Collectors.toList());
+                case "color":
+                    return Arrays.stream(ChatColor.values())
+                            .filter(ChatColor::isColor)
+                            .map(ChatColor::toString)
+                            .filter(str -> str.startsWith(args[1]))
+                            .collect(Collectors.toList());
+                case "info":
+                case "join":
+                    // TODO: have a list of party acronyms
+                    return Collections.emptyList();
+            }
+        }
+        return Collections.emptyList();
     }
 
 }

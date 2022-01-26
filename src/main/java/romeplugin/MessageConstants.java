@@ -76,6 +76,7 @@ public class MessageConstants {
     public static final String SUCCESSFUL_INVITE_DENY = null;
     public static final String SUCCESSFUL_INVITE_ACCEPT = null;
     public static final String SUCCESSFUL_INVITE_SEND = null;
+    public static final String PARTY_NAME_COLLISION_ERROR = null;
 
     /**
      * @param cond sends successMessage on true, database error on false

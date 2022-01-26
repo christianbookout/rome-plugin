@@ -7,22 +7,27 @@ import romeplugin.title.Title;
 
 public class MessageConstants {
 
+    private static final ChatColor ERROR_COLOR = ChatColor.RED;
+    private static final ChatColor SUCCESS_COLOR = ChatColor.GREEN;
+    private static final ChatColor POLITICS_COLOR = ChatColor.LIGHT_PURPLE;
+
+
     /****************************************** ELECTIONS ******************************************/
 
-    public static final String ALREADY_ELECTION_ERROR = ChatColor.RED + "election is already running";
-    public static final String ALREADY_VOTING_ERROR = ChatColor.RED + "the election is already in the voting phase";
-    public static final String NO_ELECTION_ERROR = ChatColor.RED + "there is no election at the moment";
-    public static final String SUCCESSFUL_VOTING_START = "voting period started";
-    public static final String SUCCESSFUL_ELECTION_START = "election period started. use /elections run to run for a position";
-    public static final String CANT_FIND_PLAYER = ChatColor.RED + "can't find player";
-    public static final String CANT_FIND_TITLE = ChatColor.RED + "can't find title";
-    public static final String ELECTION_ENDED = "election ended! use /elections results to view the results";
-    public static final String ALREADY_VOTED_ERROR = ChatColor.RED + "you've already voted for this title!";
-    public static final String NO_PAST_ELECTION_RESULTS = ChatColor.RED + "past election results are unavailable";
-    public static final String NOT_RUNNING_ERROR = ChatColor.RED + "that player is not running for the election";
-    public static final String SELF_NOT_RUNNING_ERROR = ChatColor.RED + "you are not running for the election";
-    public static final String NO_VOTING = ChatColor.RED + "you may not vote for this player";
-    public static final String SUCCESSFUL_VOTE = "you successfully voted for ";
+    public static final String ALREADY_ELECTION_ERROR = ERROR_COLOR + "election is already running";
+    public static final String ALREADY_VOTING_ERROR = ERROR_COLOR + "the election is already in the voting phase";
+    public static final String NO_ELECTION_ERROR = ERROR_COLOR + "there is no election at the moment";
+    public static final String SUCCESSFUL_VOTING_START = POLITICS_COLOR + "voting period started";
+    public static final String SUCCESSFUL_ELECTION_START = POLITICS_COLOR + "election period started. use /elections run to run for a position";
+    public static final String CANT_FIND_PLAYER = ERROR_COLOR + "can't find player";
+    public static final String CANT_FIND_TITLE = ERROR_COLOR + "can't find title";
+    public static final String ELECTION_ENDED = POLITICS_COLOR + "election ended! use /elections results to view the results";
+    public static final String ALREADY_VOTED_ERROR = ERROR_COLOR + "you've already voted for this title!";
+    public static final String NO_PAST_ELECTION_RESULTS = ERROR_COLOR + "past election results are unavailable";
+    public static final String NOT_RUNNING_ERROR = ERROR_COLOR + "that player is not running for the election";
+    public static final String SELF_NOT_RUNNING_ERROR = ERROR_COLOR + "you are not running for the election";
+    public static final String NO_VOTING = ERROR_COLOR + "you may not vote for this player";
+    public static final String SUCCESSFUL_VOTE = POLITICS_COLOR + "you successfully voted for ";
     public static final String ELECTIONS_HELP_COMMAND = ChatColor.YELLOW + "\n<-------- " + ChatColor.RESET + "Elections Help" + ChatColor.YELLOW + " ----------->\n" + ChatColor.RESET + ChatColor.GOLD +
                                                         "/elections vote <user>: " + ChatColor.RESET + "vote for a user\n" + ChatColor.GOLD +
                                                         "/elections candidates: " + ChatColor.RESET + "show all running candidates\n" +  ChatColor.GOLD +
@@ -46,36 +51,52 @@ public class MessageConstants {
                                                         "/claim unshare <user>: " + ChatColor.RESET + "unshare your claim with user\n" + ChatColor.GOLD +
                                                         "/claim list: " + ChatColor.RESET + "list claims you own\n" + ChatColor.GOLD +
                                                         "/claim info: " + ChatColor.RESET + "get info about the claim you are in";
-    public static final String NO_LONGER_RUNNING = "you are no longer running for the election";
-    public static final String NO_PERMISSION_ERROR = ChatColor.RED + "you do not have permission to do that";
-    public static final String ELECTION_CANCELLED = "the election has been cancelled";
-    public static final String SUCCESSFUL_RUN = "you are sucessfully running! use /elections candidates to see your competitors";
-    public static final String NOT_VOTING = ChatColor.RED + "the election is not in a voting phase!";
-    public static final String NO_CANDIDATES = ChatColor.RED + "nobody is currently running! use /elections cancel to cancel the election";
-    public static final String TITLES_NOT_FILLED = ChatColor.RED + "the titles aren't filled! starting voting anyway";
-    public static final String UWU_DATABASE_ERROR = ChatColor.RED + "somewwing went reawwy wrong!! uwu pwease tell uws devs!!";
-    public static final String PARTIES_HELP_COMMAND = ChatColor.YELLOW + "\n<-------- " + ChatColor.RESET + "Claim Help" + ChatColor.YELLOW + " ----------->\n" + ChatColor.RESET + ChatColor.GOLD +
-                                                        "/parties create <name> <acronym>: " + ChatColor.RESET + "create a political party\n" + ChatColor.GOLD +
-                                                        "/parties disband: " + ChatColor.RESET + "disband your party\n" + ChatColor.GOLD +
-                                                        "/parties setowner <player>: " + ChatColor.RESET + "transfer ownership of your party \n" + ChatColor.GOLD +
-                                                        "/parties invite <player>: " + ChatColor.RESET + "invite a player to your party\n" + ChatColor.GOLD +
-                                                        "/parties accept: " + ChatColor.RESET + "accept a party invite\n" + ChatColor.GOLD +
-                                                        "/parties deny: " + ChatColor.RESET + "deny a party invite\n" + ChatColor.GOLD +
-                                                        "/parties leave: " + ChatColor.RESET + "leave your current party\n" + ChatColor.GOLD +
-                                                        "/parties description <description>: " + ChatColor.RESET + "set your party description\n" + ChatColor.GOLD +
-                                                        "/parties rename <name> <acronym>: " + ChatColor.RESET + "change your party's name and acronym";
-    public static final String NOT_IN_PARTY = ChatColor.RED + "you aren't currently in a party";
-    public static final String CANT_FIND_PARTY = ChatColor.RED + "can't find that party";
-    public static final String NO_INVITE_ERROR = null;
-    public static final String ALREADY_IN_PARTY_ERROR = null;
-    public static final String OWNER_OF_PARTY_ERROR = null;
-    public static final String PARTY_PRIVATE_ERROR = null;
-    public static final String SUCCESSFUL_PARTY_CREATE = null;
-    public static final String SUCCESSFUL_PARTY_RENAME = null;
-    public static final String SUCCESSFUL_PARTY_DISBAND = null;
-    public static final String SUCCESSFUL_INVITE_DENY = null;
-    public static final String SUCCESSFUL_INVITE_ACCEPT = null;
-    public static final String SUCCESSFUL_INVITE_SEND = null;
+    public static final String NO_LONGER_RUNNING = POLITICS_COLOR + "you are no longer running for the election";
+    public static final String NO_PERMISSION_ERROR = ERROR_COLOR + "you do not have permission to do that";
+    public static final String ELECTION_CANCELLED = POLITICS_COLOR  + "the election has been cancelled";
+    public static final String SUCCESSFUL_RUN = SUCCESS_COLOR + "you are sucessfully running! use /elections candidates to see your competitors";
+    public static final String NOT_VOTING = ERROR_COLOR + "the election is not in a voting phase!";
+    public static final String NO_CANDIDATES = ERROR_COLOR + "nobody is currently running! use /elections cancel to cancel the election";
+    public static final String TITLES_NOT_FILLED = ERROR_COLOR + "the titles aren't filled! starting voting anyway";
+    public static final String UWU_DATABASE_ERROR = ERROR_COLOR + "somewwing went reawwy wrong!! uwu pwease tell uws devs!!";
+    public static final String PARTIES_HELP_COMMAND = ChatColor.YELLOW + "\n<-------- " + ChatColor.RESET + "Parties Help" + ChatColor.YELLOW + " ----------->\n" + ChatColor.RESET + ChatColor.GOLD +
+                                                        "/parties create <acronym> <name>: " + ChatColor.RESET + "create a political party\n" + ChatColor.GOLD + 
+                                                        "/parties disband: " + ChatColor.RESET + "disband your party\n" + ChatColor.GOLD + 
+                                                        //"/parties setowner <player>: " + ChatColor.RESET + "transfer ownership of your party \n" + ChatColor.GOLD + 
+                                                        "/parties invite <player>: " + ChatColor.RESET + "invite a player to your party\n" + ChatColor.GOLD + 
+                                                        "/parties accept: " + ChatColor.RESET + "accept a party invite\n" + ChatColor.GOLD + 
+                                                        "/parties deny: " + ChatColor.RESET + "deny a party invite\n" + ChatColor.GOLD + 
+                                                        "/parties leave: " + ChatColor.RESET + "leave your current party\n" + ChatColor.GOLD + 
+                                                        "/parties join: " + ChatColor.RESET + "join a public party\n" + ChatColor.GOLD + 
+                                                        "/parties description <description>: " + ChatColor.RESET + "set your party description\n" + ChatColor.GOLD + 
+                                                        "/parties color <color>: " + ChatColor.RESET + "set your party color\n" + ChatColor.GOLD + 
+                                                        "/parties colors: " + ChatColor.RESET + "get a list of colors\n" + ChatColor.GOLD + 
+                                                        "/parties list: " + ChatColor.RESET + "get a list of parties\n" + ChatColor.GOLD + 
+                                                        "/parties rename <acronym> <name>: " + ChatColor.RESET + "change your party's name and acronym";
+    public static final String NOT_IN_PARTY = ERROR_COLOR + "you aren't currently in a party";
+    public static final String CANT_FIND_PARTY = ERROR_COLOR + "can't find that party";
+    public static final String NO_INVITE_ERROR = ERROR_COLOR + "you have no pending invites";
+    public static final String ALREADY_IN_PARTY_ERROR = ERROR_COLOR + "you're already in a party";
+    public static final String SUCCESSFUL_PARTY_JOIN = SUCCESS_COLOR + "you've successfully joined a party";
+    public static final String SUCCESSFUL_INVITE_ACCEPT = SUCCESS_COLOR + "invite accepted";
+    public static final String SUCCESSFUL_INVITE_DENY = SUCCESS_COLOR + "invite denied";
+    public static final String SUCCESSFUL_INVITE_SEND = SUCCESS_COLOR + "invite sent";
+    public static final String SUCCESSFUL_PARTY_RENAME = SUCCESS_COLOR + "party successfully renamed. well done! you did so great <3.";
+    public static final String SUCCESSFUL_PARTY_DISBAND = SUCCESS_COLOR + "party is no more";
+    public static final String PARTY_PRIVATE_ERROR = ERROR_COLOR + "that party is private";
+    public static final String SUCCESSFUL_PARTY_CREATE = SUCCESS_COLOR + "you made a party";
+    public static final String OWNER_OF_PARTY_ERROR = ERROR_COLOR + "use /party disband or /parties setowner <player> first";
+    public static final String SUCCESSFUL_DESCRIPTION_SET = SUCCESS_COLOR + "you have set the description :thumbsup:";
+    public static final String DESCRIPTION_SET_ERROR = ERROR_COLOR + "didnt work";
+    public static final String SUCCESSFUL_PUBLIC_SET = SUCCESS_COLOR + "you did it!";
+    public static final String PUBLIC_SET_ERROR = ERROR_COLOR + "better luck next time";
+    public static final String ALREADY_INVITE_SENT = ERROR_COLOR + "that player already has a pending invite";
+    public static final String COLORS_HELP = ChatColor.BLACK + "&0" + ChatColor.DARK_BLUE + "&1" + ChatColor.DARK_GREEN + "&2" + ChatColor.DARK_AQUA + "&3" +
+                                             ChatColor.DARK_RED + "&4" + ChatColor.DARK_PURPLE + "&5" + ChatColor.GOLD + "&6" + ChatColor.GRAY + "&7" +
+                                             ChatColor.DARK_GRAY + "&8" + ChatColor.BLUE + "&9" + ChatColor.GREEN + "&a" + ChatColor.AQUA + "&b" +
+                                             ChatColor.RED + "&c" + ChatColor.LIGHT_PURPLE + "&d" + ChatColor.YELLOW + "&e" + ChatColor.WHITE + "&f";
+    public static final String SUCCESSFUL_COLOR_SET = SUCCESS_COLOR + "you have changed the color.";
+    public static final String COLOR_SET_ERROR = ERROR_COLOR + "didnt work";
 
     /**
      * @param cond sends successMessage on true, database error on false

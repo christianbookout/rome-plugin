@@ -9,6 +9,8 @@ import java.util.Collection;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.bukkit.ChatColor;
+
 public class PartyHandler {
     //DB: table 1 - players, their respective party name
     //    table 2 - party name
@@ -24,12 +26,13 @@ public class PartyHandler {
             conn.prepareStatement("CREATE TABLE IF NOT EXISTS parties (" +
                     "name VARCHAR(50) NOT NULL UNIQUE," +
                     "acronym CHAR(4) NOT NULL UNIQUE," +
-                    "owner_uuid CHAR(36) NOT NULL UNIQUE PRIMARY KEY," +
+                    "owner_uuid CHAR(36) NOT NULL PRIMARY KEY," +
                     "is_public BOOLEAN," +
-                    "description VARCHAR(250));" +
-                    "CREATE TABLE IF NOT EXISTS partyMembers (" +
-                    "uuid CHAR(36) UNIQUE PRIMARY KEY NOT NULL," +
-                    "acronym CHAR(4) NOT NULL);").executeBatch();
+                    "color CHAR(1)," + 
+                    "description VARCHAR(250));").execute();
+            conn.prepareStatement("CREATE TABLE IF NOT EXISTS partyMembers (" +
+                    "uuid CHAR(36) PRIMARY KEY NOT NULL," +
+                    "acronym CHAR(4) NOT NULL);").execute();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -48,14 +51,34 @@ public class PartyHandler {
         public static PartyAcronym make(String input) {
             return new PartyAcronym(input.toUpperCase());
         }
+        @Override
+        public String toString() {
+            return this.str;
+        }
+        @Override
+        public boolean equals(Object other) {
+            if (other instanceof PartyAcronym) {
+                return ((PartyAcronym)other).str == this.str;
+            }
+            if (other instanceof String) {
+                return ((String)other).equals(str);
+            }
+            return false;
+        }
     }
 
-    public Collection<String> getParties() {
-        var parties = new ArrayList<String>();
+    public Collection<Party> getParties() {
+        var parties = new ArrayList<Party>();
         try (Connection conn = SQLConn.getConnection()) {
-            var results = conn.prepareStatement("SELECT name, acronym FROM parties;").executeQuery();
+            var results = conn.prepareStatement("SELECT * FROM parties;").executeQuery();
             while (results.next()) {
-                parties.add(results.getString("name") + " (" + results.getString("acronym") + ")");
+                String name = results.getString("name");
+                String acronym = results.getString("acronym");
+                String description = results.getString("description");
+                boolean isPublic = results.getBoolean("is_public");
+                String owner = results.getString("owner_uuid");
+                char color = results.getString("color").toCharArray()[0];
+                parties.add(new Party(name, PartyAcronym.make(acronym), description, isPublic, owner, color));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -88,7 +111,7 @@ public class PartyHandler {
     public Collection<String> getMembersUsernames(PartyAcronym acronym) {
         var members = new ArrayList<String>();
         try (Connection conn = SQLConn.getConnection()) {
-            var stmt = conn.prepareStatement("SELECT username FROM usernames WHERE uuid = (SELECT uuid FROM partyMembers WHERE acronym=?);");
+            var stmt = conn.prepareStatement("SELECT usernames.username FROM partyMembers INNER JOIN usernames ON partyMembers.uuid = usernames.uuid WHERE acronym=?;");
             stmt.setString(1, acronym.str);
             var results = stmt.executeQuery();
             while (results.next()) {
@@ -114,12 +137,13 @@ public class PartyHandler {
 
     public boolean createParty(UUID owner, PartyAcronym acronym, String name) {
         try (Connection conn = SQLConn.getConnection()) {
-            var stmt = conn.prepareStatement("INSERT INTO parties VALUES (?, ?, ?, ?, ?);");
+            var stmt = conn.prepareStatement("INSERT INTO parties VALUES (?, ?, ?, ?, ?, ?);");
             stmt.setString(1, name);
             stmt.setString(2, acronym.str);
             stmt.setString(3, owner.toString());
             stmt.setBoolean(4, false);
-            stmt.setString(5, "This is a political party.");
+            stmt.setString(5, "7"); //set default color to gray i guess
+            stmt.setString(6, "This is a political party.");
             if (stmt.executeUpdate() < 1) {
                 return false;
             }
@@ -153,7 +177,7 @@ public class PartyHandler {
             stmt.executeUpdate();
             stmt.close();
             stmt = conn.prepareStatement("DELETE FROM partyMembers WHERE acronym=?;");
-            stmt.setString(1, party.str);
+            stmt.setString(1, party.acronym.str);
             stmt.executeUpdate();
             return true;
         } catch (SQLException e) {
@@ -180,7 +204,7 @@ public class PartyHandler {
             stmt.setString(1, acronym.str);
             var results = stmt.executeQuery();
             if (results.next()) {
-                return results.getString("title");
+                return results.getString("name");
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -188,9 +212,22 @@ public class PartyHandler {
         return null;
     }
 
+    public boolean setDescription(PartyAcronym acronym, String description) {
+        try (Connection conn = SQLConn.getConnection()) {
+            var stmt = conn.prepareStatement("UPDATE parties SET description=? WHERE acronym=?;");
+            stmt.setString(1, description);
+            stmt.setString(2, acronym.str);
+            var results = stmt.executeUpdate();
+            return results > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
     public String getDescription(PartyAcronym acronym) {
         try (Connection conn = SQLConn.getConnection()) {
-            var stmt = conn.prepareStatement("SELECT description FROM parties WHERE uuid=?;");
+            var stmt = conn.prepareStatement("SELECT description FROM parties WHERE acronym=?;");
             stmt.setString(1, acronym.str);
             var results = stmt.executeQuery();
             if (results.next()) {
@@ -202,18 +239,36 @@ public class PartyHandler {
         return null;
     }
 
-    public PartyAcronym getParty(UUID player) {
+    public Party getParty(UUID player) {
         try (Connection conn = SQLConn.getConnection()) {
-            var stmt = conn.prepareStatement("SELECT title FROM partyMembers WHERE uuid=?;");
+            var stmt = conn.prepareStatement("SELECT * FROM parties WHERE acronym=(SELECT acronym FROM partyMembers WHERE uuid=?);");
             stmt.setString(1, player.toString());
             var results = stmt.executeQuery();
             if (results.next()) {
-                return new PartyAcronym(results.getString("acronym"));
+                String name = results.getString("name");
+                String acronym = results.getString("acronym");
+                String description = results.getString("description");
+                boolean isPublic = results.getBoolean("is_public");
+                String owner = results.getString("owner_uuid");
+                char color = results.getString("color").toCharArray()[0];
+                return new Party(name, PartyAcronym.make(acronym), description, isPublic, owner, color);
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public boolean setColor(PartyAcronym acronym, String color) {
+        try (Connection conn = SQLConn.getConnection()) {
+            var stmt = conn.prepareStatement("UPDATE parties SET color=? WHERE acronym=?;");
+            stmt.setString(1, color);
+            stmt.setString(2, acronym.toString());
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
     public boolean partyExists(PartyAcronym acronym) {
@@ -255,16 +310,42 @@ public class PartyHandler {
         }
     }
 
-    public boolean rename(UUID uuid, PartyAcronym newAcronym, String newName) {
+    public boolean rename(UUID uuid, PartyAcronym oldAcronym, PartyAcronym newAcronym, String newName) {
         try (Connection conn = SQLConn.getConnection()) {
             var stmt = conn.prepareStatement("UPDATE parties SET acronym=?, name=? WHERE owner_uuid=?;");
+            var stmt2 = conn.prepareStatement("UPDATE partyMembers SET acronym=? WHERE acronym=?;");
             stmt.setString(1, newAcronym.str);
             stmt.setString(2, newName);
             stmt.setString(3, uuid.toString());
+            stmt2.setString(1, newAcronym.toString());
+            stmt2.setString(2, oldAcronym.toString());
+            stmt2.execute();
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return false;
+    }
+    
+    public class Party {
+        public final String name, description, owner;
+        public final PartyAcronym acronym;
+        public final boolean isPublic;
+        public final ChatColor color;
+        private static final int cutoffInt = 50;
+        public Party(String name, PartyAcronym acronym, String description, boolean isPublic, String owner, char color) {
+            this.name = name;
+            this.acronym = acronym;
+            this.description = description;
+            this.isPublic = isPublic;
+            this.owner = owner;
+            this.color = ChatColor.getByChar(color);
+        }
+
+        @Override
+        public String toString() {
+            String cutoff = description.length() > cutoffInt ? description.substring(0, cutoffInt).strip() + "..." : description;
+            return this.color + name + ChatColor.RESET + " (" + this.color + acronym + ChatColor.RESET + "): " + ChatColor.RESET + cutoff;
+        }
     }
 }

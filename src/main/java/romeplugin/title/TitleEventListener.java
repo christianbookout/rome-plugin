@@ -14,17 +14,17 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import romeplugin.RomePlugin;
 import romeplugin.database.SQLConn;
+import romeplugin.election.PartyHandler;
 
 import java.sql.SQLException;
 
-/**
- * @author chris
- */
 public class TitleEventListener implements Listener {
     private final TitleHandler titles;
 
-    public TitleEventListener(TitleHandler titles) {
+    private final PartyHandler partyHandler;
+    public TitleEventListener(TitleHandler titles, PartyHandler partyHandler) {
         this.titles = titles;
+        this.partyHandler = partyHandler;
     }
 
     @EventHandler
@@ -32,7 +32,9 @@ public class TitleEventListener implements Listener {
         Title playerTitle = RomePlugin.onlinePlayerTitles.get(event.getPlayer());
         if (playerTitle != null) {
             // intercept chat message here
-            event.setFormat("[" + playerTitle.color + playerTitle.fancyName + ChatColor.RESET + "] " + event.getFormat());
+            var party = partyHandler.getParty(event.getPlayer().getUniqueId());
+            var partyTitle = party != null ? "(" + party.color + party.acronym + ChatColor.RESET + ") " : "";
+            event.setFormat("[" + playerTitle.color + playerTitle.fancyName + ChatColor.RESET + "] " + partyTitle + event.getFormat());
         }
     }
 

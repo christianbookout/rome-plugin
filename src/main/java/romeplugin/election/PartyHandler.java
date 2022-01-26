@@ -59,10 +59,10 @@ public class PartyHandler {
         @Override
         public boolean equals(Object other) {
             if (other instanceof PartyAcronym) {
-                return ((PartyAcronym) other).str == this.str;
+                return ((PartyAcronym) other).str.equals(this.str);
             }
             if (other instanceof String) {
-                return ((String) other).equals(str);
+                return (other).equals(str);
             }
             return false;
         }

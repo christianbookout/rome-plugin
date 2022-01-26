@@ -296,6 +296,18 @@ public class PartyHandler {
         return false;
     }
 
+    public boolean kickMember(UUID owner, UUID toKick) {
+        try (Connection conn = SQLConn.getConnection()) {
+            var stmt = conn.prepareStatement("DELETE FROM partyMembers WHERE uuid=? AND acronym = (SELECT acronym FROM parties WHERE owner_uuid=?);");
+            stmt.setString(1, toKick.toString());
+            stmt.setString(2, owner.toString());
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
     public Optional<Boolean> isPartyPublic(PartyAcronym acronym) {
         try (Connection conn = SQLConn.getConnection()) {
             var stmt = conn.prepareStatement("SELECT is_public FROM parties WHERE acronym=?");

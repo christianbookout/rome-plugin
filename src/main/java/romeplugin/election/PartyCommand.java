@@ -43,8 +43,8 @@ public class PartyCommand implements CommandExecutor, TabCompleter {
                 //TODO
                 return false;
             case "kick":
-                //TODO
-                return false;
+                kick(player, args[1]);
+                return true;
             case "color":
                 if (args.length < 2) return false;
                 color(player, args[1]);
@@ -129,6 +129,23 @@ public class PartyCommand implements CommandExecutor, TabCompleter {
             return;
         }
         player.sendMessage(MessageConstants.COLOR_SET_ERROR);
+    }
+
+    private void kick(Player player, String toKick) {
+        var toKickUUID = SQLConn.getUUIDFromUsername(toKick);
+        if (toKickUUID == null) {
+            player.sendMessage(MessageConstants.CANT_FIND_PLAYER);
+            return;
+        }
+        if (!partyHandler.isOwner(player.getUniqueId())) {
+            player.sendMessage(MessageConstants.NO_PERMISSION_ERROR);
+            return;
+        }
+        if (partyHandler.kickMember(player.getUniqueId(), toKickUUID)) {
+            player.sendMessage(MessageConstants.SUCCESSFUL_PARTY_KICK);
+            return;
+        }
+        player.sendMessage(MessageConstants.TARGET_NOT_IN_PARTY);
     }
 
     private void description(Player player, String desc) {

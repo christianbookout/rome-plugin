@@ -77,14 +77,15 @@ public class MessageConstants {
     public static final String CANT_FIND_PARTY = ERROR_COLOR + "can't find that party";
     public static final String NO_INVITE_ERROR = ERROR_COLOR + "you have no pending invites";
     public static final String ALREADY_IN_PARTY_ERROR = ERROR_COLOR + "you're already in a party";
-    public static final String SUCCESSFUL_PARTY_JOIN = SUCCESS_COLOR + "you've successfully joined a party";
     public static final String SUCCESSFUL_INVITE_ACCEPT = SUCCESS_COLOR + "invite accepted";
     public static final String SUCCESSFUL_INVITE_DENY = SUCCESS_COLOR + "invite denied";
     public static final String SUCCESSFUL_INVITE_SEND = SUCCESS_COLOR + "invite sent";
-    public static final String SUCCESSFUL_PARTY_RENAME = SUCCESS_COLOR + "party successfully renamed. well done! you did so great <3.";
     public static final String SUCCESSFUL_PARTY_DISBAND = SUCCESS_COLOR + "party is no more";
-    public static final String PARTY_PRIVATE_ERROR = ERROR_COLOR + "that party is private";
+    public static final String SUCCESSFUL_PARTY_RENAME = SUCCESS_COLOR + "party successfully renamed. well done! you did so great <3.";
     public static final String SUCCESSFUL_PARTY_CREATE = SUCCESS_COLOR + "you made a party";
+    public static final String SUCCESSFUL_PARTY_JOIN = SUCCESS_COLOR + "you've successfully joined a party";
+    public static final String SUCCESSFUL_PARTY_KICK = SUCCESS_COLOR + "you've really kicked that guy! nice <3";
+    public static final String PARTY_PRIVATE_ERROR = ERROR_COLOR + "that party is private";
     public static final String OWNER_OF_PARTY_ERROR = ERROR_COLOR + "use /party disband or /parties setowner <player> first";
     public static final String SUCCESSFUL_DESCRIPTION_SET = SUCCESS_COLOR + "you have set the description :thumbsup:";
     public static final String DESCRIPTION_SET_ERROR = ERROR_COLOR + "didnt work";
@@ -98,6 +99,7 @@ public class MessageConstants {
     public static final String SUCCESSFUL_COLOR_SET = SUCCESS_COLOR + "you have changed the color.";
     public static final String COLOR_SET_ERROR = ERROR_COLOR + "didnt work";
     public static final String PARTY_NAME_COLLISION_ERROR = "that name already exists";
+    public static final String TARGET_NOT_IN_PARTY = ERROR_COLOR + "that person isn't in your party!";
 
     /**
      * @param cond sends successMessage on true, database error on false

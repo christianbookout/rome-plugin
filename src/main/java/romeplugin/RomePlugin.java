@@ -154,6 +154,7 @@ public class RomePlugin extends JavaPlugin {
 
         SwearFilter filter = new SwearFilter(landControl, config.getInt("messages.useSwearFilter"));
         var peeController = new PeeController(this);
+        PartyHandler partyHandler = new PartyHandler();
         getCommand("rome").setExecutor(new LandCommand(landControl));
         getCommand("claim").setExecutor(new ClaimLandCommand(landControl, this));
         getCommand("claiminfo").setExecutor(new ClaimInfoCommand());
@@ -163,16 +164,16 @@ public class RomePlugin extends JavaPlugin {
         //getCommand("bal").setExecutor(new BalanceCommand(ledger));
         getServer().getPluginManager().registerEvents(new RemovePopeListener(), this);
         getCommand("builder").setExecutor(new BuilderCommand());
-        getCommand("shout").setExecutor(new ShoutCommand());
+        getCommand("shout").setExecutor(new ShoutCommand(partyHandler));
         getCommand("pee").setExecutor(peeController);
         //getCommand("makekey").setExecutor(new MakeKeyCommand(lockManager));
         getCommand("getblocks").setExecutor(new GetClaimBlocksCommand(landControl));
         getCommand("elections").setExecutor(new ElectionCommand(new ElectionHandler(this, titles)));
         getCommand("elections").setTabCompleter(new ElectionTabCompleter());
         getCommand("titles").setExecutor(new TitlesCommand());
-        getCommand("parties").setExecutor(new PartyCommand(new PartyHandler()));
+        getCommand("parties").setExecutor(new PartyCommand(partyHandler, this));
         getServer().getPluginManager().registerEvents(peeController, this);
-        getServer().getPluginManager().registerEvents(new TitleEventListener(titles), this);
+        getServer().getPluginManager().registerEvents(new TitleEventListener(titles, partyHandler), this);
         getServer().getPluginManager().registerEvents(
                 new DistanceListener(config.getInt("messages.messageDistance"), filter, landControl),
                 this);

@@ -136,6 +136,21 @@ public class PartyHandler {
         return false;
     }
 
+    public Optional<PartyAcronym> getMemberAcronym(UUID uuid) {
+        try (Connection conn = SQLConn.getConnection()) {
+            var stmt = conn.prepareStatement("SELECT acronym FROM partyMembers WHERE uuid=?;");
+            stmt.setString(1, uuid.toString());
+            var res = stmt.executeQuery();
+            if (res.next()) {
+                return Optional.of(new PartyAcronym(res.getString(1)));
+            }
+            return Optional.empty();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return Optional.empty();
+        }
+    }
+
     public boolean createParty(UUID owner, PartyAcronym acronym, String name) {
         try (Connection conn = SQLConn.getConnection()) {
             var stmt = conn.prepareStatement("INSERT INTO parties VALUES (?, ?, ?, ?, ?, ?);");
@@ -340,7 +355,7 @@ public class PartyHandler {
         return false;
     }
 
-    public class Party {
+    public static class Party {
         public final String name, description, owner;
         public final PartyAcronym acronym;
         public final boolean isPublic;

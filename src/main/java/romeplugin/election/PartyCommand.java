@@ -89,10 +89,11 @@ public class PartyCommand implements CommandExecutor, TabCompleter {
                 deny(player);
                 return true;
             case "info":
-                if (args.length < 2)
-                    return false;
-                info(player, args[1]);
-                //TODO when args.length < 2 display info about player's party
+                if (args.length < 2) {
+                    infoPlayerParty(player);
+                    return true;
+                }
+                info(player, PartyAcronym.make(args[1]));
                 return true;
             case "list":
                 list(player);
@@ -178,20 +179,27 @@ public class PartyCommand implements CommandExecutor, TabCompleter {
         player.sendMessage(ChatColor.YELLOW + "<-- " + ChatColor.RESET + "Parties" + ChatColor.YELLOW + " -->\n" + String.join(ChatColor.GOLD + "\n" + ChatColor.RESET, players));
     }
 
-    private void info(Player player, String acronym) {
-        var acronym_canon = PartyAcronym.make(acronym);
-        Collection<String> members = partyHandler.getMembersUsernames(acronym_canon);
-        String name = partyHandler.getName(acronym_canon);
-        String description = partyHandler.getDescription(acronym_canon);
+    private void info(Player player, PartyAcronym acronym) {
+        Collection<String> members = partyHandler.getMembersUsernames(acronym);
+        String name = partyHandler.getName(acronym);
+        String description = partyHandler.getDescription(acronym);
         if (name == null || description == null || members.isEmpty()) {
             player.sendMessage(MessageConstants.CANT_FIND_PARTY);
             return;
         }
         String membersStr = members.stream().limit(10).collect(Collectors.joining(", "));
         player.sendMessage(
-                ChatColor.YELLOW + "<-- " + ChatColor.RESET + "Party: " + name + " (" + acronym.toUpperCase() + ")" + ChatColor.YELLOW + " -->\n" + ChatColor.GOLD +
+                ChatColor.YELLOW + "<-- " + ChatColor.RESET + "Party: " + name + " (" + acronym.str + ")" + ChatColor.YELLOW + " -->\n" + ChatColor.GOLD +
                         "Description: " + ChatColor.RESET + description + "\n" + ChatColor.GOLD +
                         "Members: " + ChatColor.RESET + membersStr);
+    }
+
+    private void infoPlayerParty(Player player) {
+        partyHandler.getMemberAcronym(player.getUniqueId())
+                .ifPresentOrElse(
+                        acronym -> info(player, acronym),
+                        () -> player.sendMessage(MessageConstants.CANT_FIND_PARTY)
+                );
     }
 
     private void accept(Player player) {

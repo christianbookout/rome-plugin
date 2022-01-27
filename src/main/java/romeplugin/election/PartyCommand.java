@@ -375,7 +375,7 @@ public class PartyCommand implements CommandExecutor, TabCompleter {
         return str.toString();
     }
 
-    private static final Stream<String> SUBCOMMANDS = Arrays.stream(new String[]{
+    private static final String[] SUBCOMMANDS = new String[]{
             "help",
             "setowner",
             "kick",
@@ -393,7 +393,7 @@ public class PartyCommand implements CommandExecutor, TabCompleter {
             "info",
             "list",
             "public"
-    });
+    };
 
     private static final String[] TRUE_STRINGS = {
             "true",
@@ -403,10 +403,11 @@ public class PartyCommand implements CommandExecutor, TabCompleter {
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+        Stream<String> subCommands = Arrays.stream(SUBCOMMANDS); // you can only call .collect on a stream once so we have to make a new stream every time 
         if (args.length == 0) {
-            return SUBCOMMANDS.collect(Collectors.toList());
+            return subCommands.collect(Collectors.toList());
         } else if (args.length == 1) {
-            return SUBCOMMANDS.filter(cmd -> cmd.startsWith(args[0])).collect(Collectors.toList());
+            return subCommands.filter(cmd -> cmd.startsWith(args[0])).collect(Collectors.toList());
         } else if (args.length == 2) {
             switch (args[0]) {
                 case "invite":
@@ -425,8 +426,7 @@ public class PartyCommand implements CommandExecutor, TabCompleter {
                             .collect(Collectors.toList());
                 case "info":
                 case "join":
-                    // TODO: have a list of party acronyms
-                    return Collections.emptyList();
+                    return partyHandler.getParties().stream().map(p -> p.acronym.toString()).collect(Collectors.toList());
             }
         }
         return Collections.emptyList();

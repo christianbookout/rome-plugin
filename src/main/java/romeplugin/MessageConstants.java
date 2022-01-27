@@ -102,6 +102,8 @@ public class MessageConstants {
     public static final String PARTY_NAME_COLLISION_ERROR = "that name already exists";
     public static final String TARGET_NOT_IN_PARTY = ERROR_COLOR + "that person isn't in your party!";
 
+    public static final String NOTIFICATION_RECEIVED = "you've got mail!";
+
     /**
      * @param cond sends successMessage on true, database error on false
      * @param sender who to send the message to

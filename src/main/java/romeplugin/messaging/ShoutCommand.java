@@ -1,4 +1,4 @@
-package romeplugin.messageIntercepter;
+package romeplugin.messaging;
 
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;

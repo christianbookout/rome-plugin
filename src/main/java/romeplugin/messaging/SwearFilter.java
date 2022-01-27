@@ -1,4 +1,4 @@
-package romeplugin.messageIntercepter;
+package romeplugin.messaging;
 
 import org.bukkit.entity.Player;
 import romeplugin.zoning.claims.LandControl;

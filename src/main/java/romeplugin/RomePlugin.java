@@ -5,8 +5,6 @@
  */
 package romeplugin;
 
-import blockchain.BalanceCommand;
-import blockchain.BlockchainEventListener;
 import blockchain.Ledger;
 import com.mysql.cj.jdbc.MysqlConnectionPoolDataSource;
 import com.mysql.cj.jdbc.MysqlDataSource;
@@ -22,9 +20,9 @@ import romeplugin.election.ElectionHandler;
 import romeplugin.election.ElectionTabCompleter;
 import romeplugin.election.PartyCommand;
 import romeplugin.election.PartyHandler;
-import romeplugin.messageIntercepter.DistanceListener;
-import romeplugin.messageIntercepter.ShoutCommand;
-import romeplugin.messageIntercepter.SwearFilter;
+import romeplugin.messaging.DistanceListener;
+import romeplugin.messaging.ShoutCommand;
+import romeplugin.messaging.SwearFilter;
 import romeplugin.misc.PeeController;
 import romeplugin.title.*;
 import romeplugin.zoning.FoundCityCommand;
@@ -36,7 +34,6 @@ import romeplugin.zoning.claims.ClaimLandCommand;
 import romeplugin.zoning.claims.GetClaimBlocksCommand;
 import romeplugin.zoning.claims.LandControl;
 import romeplugin.zoning.locks.LockManager;
-import romeplugin.zoning.locks.MakeKeyCommand;
 
 import java.sql.Connection;
 import java.sql.SQLException;

@@ -1,4 +1,4 @@
-package romeplugin.messageIntercepter;
+package romeplugin.messaging;
 
 import org.bukkit.World.Environment;
 import org.bukkit.event.EventHandler;

@@ -40,7 +40,7 @@ public class PartyCommand implements CommandExecutor, TabCompleter {
                 help(sender);
                 return true;
             case "setowner":
-                //TODO
+                setOwner(player, args[1]);
                 return false;
             case "kick":
                 kick(player, args[1]);
@@ -106,6 +106,39 @@ public class PartyCommand implements CommandExecutor, TabCompleter {
             default:
                 return false;
         }
+    }
+
+    private void setOwner(Player player, String arg) {
+        var target = SQLConn.getUUIDFromUsername(arg);
+        if (target == null) {
+            player.sendMessage(MessageConstants.CANT_FIND_PLAYER);
+            return;
+        }
+        if (target.equals(player.getUniqueId())) {
+            player.sendMessage("you silly goose, that's yourself!");
+            return;
+        }
+        var ownerParty = partyHandler.getOwnerAcronym(player.getUniqueId());
+        if (ownerParty == null) {
+            player.sendMessage(MessageConstants.NO_PERMISSION_ERROR);
+            return;
+        }
+        var targetPartyOptional = partyHandler.getMemberAcronym(target);
+        if (targetPartyOptional.isEmpty()) {
+            player.sendMessage(MessageConstants.TARGET_NOT_IN_PARTY);
+            return;
+        }
+        var targetParty = targetPartyOptional.get();
+        if (!targetParty.str.equals(ownerParty.str)) {
+            player.sendMessage(MessageConstants.TARGET_NOT_IN_PARTY);
+            return;
+        }
+
+        MessageConstants.sendOnSuccess(
+                partyHandler.setOwner(player.getUniqueId(), target),
+                player,
+                MessageConstants.SUCCESSFUL_PARTY_SETOWNER
+        );
     }
 
     private void colors(Player player) {

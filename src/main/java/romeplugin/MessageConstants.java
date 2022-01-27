@@ -62,7 +62,7 @@ public class MessageConstants {
     public static final String PARTIES_HELP_COMMAND = ChatColor.YELLOW + "\n<-------- " + ChatColor.RESET + "Parties Help" + ChatColor.YELLOW + " ----------->\n" + ChatColor.RESET + ChatColor.GOLD +
                                                         "/parties create <acronym> <name>: " + ChatColor.RESET + "create a political party\n" + ChatColor.GOLD + 
                                                         "/parties disband: " + ChatColor.RESET + "disband your party\n" + ChatColor.GOLD + 
-                                                        //"/parties setowner <player>: " + ChatColor.RESET + "transfer ownership of your party \n" + ChatColor.GOLD + 
+                                                        "/parties setowner <player>: " + ChatColor.RESET + "transfer ownership of your party \n" + ChatColor.GOLD +
                                                         "/parties invite <player>: " + ChatColor.RESET + "invite a player to your party\n" + ChatColor.GOLD + 
                                                         "/parties accept: " + ChatColor.RESET + "accept a party invite\n" + ChatColor.GOLD + 
                                                         "/parties deny: " + ChatColor.RESET + "deny a party invite\n" + ChatColor.GOLD + 
@@ -85,6 +85,7 @@ public class MessageConstants {
     public static final String SUCCESSFUL_PARTY_CREATE = SUCCESS_COLOR + "you made a party";
     public static final String SUCCESSFUL_PARTY_JOIN = SUCCESS_COLOR + "you've successfully joined a party";
     public static final String SUCCESSFUL_PARTY_KICK = SUCCESS_COLOR + "you've really kicked that guy! nice <3";
+    public static final String SUCCESSFUL_PARTY_SETOWNER = SUCCESS_COLOR + "you changed the owner of the party! good work <3";
     public static final String PARTY_PRIVATE_ERROR = ERROR_COLOR + "that party is private";
     public static final String OWNER_OF_PARTY_ERROR = ERROR_COLOR + "use /party disband or /parties setowner <player> first";
     public static final String SUCCESSFUL_DESCRIPTION_SET = SUCCESS_COLOR + "you have set the description :thumbsup:";

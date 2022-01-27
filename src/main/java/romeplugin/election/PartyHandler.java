@@ -136,6 +136,20 @@ public class PartyHandler {
         return false;
     }
 
+    public PartyAcronym getOwnerAcronym(UUID uuid) {
+        try (Connection conn = SQLConn.getConnection()) {
+            var stmt = conn.prepareStatement("SELECT acronym FROM parties WHERE owner_uuid=?;");
+            stmt.setString(1, uuid.toString());
+            var results = stmt.executeQuery();
+            if (results.next()) {
+                return new PartyAcronym(results.getString("acronym"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     public Optional<PartyAcronym> getMemberAcronym(UUID uuid) {
         try (Connection conn = SQLConn.getConnection()) {
             var stmt = conn.prepareStatement("SELECT acronym FROM partyMembers WHERE uuid=?;");
@@ -348,6 +362,18 @@ public class PartyHandler {
             stmt2.setString(1, newAcronym.toString());
             stmt2.setString(2, oldAcronym.toString());
             stmt2.execute();
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public boolean setOwner(UUID oldUUID, UUID newUUID) {
+        try (Connection conn = SQLConn.getConnection()) {
+            var stmt = conn.prepareStatement("UPDATE parties SET owner_uuid=? WHERE owner_uuid=?;");
+            stmt.setString(1, newUUID.toString());
+            stmt.setString(2, oldUUID.toString());
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();

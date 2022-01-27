@@ -23,6 +23,7 @@ import romeplugin.election.PartyHandler;
 import romeplugin.messaging.DistanceListener;
 import romeplugin.messaging.ShoutCommand;
 import romeplugin.messaging.SwearFilter;
+import romeplugin.misc.ItemBank;
 import romeplugin.misc.PeeController;
 import romeplugin.title.*;
 import romeplugin.zoning.FoundCityCommand;
@@ -151,6 +152,7 @@ public class RomePlugin extends JavaPlugin {
 
         SwearFilter filter = new SwearFilter(landControl, config.getInt("messages.useSwearFilter"));
         var peeController = new PeeController(this);
+        var itemBank = new ItemBank();
         PartyHandler partyHandler = new PartyHandler();
         getCommand("rome").setExecutor(new LandCommand(landControl));
         getCommand("claim").setExecutor(new ClaimLandCommand(landControl, this));
@@ -169,6 +171,8 @@ public class RomePlugin extends JavaPlugin {
         getCommand("elections").setTabCompleter(new ElectionTabCompleter());
         getCommand("titles").setExecutor(new TitlesCommand());
         getCommand("parties").setExecutor(new PartyCommand(partyHandler, this));
+        getCommand("itembank").setExecutor(itemBank);
+        getServer().getPluginManager().registerEvents(itemBank, this);
         getServer().getPluginManager().registerEvents(peeController, this);
         getServer().getPluginManager().registerEvents(new TitleEventListener(titles, partyHandler), this);
         getServer().getPluginManager().registerEvents(

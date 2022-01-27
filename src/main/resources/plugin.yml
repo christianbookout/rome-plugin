@@ -91,3 +91,7 @@ commands:
   parties:
     description: "type /parties help for help"
     usage: /parties help
+  itembank:
+    description: "open rome's bank"
+    usage: "/itembank"
+    permission: romeplugin.censor 

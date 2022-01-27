@@ -103,6 +103,7 @@ public class MessageConstants {
     public static final String TARGET_NOT_IN_PARTY = ERROR_COLOR + "that person isn't in your party!";
 
     public static final String NOTIFICATION_RECEIVED = "you've got mail!";
+    public static final String SUCCESSFUL_NOTIFICATION_CLEAR = SUCCESS_COLOR + "you cleared all your notifications! <3";
 
     /**
      * @param cond sends successMessage on true, database error on false

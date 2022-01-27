@@ -33,6 +33,16 @@ public class NotificationQueue {
         }
     }
 
+    public void broadcastNotification(String message) {
+        var uuids = SQLConn.getAllUUIDs();
+        if (uuids == null) {
+            return;
+        }
+        for (var uuid : uuids) {
+            insertLast(uuid, message);
+        }
+    }
+
     public int messageCount(UUID target) throws SQLException {
         try (var conn = SQLConn.getConnection()) {
             var stmt = conn.prepareStatement("SELECT COUNT(*) FROM notificationQueue WHERE uuid=?;");
@@ -83,14 +93,16 @@ public class NotificationQueue {
         }
     }
 
-    public void clear(UUID target) {
+    public boolean clear(UUID target) {
         try (var conn = SQLConn.getConnection()) {
             var stmt = conn.prepareStatement("DELETE FROM notificationQueue WHERE uuid=?;");
             stmt.setString(1, target.toString());
             stmt.executeUpdate();
             stmt.close();
+            return true;
         } catch (SQLException e) {
             e.printStackTrace();
+            return false;
         }
     }
 }

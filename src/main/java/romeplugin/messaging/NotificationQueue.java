@@ -79,6 +79,21 @@ public class NotificationQueue {
         return null;
     }
 
+    public String getIndex(UUID target, int n) {
+        try (var conn = SQLConn.getConnection()) {
+            var stmt = conn.prepareStatement("SELECT message FROM notificationQueue WHERE uuid=? AND priority=?;");
+            stmt.setString(1, target.toString());
+            stmt.setInt(2, n);
+            var res = stmt.executeQuery();
+            if (res.next()) {
+                return res.getString("message");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     public void removeFirst(UUID target) {
         try (var conn = SQLConn.getConnection()) {
             var stmt = conn.prepareStatement("DELETE FROM notificationQueue WHERE uuid=? ORDER BY priority ASC LIMIT 1;");

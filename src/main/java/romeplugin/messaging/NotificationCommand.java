@@ -7,6 +7,7 @@ import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import romeplugin.MessageConstants;
 
+import java.sql.SQLException;
 import java.util.Collections;
 import java.util.List;
 
@@ -24,8 +25,16 @@ public class NotificationCommand implements CommandExecutor, TabCompleter {
         }
         var player = (Player) sender;
         if (args.length == 0) {
+            int messageCount;
+            try {
+                messageCount = notifications.messageCount(player.getUniqueId());
+            } catch (SQLException e) {
+                e.printStackTrace();
+                player.sendMessage(MessageConstants.UWU_DATABASE_ERROR);
+                return true;
+            }
             var msg = notifications.getFirst(player.getUniqueId());
-            player.sendMessage(msg);
+            player.sendMessage(msg + "\n<Message " + 1 + " / " + messageCount + ">");
             return true;
         }
         if ("clear".equals(args[0])) {
@@ -37,10 +46,24 @@ public class NotificationCommand implements CommandExecutor, TabCompleter {
             return true;
         }
         try {
+            var messageCount = notifications.messageCount(player.getUniqueId());
             var n = Integer.parseInt(args[0]);
-            // TODO: implement getting nth notification
+            if (n > messageCount) {
+                player.sendMessage(MessageConstants.NOTIFICATION_INDEX_OUT_OF_BOUNDS);
+                return true;
+            }
+            var msg = notifications.getIndex(player.getUniqueId(), n - 1);
+            if (msg == null) {
+                // this should never happen, but just in case :)
+                player.sendMessage(MessageConstants.UWU_DATABASE_ERROR);
+                return true;
+            }
+            player.sendMessage(msg + "\n<Message " + n + " / " + messageCount + ">");
         } catch (NumberFormatException e) {
             player.sendMessage("not a number..!");
+        } catch (SQLException e) {
+            e.printStackTrace();
+            player.sendMessage(MessageConstants.UWU_DATABASE_ERROR);
         }
         return true;
     }

@@ -94,4 +94,7 @@ commands:
   itembank:
     description: "open rome's bank"
     usage: "/itembank"
-    permission: romeplugin.censor 
+    permission: romeplugin.censor
+  notification:
+    description: "notifications"
+    usage: "/notification"

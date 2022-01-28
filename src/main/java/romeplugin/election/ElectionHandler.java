@@ -4,6 +4,7 @@ import org.bukkit.plugin.Plugin;
 import romeplugin.MessageConstants;
 import romeplugin.RomePlugin;
 import romeplugin.database.SQLConn;
+import romeplugin.messaging.NotificationQueue;
 import romeplugin.title.Title;
 import romeplugin.title.TitleHandler;
 
@@ -30,10 +31,12 @@ public class ElectionHandler {
         VOTING
     }
 
+    private final NotificationQueue notifications;
     private final TitleHandler titleHandler;
     private final Plugin plugin;
 
-    public ElectionHandler(Plugin plugin, TitleHandler titleHandler) {
+    public ElectionHandler(NotificationQueue notifications, Plugin plugin, TitleHandler titleHandler) {
+        this.notifications = notifications;
         this.titleHandler = titleHandler;
         this.plugin = plugin;
         this.initialize();
@@ -173,6 +176,7 @@ public class ElectionHandler {
 
     public void startElection() {
         this.setElectionPhase(ElectionPhase.RUNNING);
+        notifications.broadcastNotification(MessageConstants.SUCCESSFUL_ELECTION_START);
         plugin.getServer().broadcastMessage(MessageConstants.SUCCESSFUL_ELECTION_START);
     }
 
@@ -181,6 +185,7 @@ public class ElectionHandler {
      */
     public void startVoting() {
         this.setElectionPhase(ElectionPhase.VOTING);
+        notifications.broadcastNotification(MessageConstants.SUCCESSFUL_VOTING_START);
         plugin.getServer().broadcastMessage(MessageConstants.SUCCESSFUL_VOTING_START);
     }
 

@@ -20,9 +20,7 @@ import romeplugin.election.ElectionHandler;
 import romeplugin.election.ElectionTabCompleter;
 import romeplugin.election.PartyCommand;
 import romeplugin.election.PartyHandler;
-import romeplugin.messaging.DistanceListener;
-import romeplugin.messaging.ShoutCommand;
-import romeplugin.messaging.SwearFilter;
+import romeplugin.messaging.*;
 import romeplugin.misc.ItemBank;
 import romeplugin.misc.PeeController;
 import romeplugin.title.*;
@@ -153,6 +151,8 @@ public class RomePlugin extends JavaPlugin {
         SwearFilter filter = new SwearFilter(landControl, config.getInt("messages.useSwearFilter"));
         var peeController = new PeeController(this);
         var itemBank = new ItemBank();
+        var notifications = new NotificationQueue();
+
         PartyHandler partyHandler = new PartyHandler();
         getCommand("rome").setExecutor(new LandCommand(landControl));
         getCommand("claim").setExecutor(new ClaimLandCommand(landControl, this));
@@ -167,11 +167,12 @@ public class RomePlugin extends JavaPlugin {
         getCommand("pee").setExecutor(peeController);
         //getCommand("makekey").setExecutor(new MakeKeyCommand(lockManager));
         getCommand("getblocks").setExecutor(new GetClaimBlocksCommand(landControl));
-        getCommand("elections").setExecutor(new ElectionCommand(new ElectionHandler(this, titles)));
+        getCommand("elections").setExecutor(new ElectionCommand(new ElectionHandler(notifications, this, titles)));
         getCommand("elections").setTabCompleter(new ElectionTabCompleter());
         getCommand("titles").setExecutor(new TitlesCommand());
         getCommand("parties").setExecutor(new PartyCommand(partyHandler, this));
         getCommand("itembank").setExecutor(itemBank);
+        getCommand("notification").setTabCompleter(new NotificationCommand(notifications));
         getServer().getPluginManager().registerEvents(itemBank, this);
         getServer().getPluginManager().registerEvents(peeController, this);
         getServer().getPluginManager().registerEvents(new TitleEventListener(titles, partyHandler), this);

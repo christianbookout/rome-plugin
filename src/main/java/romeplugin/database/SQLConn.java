@@ -275,7 +275,7 @@ public class SQLConn {
     /**
      * unshare claim with someone or everyone
      *
-     * @param entry claimEntry to un-share from
+     * @param entry    claimEntry to un-share from
      * @param toRemove if not exists then remove all players
      * @return returns true if the sql query removed any rows and false otherwise
      */
@@ -435,6 +435,21 @@ public class SQLConn {
                 }
                 return claims;
             }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public static List<UUID> getAllUUIDs() {
+        try (var conn = getConnection();
+             var stmt = conn.prepareStatement("SELECT uuid FROM usernames;");
+             var res = stmt.executeQuery()) {
+            var claims = new ArrayList<UUID>();
+            while (res.next()) {
+                claims.add(UUID.fromString(res.getString("uuid")));
+            }
+            return claims;
         } catch (SQLException e) {
             e.printStackTrace();
             return null;

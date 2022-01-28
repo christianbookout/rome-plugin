@@ -104,6 +104,7 @@ public class ItemBank implements CommandExecutor, Listener {
     public void onItemTaken(InventoryClickEvent e) {
         if (!e.getView().getTitle().equals(BANK_TITLE)) return;
 
+        //TODO check if e.getCurrentItem() is null
         ItemMeta meta = e.getCurrentItem().getItemMeta();
         if (meta.hasLore() && meta.getLore().contains(UNOBTAINABLE_STR)) {
             e.setCancelled(true);

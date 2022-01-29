@@ -3,13 +3,9 @@ package romeplugin.misc;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -17,21 +13,16 @@ import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
-import org.bukkit.event.inventory.InventoryInteractEvent;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-
+import org.bukkit.plugin.Plugin;
 import romeplugin.database.SQLConn;
 
 public class ItemBank implements CommandExecutor, Listener {
@@ -40,16 +31,20 @@ public class ItemBank implements CommandExecutor, Listener {
 
     private static final String UNOBTAINABLE_STR = "unobtainable";
     private static final String BANK_TITLE =  ChatColor.BOLD + "Bank of Rome";
-    private final HashMap<UUID, Inventory> openBanks = new HashMap<>();
-
+    private Inventory openBank = null;
+    private int openPage = 1;
+    private static final int INVENTORY_SIZE = 6*9;
     public ItemBank() {
         this.initialize();
     }
     private void initialize () {
         try(Connection conn = SQLConn.getConnection()) {
             conn.prepareStatement("CREATE TABLE IF NOT EXISTS itemBank (" +
-                                  "item VARCHAR(100) NOT NULL PRIMARY KEY," + 
-                                  "count INT NOT NULL);").execute();
+                                  "item VARCHAR(100) NOT NULL," + 
+                                  "count INT NOT NULL," +
+                                  "slot INT NOT NULL," +
+                                  "page INT NOT NULL,"+
+                                  "itemNumber INT NOT NULL PRIMARY KEY);").execute(); // the unique item number of slot * page
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -64,34 +59,61 @@ public class ItemBank implements CommandExecutor, Listener {
         return true;
     }
     
+    private final ItemStack selectedPage = this.makeItem(Material.GREEN_STAINED_GLASS_PANE, ChatColor.GOLD + "Selected Page");
+
+    private Inventory getBank() {
+        if (this.openBank == null) return this.openBank = Bukkit.createInventory(null, 6*9, BANK_TITLE);
+        else return this.openBank;
+    }
+
     private void openBank(Player player) {
         ArrayList<ItemStack> items = new ArrayList<>();
         try(Connection conn = SQLConn.getConnection()) {
             var stmt = conn.prepareStatement("SELECT * FROM itemBank;");
             var results = stmt.executeQuery();
             while (results.next()) {
-                items.add(new ItemStack(Material.valueOf(results.getString("item")), results.getInt("amount")));
+                items.add(new ItemStack(Material.valueOf(results.getString("item")), results.getInt("count")));
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        Inventory inventory = Bukkit.createInventory(player, 6*9, BANK_TITLE);
-        var filler = makeItem(Material.GRAY_STAINED_GLASS_PANE, ChatColor.RESET + ""); // have to make it .reset to make it not have a name
-        for (int i = 2; i <= 8; i++) {
-            inventory.setItem(6 * 9 - i, filler);
-        }
-        var next = makeItem(Material.LIME_STAINED_GLASS_PANE, ChatColor.GREEN + "Next Page"); //TODO maybe make a "Last Page" and "First Page"
-        var prev = makeItem(Material.RED_STAINED_GLASS_PANE, ChatColor.RED + "Previous Page");
-
-        inventory.setItem(53, next);
-        inventory.setItem(45, prev);
-        openBanks.put(player.getUniqueId(), inventory);
+        Inventory inventory = this.getBank();
+        showItems(inventory, this.openPage);
         player.openInventory(inventory);
+    }
+
+    private void initInventory(Inventory inventory) {
+        for (int i = 1; i <= 9; i++) {
+            var filler = makeFiller(i); // have to make it .reset to make it not have a name
+            inventory.setItem(pageToSlot(i), filler); // Fill the bottom row with stained glass
+            inventory.setItem(pageToSlot(this.openPage), selectedPage);
+        }
+    }
+
+    private ItemStack makeFiller(int page) {
+        return makeItem(Material.GRAY_STAINED_GLASS_PANE, ChatColor.GRAY + "Page " + page);
+    }
+
+    //Gets the absolute page number depending on current slot number
+    private int getPage(int i) {
+        return (i%9)+1;
+    }
+
+    private int pageToSlot(int page) {
+        return page + INVENTORY_SIZE - 10;
+    }
+
+    private int getItemNumber(int slot, int page) {
+        return (page-1) * INVENTORY_SIZE + slot;
+    }
+
+    private boolean insideBank(int i) {
+        return i < INVENTORY_SIZE;
     }
 
     private ItemStack makeItem(Material type, String name) {
         var item = new ItemStack(type);
-        ItemMeta itemMeta= item.getItemMeta();
+        ItemMeta itemMeta = item.getItemMeta();
         itemMeta.setDisplayName(name);
         var lore = new ArrayList<String>();
         lore.add(UNOBTAINABLE_STR);
@@ -100,52 +122,80 @@ public class ItemBank implements CommandExecutor, Listener {
         return item;
     }
 
+
     @EventHandler
-    public void onItemTaken(InventoryClickEvent e) {
+    public void onItemClick(InventoryClickEvent e) {
         if (!e.getView().getTitle().equals(BANK_TITLE)) return;
-
-        //TODO check if e.getCurrentItem() is null
-        ItemMeta meta = e.getCurrentItem().getItemMeta();
-        if (meta.hasLore() && meta.getLore().contains(UNOBTAINABLE_STR)) {
-            e.setCancelled(true);
+        if (e.getCurrentItem() != null) {
+            ItemMeta meta = e.getCurrentItem().getItemMeta();
+            //make it so you cant take the glass pane page selectors
+            if (meta.hasLore() && meta.getLore().contains(UNOBTAINABLE_STR)) {
+                this.setPage(getPage(e.getRawSlot())); // change the page
+                e.setCancelled(true);
+                return;
+            }
         }
-
-        //TODO check if any modifications were made and pass them to the store/remove items methods
+        //TODO check if the shit changed
     } 
 
-    @EventHandler
-    public void onItemDragged(InventoryDragEvent e) {
-        if (!e.getView().getTitle().equals(BANK_TITLE)) return;
-
-        //TODO remove all of the items from e.getNewItems() if they're not in the top inventory (you can drag from the bottom inventory up into the top inventory)
-
-        storeItems(e.getNewItems().values().toArray(ItemStack[]::new));
+    private void setPage(int pageNumber) {
+        this.openBank.setItem(this.pageToSlot(this.openPage), this.makeFiller(this.openPage));
+        this.openPage = pageNumber;
+        this.openBank.setItem(this.pageToSlot(pageNumber), selectedPage);
+        this.showItems(this.getBank(), pageNumber);
     }
 
-    private void storeItems(ItemStack[] items) {
+    @EventHandler
+    public void onItemDragged(InventoryDragEvent e) { // this works
+        if (!e.getView().getTitle().equals(BANK_TITLE)) return;
+
+        Map<Integer, ItemStack> items = new HashMap<>();
+        e.getNewItems().entrySet().forEach(entry -> items.put(entry.getKey(), entry.getValue()));
+
+        items.keySet()
+             .removeIf(entry -> !this.insideBank(entry)); // don't store items dragged in the player's inventory
+
+        items.entrySet().forEach(i -> storeItem(i.getValue(), i.getKey(), openPage));
+    }
+
+    private void storeItem(ItemStack item, int rawSlot, int page) {
         try (Connection conn = SQLConn.getConnection()){
-            StringBuilder statement = new StringBuilder("INSERT INTO itemBank VALUES");
-            for(ItemStack i: items) {
-                statement.append("('" + i.getType().toString() + "'," + i.getAmount()+"),");
-            }
-            statement.append(";");
-            conn.prepareStatement(statement.toString()).execute();
+            var statement = conn.prepareStatement("REPLACE INTO itemBank VALUES (?, ?, ?, ?, ?);");
+            statement.setString(1, item.getType().toString());
+            statement.setInt(2, item.getAmount());
+            statement.setInt(3, rawSlot);
+            statement.setInt(4, page);
+            statement.setInt(5, getItemNumber(rawSlot, page));
+            statement.execute();
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
-    private void removeItems(ItemStack[] items) {
+
+    private void removeItem(int rawSlot, int page) {
         try (Connection conn = SQLConn.getConnection()){
-            for(ItemStack i: items) {
-                var stmt = conn.prepareStatement("");
-            }
+            var stmt = conn.prepareStatement("DELETE FROM itemBank WHERE itemNumber=?");
+            stmt.setInt(1, getItemNumber(rawSlot, page));
+            stmt.execute();
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
-    @EventHandler
-    public void onInvClose(InventoryCloseEvent e) {
-        openBanks.remove(e.getPlayer().getUniqueId());
-    } 
+    private void showItems(Inventory inventory, int page) {
+        inventory.clear();
+        this.initInventory(inventory);
+        try (Connection conn = SQLConn.getConnection()) {
+            var stmt = conn.prepareStatement("SELECT * FROM itemBank WHERE page=?");
+            stmt.setInt(1, page);
+            var results = stmt.executeQuery();
+            while (results.next()) {
+                Material material = Material.getMaterial(results.getString("item"));
+                ItemStack item = new ItemStack(material, results.getInt("count"));
+                inventory.setItem(results.getInt("slot"), item);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 }

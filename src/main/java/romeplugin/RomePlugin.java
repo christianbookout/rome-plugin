@@ -23,6 +23,7 @@ import romeplugin.election.PartyHandler;
 import romeplugin.messaging.*;
 import romeplugin.misc.ItemBank;
 import romeplugin.misc.PeeController;
+import romeplugin.misc.SpawnCommand;
 import romeplugin.title.*;
 import romeplugin.zoning.FoundCityCommand;
 import romeplugin.zoning.LandCommand;
@@ -172,7 +173,8 @@ public class RomePlugin extends JavaPlugin {
         getCommand("titles").setExecutor(new TitlesCommand());
         getCommand("parties").setExecutor(new PartyCommand(partyHandler, this));
         getCommand("itembank").setExecutor(itemBank);
-        getCommand("notification").setTabCompleter(new NotificationCommand(notifications));
+        getCommand("notification").setExecutor(new NotificationCommand(notifications));
+        getCommand("spawn").setExecutor(new SpawnCommand(landControl));
         getServer().getPluginManager().registerEvents(itemBank, this);
         getServer().getPluginManager().registerEvents(peeController, this);
         getServer().getPluginManager().registerEvents(new TitleEventListener(titles, partyHandler), this);

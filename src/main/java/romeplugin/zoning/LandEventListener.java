@@ -1,6 +1,8 @@
 package romeplugin.zoning;
 
 import net.md_5.bungee.api.ChatColor;
+
+import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -32,6 +34,7 @@ import romeplugin.zoning.claims.LandControl;
 import romeplugin.zoning.locks.LockManager;
 
 import java.util.*;
+import java.util.logging.Level;
 
 public class LandEventListener implements Listener {
     private final LockManager lockManager;
@@ -121,8 +124,9 @@ public class LandEventListener implements Listener {
             return;
 
         Location loc = e.getEntity().getLocation();
-        if (controller.inCity(loc) || SQLConn.getClaim(loc) != null)
+        if (controller.inCity(loc) || SQLConn.getClaim(loc) != null) {
             e.setCancelled(true);
+        }
     }
 
     //don't let players or mobs break hanging items w/ a bow or something in a claim/city
@@ -267,7 +271,8 @@ public class LandEventListener implements Listener {
         if (!(e.getEntity() instanceof ItemFrame || e.getEntity() instanceof ArmorStand))
             return;
 
-        if (controller.inCity(location)) {
+        if ((controller.inCity(location) || SQLConn.getClaim(e.getEntity().getLocation()) != null) && !(e.getDamager() instanceof Player)) {
+            Bukkit.getLogger().log(Level.INFO, "wtf bro");
             e.setCancelled(true);
             return;
         }
@@ -288,10 +293,12 @@ public class LandEventListener implements Listener {
             return;
         var entity = e.getRightClicked();
         if ((entity instanceof ItemFrame || entity instanceof ArmorStand) && !controller.canBreak(e.getPlayer(), loc)) {
+            e.getPlayer().sendMessage(ChatColor.RED + "you cant do that :(");
             e.setCancelled(true);
         }
     }
 
+    // When you shoot someone in the city
     @EventHandler
     public void onEntityDamageEntity(EntityDamageByEntityEvent event) {
         if (!(event.getEntity() instanceof Player)) {
@@ -323,7 +330,9 @@ public class LandEventListener implements Listener {
         Material mainHandItem = e.getPlayer().getInventory().getItemInMainHand().getType();
 
         //don't let players place/interact w/ armor stands in a claim
-        if (mainHandItem.equals(Material.ARMOR_STAND)) {
+        if (!controller.canBreak(e.getPlayer(), e.getClickedBlock().getLocation()) && mainHandItem.equals(Material.ARMOR_STAND)) {
+            
+            Bukkit.getLogger().log(Level.INFO, "a");
             e.setCancelled(true);
             return;
         }

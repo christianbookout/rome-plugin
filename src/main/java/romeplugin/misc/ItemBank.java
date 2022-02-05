@@ -3,9 +3,10 @@ package romeplugin.misc;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
+import java.util.logging.Level;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -17,12 +18,13 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.scheduler.BukkitRunnable;
+
 import romeplugin.database.SQLConn;
 
 public class ItemBank implements CommandExecutor, Listener {
@@ -34,8 +36,11 @@ public class ItemBank implements CommandExecutor, Listener {
     private Inventory openBank = null;
     private int openPage = 1;
     private static final int INVENTORY_SIZE = 6*9;
-    public ItemBank() {
+    private final Plugin plugin;
+    private ItemStack[] lastState = null;
+    public ItemBank(Plugin plugin) {
         this.initialize();
+        this.plugin = plugin;
     }
     private void initialize () {
         try(Connection conn = SQLConn.getConnection()) {
@@ -79,6 +84,7 @@ public class ItemBank implements CommandExecutor, Listener {
         }
         Inventory inventory = this.getBank();
         showItems(inventory, this.openPage);
+        this.lastState = inventory.getContents();
         player.openInventory(inventory);
     }
 
@@ -122,9 +128,9 @@ public class ItemBank implements CommandExecutor, Listener {
         return item;
     }
 
-
     @EventHandler
     public void onItemClick(InventoryClickEvent e) {
+        log("\n--------------\nOn item click...");
         if (!e.getView().getTitle().equals(BANK_TITLE)) return;
         if (e.getCurrentItem() != null) {
             ItemMeta meta = e.getCurrentItem().getItemMeta();
@@ -135,8 +141,41 @@ public class ItemBank implements CommandExecutor, Listener {
                 return;
             }
         }
-        //TODO check if the shit changed
+
+
+        var newState = e.getInventory().getContents();
+        var oldSet = new ArrayList<ItemStack>(Arrays.asList(lastState));
+        var newSet = new ArrayList<ItemStack>(Arrays.asList(newState));
+        oldSet.removeIf(p -> p == null || p.getType() == Material.AIR);
+        newSet.removeIf(p -> p == null || p.getType() == Material.AIR);
+        log ("old size: " + oldSet.size() + " new size: " + newSet.size());
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                var newSet = new ArrayList<ItemStack>(Arrays.asList(openBank.getContents()));
+                newSet.removeIf(p -> p == null || p.getType() == Material.AIR);
+                log ("after event size: " + newSet.size());
+            }
+        }.runTaskLater(plugin, 1);
+        //var oldSet = new ArrayList<ItemStack>(Arrays.asList(lastState));
+        //var newSet = new ArrayList<ItemStack>(Arrays.asList(newState));
+        //var oldSet2 = new ArrayList<ItemStack>(Arrays.asList(lastState));
+        //newSet.removeIf(p -> p == null);
+        //oldSet.removeIf(p -> p == null);
+        //oldSet2.removeIf(p -> p == null);
+        //oldSet2.removeAll(newSet);
+        //newSet.removeAll(Arrays.asList(lastState));
+        //log("added: " + newSet.stream().map(s -> s.getType().toString()).collect(Collectors.toList()));
+        //log("removed: " + oldSet2.stream().map(s -> s.getType().toString()).collect(Collectors.toList()));
+
+        lastState = e.getInventory().getContents();
+
+        //e.getAction()
     } 
+
+    private void log(String message){ 
+        Bukkit.getServer().getLogger().log(Level.INFO, message);
+    }
 
     private void setPage(int pageNumber) {
         this.openBank.setItem(this.pageToSlot(this.openPage), this.makeFiller(this.openPage));

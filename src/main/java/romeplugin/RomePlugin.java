@@ -150,7 +150,7 @@ public class RomePlugin extends JavaPlugin {
 
         SwearFilter filter = new SwearFilter(landControl, config.getInt("messages.useSwearFilter"));
         var peeController = new PeeController(this);
-        var itemBank = new ItemBank();
+        //var itemBank = new ItemBank(this);
         var notifications = new NotificationQueue();
 
         PartyHandler partyHandler = new PartyHandler();
@@ -171,9 +171,9 @@ public class RomePlugin extends JavaPlugin {
         getCommand("elections").setTabCompleter(new ElectionTabCompleter());
         getCommand("titles").setExecutor(new TitlesCommand());
         getCommand("parties").setExecutor(new PartyCommand(partyHandler, this));
-        getCommand("itembank").setExecutor(itemBank);
+        //getCommand("itembank").setExecutor(itemBank);
         getCommand("notification").setTabCompleter(new NotificationCommand(notifications));
-        getServer().getPluginManager().registerEvents(itemBank, this);
+        //getServer().getPluginManager().registerEvents(itemBank, this);
         getServer().getPluginManager().registerEvents(peeController, this);
         getServer().getPluginManager().registerEvents(new TitleEventListener(titles, partyHandler), this);
         getServer().getPluginManager().registerEvents(

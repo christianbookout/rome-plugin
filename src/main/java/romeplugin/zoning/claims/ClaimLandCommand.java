@@ -87,7 +87,7 @@ public class ClaimLandCommand implements CommandExecutor, TabCompleter {
             owner_username = claim.owner.toString();
         }
         var msg = "claim owner: " + owner_username +
-                "\narea: " + claim.getArea() + " blocks" +
+                "\nsize: " + claim.getLength() + "x" + claim.getHeight() + " (" + claim.getArea() + " blocks)" +
                 "\nfrom (" + claim.x0 + ", " + claim.y0 + ") to (" + claim.x1 + ", " + claim.y1 + ")";
 
         var shared = SQLConn.claimSharedWithUsernames(claim);

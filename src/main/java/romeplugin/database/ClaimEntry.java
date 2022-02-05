@@ -20,4 +20,12 @@ public class ClaimEntry {
     public int getArea() {
         return (x1 - x0 + 1) * (y0 - y1 + 1);
     }
+
+    public int getLength() {
+        return x1 - x0 + 1;
+    }
+
+    public int getHeight() {
+        return y0 - y1 + 1;
+    }
 }

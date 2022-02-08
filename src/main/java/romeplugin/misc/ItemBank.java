@@ -142,7 +142,6 @@ public class ItemBank implements CommandExecutor, Listener {
             }
         }
 
-
         var newState = e.getInventory().getContents();
         var oldSet = new ArrayList<ItemStack>(Arrays.asList(lastState));
         var newSet = new ArrayList<ItemStack>(Arrays.asList(newState));

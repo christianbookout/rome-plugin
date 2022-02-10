@@ -37,7 +37,7 @@ public class PartyCommand implements CommandExecutor, TabCompleter {
         Player player = (Player) sender;
         switch (args[0]) {
             case "shareclaim":
-                shareclaim(player);
+                shareClaim(player);
                 return true;
             case "help":
                 help(sender);
@@ -111,7 +111,7 @@ public class PartyCommand implements CommandExecutor, TabCompleter {
         }
     }
 
-    private void shareclaim(Player player) {
+    private void shareClaim(Player player) {
         Party party = partyHandler.getParty(player.getUniqueId());
         if (party == null) {
             player.sendMessage(MessageConstants.NOT_IN_PARTY);
@@ -126,7 +126,9 @@ public class PartyCommand implements CommandExecutor, TabCompleter {
             player.sendMessage(MessageConstants.NOT_CLAIM_OWNER);
         }
         player.sendMessage(MessageConstants.PARTY_CLAIM_SHARE);
-        partyHandler.getMembers(party.acronym).forEach(m -> {if (!player.getUniqueId().equals(m)) SQLConn.shareClaim(claim, m);});
+        partyHandler.getMembers(party.acronym).forEach(m -> {
+            if (!player.getUniqueId().equals(m)) SQLConn.shareClaim(claim, m);
+        });
     }
 
     private void setOwner(Player player, String arg) {
@@ -222,7 +224,7 @@ public class PartyCommand implements CommandExecutor, TabCompleter {
             return;
         }
         arg = arg.toLowerCase();
-        if (partyHandler.setPublic(player.getUniqueId(), arg.equals("true") || arg.equals("yes") || arg.equals("yeah"))) {
+        if (partyHandler.setPublic(player.getUniqueId(), Arrays.asList(TRUE_STRINGS).contains(arg))) {
             player.sendMessage(MessageConstants.SUCCESSFUL_PUBLIC_SET);
         }
         player.sendMessage(MessageConstants.PUBLIC_SET_ERROR);

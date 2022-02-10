@@ -36,6 +36,9 @@ public class PartyCommand implements CommandExecutor, TabCompleter {
             return false;
         Player player = (Player) sender;
         switch (args[0]) {
+            case "shareclaim":
+                shareclaim(player);
+                return true;
             case "help":
                 help(sender);
                 return true;
@@ -106,6 +109,24 @@ public class PartyCommand implements CommandExecutor, TabCompleter {
             default:
                 return false;
         }
+    }
+
+    private void shareclaim(Player player) {
+        Party party = partyHandler.getParty(player.getUniqueId());
+        if (party == null) {
+            player.sendMessage(MessageConstants.NOT_IN_PARTY);
+            return;
+        }
+        var claim = SQLConn.getClaim(player.getLocation());
+        if (claim == null) {
+            player.sendMessage(MessageConstants.NO_CLAIM_ERROR);
+            return;
+        }
+        if (!claim.owner.equals(player.getUniqueId())) {
+            player.sendMessage(MessageConstants.NOT_CLAIM_OWNER);
+        }
+        player.sendMessage(MessageConstants.PARTY_CLAIM_SHARE);
+        partyHandler.getMembers(party.acronym).forEach(m -> {if (!player.getUniqueId().equals(m)) SQLConn.shareClaim(claim, m);});
     }
 
     private void setOwner(Player player, String arg) {
@@ -392,13 +413,30 @@ public class PartyCommand implements CommandExecutor, TabCompleter {
             "deny",
             "info",
             "list",
-            "public"
+            "public",
+            "shareclaim"
     };
 
     private static final String[] TRUE_STRINGS = {
             "true",
             "yes",
-            "yeah"
+            "yeah",
+            "uh-huh",
+            "yep",
+            "sure",
+            "oui",
+            "y",
+            "yea",
+            "ye",
+            "yeehaw",
+            "tru",
+            "t",
+            "ya",
+            "uhhuh",
+            "okay",
+            "ok",
+            "k",
+            "o.k."
     };
 
     @Override

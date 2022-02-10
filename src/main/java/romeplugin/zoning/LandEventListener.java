@@ -272,7 +272,6 @@ public class LandEventListener implements Listener {
             return;
 
         if ((controller.inCity(location) || SQLConn.getClaim(e.getEntity().getLocation()) != null) && !(e.getDamager() instanceof Player)) {
-            Bukkit.getLogger().log(Level.INFO, "wtf bro");
             e.setCancelled(true);
             return;
         }
@@ -331,8 +330,7 @@ public class LandEventListener implements Listener {
 
         //don't let players place/interact w/ armor stands in a claim
         if (!controller.canBreak(e.getPlayer(), e.getClickedBlock().getLocation()) && mainHandItem.equals(Material.ARMOR_STAND)) {
-            
-            Bukkit.getLogger().log(Level.INFO, "a");
+            e.getPlayer().sendMessage(ChatColor.RED + "no");
             e.setCancelled(true);
             return;
         }

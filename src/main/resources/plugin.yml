@@ -98,3 +98,6 @@ commands:
   notification:
     description: "notifications"
     usage: "/notification"
+  spawn:
+    description: "go to the center of rome"
+    usage: "/spawn"

@@ -72,7 +72,8 @@ public class MessageConstants {
                                                         "/parties color <color>: " + ChatColor.RESET + "set your party color\n" + ChatColor.GOLD + 
                                                         "/parties colors: " + ChatColor.RESET + "get a list of colors\n" + ChatColor.GOLD + 
                                                         "/parties list: " + ChatColor.RESET + "get a list of parties\n" + ChatColor.GOLD + 
-                                                        "/parties rename <acronym> <name>: " + ChatColor.RESET + "change your party's name and acronym";
+                                                        "/parties rename <acronym> <name>: " + ChatColor.RESET + "change your party's name and acronym" + ChatColor.GOLD +
+                                                        "/parties shareclaim: " + ChatColor.RESET + "share a claim with your whole party";
     public static final String NOT_IN_PARTY = ERROR_COLOR + "you aren't currently in a party";
     public static final String CANT_FIND_PARTY = ERROR_COLOR + "can't find that party";
     public static final String NO_INVITE_ERROR = ERROR_COLOR + "you have no pending invites";
@@ -105,6 +106,9 @@ public class MessageConstants {
     public static final String NOTIFICATION_RECEIVED = "you've got mail!";
     public static final String NOTIFICATION_INDEX_OUT_OF_BOUNDS = ERROR_COLOR + "you don't have that much mail";
     public static final String SUCCESSFUL_NOTIFICATION_CLEAR = SUCCESS_COLOR + "you cleared all your notifications! <3";
+    public static final String NO_CLAIM_ERROR = ERROR_COLOR + "there is no claim here";
+    public static final String NOT_CLAIM_OWNER = ERROR_COLOR + "you do not own this claim";
+    public static final String PARTY_CLAIM_SHARE = SUCCESS_COLOR + "you've shared this claim with all of your party";
 
     /**
      * @param cond sends successMessage on true, database error on false

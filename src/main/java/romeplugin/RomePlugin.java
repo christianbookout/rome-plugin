@@ -25,10 +25,7 @@ import romeplugin.misc.ItemBank;
 import romeplugin.misc.PeeController;
 import romeplugin.misc.SpawnCommand;
 import romeplugin.title.*;
-import romeplugin.zoning.FoundCityCommand;
-import romeplugin.zoning.LandCommand;
-import romeplugin.zoning.LandEnterListener;
-import romeplugin.zoning.LandEventListener;
+import romeplugin.zoning.*;
 import romeplugin.zoning.claims.ClaimInfoCommand;
 import romeplugin.zoning.claims.ClaimLandCommand;
 import romeplugin.zoning.claims.GetClaimBlocksCommand;
@@ -139,6 +136,9 @@ public class RomePlugin extends JavaPlugin {
                     "keyId INT NOT NULL AUTO_INCREMENT PRIMARY KEY," +
                     "creator_uuid CHAR(36) NOT NULL);").execute();
 
+            conn.prepareStatement("CREATE TABLE IF NOT EXISTS banished (" +
+                    "uuid CHAR(36) NOT NULL PRIMARY KEY);").execute();
+
             var res = conn.prepareStatement("SELECT * FROM cityInfo WHERE type = 0;").executeQuery();
             if (res.next()) {
                 landControl.setGovernmentSize(res.getInt("size"));
@@ -150,6 +150,7 @@ public class RomePlugin extends JavaPlugin {
         var titles = new TitleHandler(this);
 
         SwearFilter filter = new SwearFilter(landControl, config.getInt("messages.useSwearFilter"));
+        var landEnterListener = new LandEnterListener(landControl);
         var peeController = new PeeController(this);
         //var itemBank = new ItemBank(this);
         var notifications = new NotificationQueue();
@@ -176,6 +177,7 @@ public class RomePlugin extends JavaPlugin {
         getCommand("notification").setTabCompleter(new NotificationCommand(notifications));
         //getServer().getPluginManager().registerEvents(itemBank, this);
         getCommand("spawn").setExecutor(new SpawnCommand(landControl));
+        getCommand("banish").setExecutor(new BanishCommand(landEnterListener));
         getServer().getPluginManager().registerEvents(peeController, this);
         getServer().getPluginManager().registerEvents(new TitleEventListener(titles, partyHandler), this);
         getServer().getPluginManager().registerEvents(
@@ -184,7 +186,7 @@ public class RomePlugin extends JavaPlugin {
         //getServer().getPluginManager().registerEvents(new BlockchainEventListener(this, ledger), this);
         getServer().getPluginManager().registerEvents(landListener, this);
         getServer().getPluginManager().registerEvents(lockManager, this);
-        getServer().getPluginManager().registerEvents(new LandEnterListener(landControl), this);
+        getServer().getPluginManager().registerEvents(landEnterListener, this);
     }
 
     // true/false if it worked or didnt work

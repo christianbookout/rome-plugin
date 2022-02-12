@@ -21,6 +21,7 @@ import romeplugin.election.ElectionTabCompleter;
 import romeplugin.election.PartyCommand;
 import romeplugin.election.PartyHandler;
 import romeplugin.messaging.*;
+import romeplugin.messaging.SwearFilter.SwearLevel;
 import romeplugin.misc.ItemBank;
 import romeplugin.misc.PeeController;
 import romeplugin.misc.SpawnCommand;
@@ -149,7 +150,7 @@ public class RomePlugin extends JavaPlugin {
         }
         var titles = new TitleHandler(this);
 
-        SwearFilter filter = new SwearFilter(landControl, config.getInt("messages.useSwearFilter"));
+        SwearFilter filter = new SwearFilter(landControl, SwearLevel.valueOf(config.getString("messages.useSwearFilter").toUpperCase()));
         var landEnterListener = new LandEnterListener(landControl);
         var peeController = new PeeController(this);
         //var itemBank = new ItemBank(this);

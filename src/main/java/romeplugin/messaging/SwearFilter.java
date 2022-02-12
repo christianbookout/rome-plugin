@@ -1,6 +1,7 @@
 package romeplugin.messaging;
 
 import org.bukkit.entity.Player;
+import romeplugin.zoning.ZoneType;
 import romeplugin.zoning.claims.LandControl;
 
 import java.io.BufferedReader;
@@ -16,10 +17,16 @@ public final class SwearFilter {
     private final ArrayList<String> swears = new ArrayList<>();
     private final LandControl controller;
 
-    //0 for off, 1 for only city/government, 2 for everywhere
-    private final int swearLevel;
+    public enum SwearLevel {
+        NEVER, 
+        SUBURBS, 
+        CITY, 
+        GOVERNMENT, 
+        ALWAYS
+    }
+    private final SwearLevel swearLevel;
 
-    public SwearFilter(LandControl controller, int swearLevel) {
+    public SwearFilter(LandControl controller, SwearLevel swearLevel) {
         this.controller = controller;
         this.swearLevel = swearLevel;
         generateSwears();
@@ -44,7 +51,13 @@ public final class SwearFilter {
 
     //Return whether or not the current player should be swear-filtered 
     public boolean doFilter(Player p) {
-        return swearLevel == 2 || (controller.inCity(p.getLocation()) && swearLevel == 1);
+        if (swearLevel == SwearLevel.NEVER) return false;
+        else if (swearLevel == SwearLevel.ALWAYS) return true;
+
+        ZoneType zone = controller.getArea(p.getLocation()).getType();
+        return  (zone == ZoneType.SUBURB && swearLevel == SwearLevel.SUBURBS) ||
+                (zone == ZoneType.CITY && swearLevel == SwearLevel.CITY) ||
+                (zone == ZoneType.GOVERNMENT && swearLevel == SwearLevel.GOVERNMENT);
     }
 
     public String replaceSwears(String message) {

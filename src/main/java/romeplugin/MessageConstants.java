@@ -72,7 +72,7 @@ public class MessageConstants {
                                                         "/parties color <color>: " + ChatColor.RESET + "set your party color\n" + ChatColor.GOLD + 
                                                         "/parties colors: " + ChatColor.RESET + "get a list of colors\n" + ChatColor.GOLD + 
                                                         "/parties list: " + ChatColor.RESET + "get a list of parties\n" + ChatColor.GOLD + 
-                                                        "/parties rename <acronym> <name>: " + ChatColor.RESET + "change your party's name and acronym" + ChatColor.GOLD +
+                                                        "/parties rename <acronym> <name>: " + ChatColor.RESET + "change your party's name and acronym\n" + ChatColor.GOLD +
                                                         "/parties shareclaim: " + ChatColor.RESET + "share a claim with your whole party";
     public static final String NOT_IN_PARTY = ERROR_COLOR + "you aren't currently in a party";
     public static final String CANT_FIND_PARTY = ERROR_COLOR + "can't find that party";

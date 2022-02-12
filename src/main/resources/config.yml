@@ -6,13 +6,14 @@ database:
   password: pass
 
 land:
-  cityMultiplier: 3
-  suburbsMultiplier: 5
+  cityMultiplier: 3 # the amount to multiply by your initial area to get the city area
+  suburbsMultiplier: 5 # the amount to multiply by your initial number to get the suburbs area (suburbs area = city multiplier * suburbs multiplier * your initial number)
 
 claims:
   claimMaterial: BRICK # material to set claims with
   claimTimeoutMS: 20000 # set to 0 for none
   defaultClaimBlocks: 400
+  protectedLevel: GOVERNMENT # NONE, SUBURBS, CITY, or GOVERNMENT. If you choose SUBURBS, the city/government will be protected as well.
   autoLockedBlocks:
     - CHEST
     - BARREL
@@ -60,7 +61,7 @@ claims:
     - WARPED_DOOR
   
 messages:
-  useSwearFilter: 1 # 0 for no filter, 1 for only city/government, and 2 for global
+  useSwearFilter: CITY # NEVER, SUBURBS, CITY, GOVERNMENT, or ALWAYS. This controls the area the swear filter applies to 
   messageDistance: 150 # distance to broadcast messages locally (0 for infinite distance)
 
 webhooks:

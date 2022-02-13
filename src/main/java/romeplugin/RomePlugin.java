@@ -178,7 +178,7 @@ public class RomePlugin extends JavaPlugin {
         getCommand("titles").setExecutor(new TitlesCommand());
         getCommand("parties").setExecutor(new PartyCommand(partyHandler, this));
         //getCommand("itembank").setExecutor(itemBank);
-        getCommand("notification").setTabCompleter(new NotificationCommand(notifications));
+        getCommand("notification").setExecutor(new NotificationCommand(notifications));
         //getServer().getPluginManager().registerEvents(itemBank, this);
         getCommand("spawn").setExecutor(new SpawnCommand(mainCity));
         getCommand("banish").setExecutor(new BanishCommand(landEnterListener));

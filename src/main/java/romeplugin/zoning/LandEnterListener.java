@@ -5,7 +5,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerMoveEvent;
 import romeplugin.database.SQLConn;
-import romeplugin.zoning.claims.LandControl;
+import romeplugin.zoning.claims.City;
 
 import java.sql.SQLException;
 import java.util.HashSet;
@@ -13,10 +13,10 @@ import java.util.Set;
 import java.util.UUID;
 
 public class LandEnterListener implements Listener {
-    private final LandControl controller;
+    private final CityManager controller;
     private final Set<UUID> banished = new HashSet<>();
 
-    public LandEnterListener(LandControl controller) {
+    public LandEnterListener(CityManager controller) {
         this.controller = controller;
         try (var conn = SQLConn.getConnection()) {
             var stmt = conn.prepareStatement("SELECT * FROM banished;");

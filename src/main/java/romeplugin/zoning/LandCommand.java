@@ -4,12 +4,12 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 
-import romeplugin.zoning.claims.LandControl;
+import romeplugin.zoning.claims.City;
 
 public class LandCommand implements CommandExecutor {
-    private final LandControl controller;
+    private final City controller;
 
-    public LandCommand(LandControl controller) {
+    public LandCommand(City controller) {
         this.controller = controller;
     }
 

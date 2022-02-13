@@ -15,7 +15,7 @@ import java.util.UUID;
 
 import static romeplugin.zoning.ZoneType.*;
 
-public class LandControl {
+public class City {
 
     private CityArea[] areas;
     private int cityX, cityY;
@@ -25,7 +25,7 @@ public class LandControl {
     private final int minBlockLimit;
     private final ClaimCache claimCache = new ClaimCache(100);
 
-    public LandControl(int cityX, int cityY, int governmentSize, int cityMult, int suburbsMult, int minBlockLimit) {
+    public City(int cityX, int cityY, int governmentSize, int cityMult, int suburbsMult, int minBlockLimit) {
         this.minBlockLimit = minBlockLimit;
         this.cityX = cityX;
         this.cityY = cityY;
@@ -235,5 +235,10 @@ public class LandControl {
             e.printStackTrace();
             return 9999;
         }
+    }
+
+    public boolean cityIntersects(int x0, int y0, int x1, int y1) {
+        var extents = governmentSize * cityMult;
+        return rectIntersects(x0, y0, x1, y1, cityX - extents, cityY + extents, cityX + extents, cityY - extents);
     }
 }

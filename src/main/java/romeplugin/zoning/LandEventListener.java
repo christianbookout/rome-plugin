@@ -2,7 +2,6 @@ package romeplugin.zoning;
 
 import net.md_5.bungee.api.ChatColor;
 
-import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -27,18 +26,16 @@ import org.bukkit.event.player.PlayerBucketFillEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
-import romeplugin.MessageConstants;
 import romeplugin.database.ClaimEntry;
 import romeplugin.database.SQLConn;
-import romeplugin.zoning.claims.LandControl;
+import romeplugin.zoning.claims.City;
 import romeplugin.zoning.locks.LockManager;
 
 import java.util.*;
-import java.util.logging.Level;
 
 public class LandEventListener implements Listener {
     private final LockManager lockManager;
-    private final LandControl controller;
+    private final CityManager controller;
     public static final Material DEFAULT_MATERIAL = Material.BRICK;
 
     private final Material claimMaterial;
@@ -58,7 +55,7 @@ public class LandEventListener implements Listener {
     private Player spongePlacer = null;
 
     public LandEventListener(
-            LandControl controller,
+            CityManager controller,
             LockManager lockManager,
             Material claimMaterial,
             Set<Material> autoLockedBlocks,

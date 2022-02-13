@@ -5,12 +5,12 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import romeplugin.zoning.claims.LandControl;
+import romeplugin.zoning.claims.City;
 
 public class FoundCityCommand implements CommandExecutor {
-    private final LandControl control;
+    private final City control;
 
-    public FoundCityCommand(LandControl control) {
+    public FoundCityCommand(City control) {
         this.control = control;
     }
 

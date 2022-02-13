@@ -10,10 +10,11 @@ import romeplugin.database.SQLConn;
 import java.util.UUID;
 
 public class GetClaimBlocksCommand implements CommandExecutor {
-    private final LandControl landControl;
+    // TODO: move to CityManager
+    private final City city;
 
-    public GetClaimBlocksCommand(LandControl landControl) {
-        this.landControl = landControl;
+    public GetClaimBlocksCommand(City city) {
+        this.city = city;
     }
 
     @Override
@@ -36,7 +37,7 @@ public class GetClaimBlocksCommand implements CommandExecutor {
             uuid = ((Player) sender).getUniqueId();
         }
         sender.sendMessage("total claimed area: " + SQLConn.getTotalClaimedBlocks(uuid) +
-                "\ntotal claimed area inside suburbs: " + landControl.getClaimedBlocksInSuburbs(uuid));
+                "\ntotal claimed area inside suburbs: " + city.getClaimedBlocksInSuburbs(uuid));
         return true;
     }
 }

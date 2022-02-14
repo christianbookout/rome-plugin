@@ -15,21 +15,17 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import romeplugin.database.SQLConn;
-import romeplugin.election.ElectionCommand;
-import romeplugin.election.ElectionHandler;
-import romeplugin.election.ElectionTabCompleter;
-import romeplugin.election.PartyCommand;
-import romeplugin.election.PartyHandler;
+import romeplugin.election.*;
 import romeplugin.messaging.*;
 import romeplugin.messaging.SwearFilter.SwearLevel;
 import romeplugin.misc.PeeController;
 import romeplugin.misc.SpawnCommand;
 import romeplugin.title.*;
 import romeplugin.zoning.*;
+import romeplugin.zoning.claims.City;
 import romeplugin.zoning.claims.ClaimInfoCommand;
 import romeplugin.zoning.claims.ClaimLandCommand;
 import romeplugin.zoning.claims.GetClaimBlocksCommand;
-import romeplugin.zoning.claims.City;
 import romeplugin.zoning.locks.LockManager;
 
 import java.sql.Connection;
@@ -81,8 +77,11 @@ public class RomePlugin extends JavaPlugin {
         protectedMaterialStrings.forEach(matStr -> protectedMaterials.add(Material.valueOf(matStr)));
 
         var lockManager = new LockManager(this);
-        var cityManager = new CityManager();
-        cityManager.addCity(mainCity);
+        var cityManager = new CityManager(
+                config.getInt("land.initialCitySize"),
+                config.getInt("land.cityMultiplier"),
+                config.getInt("land.suburbsMultiplier"),
+                config.getInt("claims.defaultClaimBlocks"));
 
         LandEventListener landListener = new LandEventListener(
                 cityManager,
@@ -117,7 +116,7 @@ public class RomePlugin extends JavaPlugin {
                     "added_player_uuid CHAR(36) NOT NULL);").execute();
             // overkill
             conn.prepareStatement("CREATE TABLE IF NOT EXISTS cityInfo (" +
-                    "type TINYINT NOT NULL PRIMARY KEY," +
+                    "id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY," +
                     "size INT NOT NULL," +
                     "x INT NOT NULL," +
                     "y INT NOT NULL);").execute();
@@ -160,7 +159,7 @@ public class RomePlugin extends JavaPlugin {
         var notifications = new NotificationQueue();
 
         PartyHandler partyHandler = new PartyHandler();
-        getCommand("rome").setExecutor(new LandCommand(mainCity));
+        getCommand("rome").setExecutor(new LandCommand(cityManager));
         getCommand("claim").setExecutor(new ClaimLandCommand(cityManager, this));
         getCommand("claiminfo").setExecutor(new ClaimInfoCommand());
         getCommand("removetitle").setExecutor(new RemoveTitleCommand(titles));

@@ -3,12 +3,27 @@ package romeplugin.zoning;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
+import romeplugin.MessageConstants;
+import romeplugin.database.SQLConn;
 import romeplugin.zoning.claims.City;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 
 public class CityManager {
     private final ArrayList<City> cities = new ArrayList<>();
+    private final int initialGovernmentSize;
+    private final int cityMult;
+    private final int suburbsMult;
+    private final int minBlockLimit;
+
+    public CityManager(int initialGovernmentSize, int cityMult, int suburbsMult, int minBlockLimit) {
+        this.initialGovernmentSize = initialGovernmentSize;
+        this.cityMult = cityMult;
+        this.suburbsMult = suburbsMult;
+        this.minBlockLimit = minBlockLimit;
+        getDatabaseCities();
+    }
 
     public City getCity(Location loc) {
         for (var city : cities) {
@@ -76,7 +91,39 @@ public class CityManager {
         return city.inWilderness(location);
     }
 
-    public void addCity(City mainCity) {
-        cities.add(mainCity);
+    private void getDatabaseCities() {
+        try (var conn = SQLConn.getConnection()) {
+            var res = conn.prepareStatement("SELECT * FROM cityInfo;").executeQuery();
+            while (res.next()) {
+                cities.add(new City(
+                        res.getInt("x"),
+                        res.getInt("y"),
+                        res.getInt("size"),
+                        cityMult,
+                        suburbsMult,
+                        minBlockLimit
+                ));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void foundCity(Player player) {
+        var loc = player.getLocation();
+        try (var conn = SQLConn.getConnection()) {
+            var stmt = conn.prepareStatement("INSERT INTO cityInfo (size, x, y) VALUES (?, ?, ?);");
+            stmt.setInt(1, initialGovernmentSize);
+            stmt.setInt(2, loc.getBlockX());
+            stmt.setInt(3, loc.getBlockZ());
+            if (stmt.executeUpdate() < 1) {
+                throw new SQLException("failed to insert new city?!");
+            }
+        } catch (SQLException e) {
+            player.sendMessage(MessageConstants.UWU_DATABASE_ERROR);
+            e.printStackTrace();
+            return;
+        }
+        cities.add(new City(loc.getBlockX(), loc.getBlockZ(), initialGovernmentSize, cityMult, suburbsMult, minBlockLimit));
     }
 }

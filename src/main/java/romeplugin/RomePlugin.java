@@ -114,12 +114,14 @@ public class RomePlugin extends JavaPlugin {
                     "x1 INT NOT NULL," +
                     "y1 INT NOT NULL," +
                     "added_player_uuid CHAR(36) NOT NULL);").execute();
-            // overkill
             conn.prepareStatement("CREATE TABLE IF NOT EXISTS cityInfo (" +
                     "id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY," +
                     "size INT NOT NULL," +
                     "x INT NOT NULL," +
-                    "y INT NOT NULL);").execute();
+                    "y INT NOT NULL," +
+                    "name VARCHAR(20) NOT NULL," +
+                    "founder_uuid CHAR(36) NOT NULL," +
+                    "found_date DATE NOT NULL);").execute();
             conn.prepareStatement("CREATE TABLE IF NOT EXISTS usernames (" +
                     "uuid CHAR(36) NOT NULL PRIMARY KEY," +
                     "username CHAR(32) NOT NULL);").execute();

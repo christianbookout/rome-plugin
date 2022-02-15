@@ -109,13 +109,15 @@ public class CityManager {
         }
     }
 
-    public void foundCity(Player player) {
+    public void foundCity(Player player, String name) {
         var loc = player.getLocation();
         try (var conn = SQLConn.getConnection()) {
-            var stmt = conn.prepareStatement("INSERT INTO cityInfo (size, x, y) VALUES (?, ?, ?);");
+            var stmt = conn.prepareStatement("INSERT INTO cityInfo (size, x, y, name, founder_uuid, found_date) VALUES (?, ?, ?, ?, ?, CURDATE());");
             stmt.setInt(1, initialGovernmentSize);
             stmt.setInt(2, loc.getBlockX());
             stmt.setInt(3, loc.getBlockZ());
+            stmt.setString(4, name);
+            stmt.setString(5, player.getUniqueId().toString());
             if (stmt.executeUpdate() < 1) {
                 throw new SQLException("failed to insert new city?!");
             }

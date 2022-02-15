@@ -22,8 +22,12 @@ public class LandCommand implements CommandExecutor {
         }
         switch (args[0]) {
             case "found":
+                if (args.length < 2) {
+                    sender.sendMessage("no city name :(");
+                    return true;
+                }
                 if (sender instanceof Player) {
-                    manager.foundCity((Player) sender);
+                    manager.foundCity((Player) sender, args[1]);
                     return true;
                 }
                 return false;

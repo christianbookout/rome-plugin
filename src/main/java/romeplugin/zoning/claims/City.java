@@ -71,21 +71,9 @@ public class City {
     }
 
     public CityArea getArea(Location loc) {
-        if (loc.getWorld().getEnvironment() != Environment.NORMAL) return null;
+        if (loc.getWorld() == null || loc.getWorld().getEnvironment() != Environment.NORMAL)
+            return null;
         return getArea(loc.getBlockX(), loc.getBlockZ());
-    }
-
-    public void updateDB() {
-        try {
-            var stmt = SQLConn.getConnection()
-                    .prepareStatement("REPLACE INTO cityInfo VALUES (0, ?, ?, ?);");
-            stmt.setInt(1, governmentSize);
-            stmt.setInt(2, cityX);
-            stmt.setInt(3, cityY);
-            stmt.execute();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
     }
 
     private boolean inCity(int x, int y) {
@@ -93,23 +81,25 @@ public class City {
         return Math.abs(x - cityX) <= extents && Math.abs(y - cityY) <= extents;
     }
 
-    private boolean inSuburbs(int x, int y) {
+    private boolean isOutsideSuburbs(int x, int y) {
         var extents = governmentSize * suburbsMult;
-        return Math.abs(x - cityX) <= extents && Math.abs(y - cityY) <= extents;
+        return Math.abs(x - cityX) > extents || Math.abs(y - cityY) > extents;
     }
 
-    public boolean inSuburbs(Location loc) {
-        if (loc.getWorld().getEnvironment() != Environment.NORMAL) return false;
-        return inSuburbs(loc.getBlockX(), loc.getBlockZ());
+    public boolean isOutsideSuburbs(Location loc) {
+        if (loc.getWorld() == null || loc.getWorld().getEnvironment() != World.Environment.NORMAL)
+            return true;
+        return isOutsideSuburbs(loc.getBlockX(), loc.getBlockZ());
     }
 
     public boolean inCity(Location loc) {
-        if (loc.getWorld().getEnvironment() != Environment.NORMAL) return false;
+        if (loc.getWorld() == null || loc.getWorld().getEnvironment() != Environment.NORMAL)
+            return false;
         return inCity(loc.getBlockX(), loc.getBlockZ());
     }
 
     private boolean canBreak(Player player, int x, int y) {
-        if (!inSuburbs(x, y)) {
+        if (isOutsideSuburbs(x, y)) {
             return true;
         }
         var title = RomePlugin.onlinePlayerTitles.get(player);
@@ -123,7 +113,7 @@ public class City {
             return claim.owner.equals(player.getUniqueId()) || SQLConn.claimShared(claim, player.getUniqueId());
         }
         try {
-            if (area.getType() == GOVERNMENT && SQLConn.isBuilder(player.getUniqueId()) ) {
+            if (area.getType() == GOVERNMENT && SQLConn.isBuilder(player.getUniqueId())) {
                 return true;
             }
         } catch (SQLException e) {
@@ -214,7 +204,7 @@ public class City {
     }
 
     public boolean inWilderness(Location toLoc) {
-        return !inSuburbs(toLoc);
+        return isOutsideSuburbs(toLoc);
     }
 
     public int getClaimedBlocksInSuburbs(UUID who) {

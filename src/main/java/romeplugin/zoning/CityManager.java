@@ -70,11 +70,11 @@ public class CityManager {
         return city.tryClaimLand(player, x0, y0, x1, y1);
     }
 
-    public boolean inSuburbs(Location location) {
+    public boolean isOutsideSuburbs(Location location) {
         var city = getCity(location);
         if (city == null)
-            return false;
-        return city.inSuburbs(location);
+            return true;
+        return city.isOutsideSuburbs(location);
     }
 
     public boolean canBreak(Player player, Location location) {

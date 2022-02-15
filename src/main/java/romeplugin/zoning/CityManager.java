@@ -91,6 +91,15 @@ public class CityManager {
         return city.inWilderness(location);
     }
 
+    public City getCityByName(String name) {
+        for (var city : cities) {
+            if (city.getName().equals(name)) {
+                return city;
+            }
+        }
+        return null;
+    }
+
     private void getDatabaseCities() {
         try (var conn = SQLConn.getConnection()) {
             var res = conn.prepareStatement("SELECT * FROM cityInfo;").executeQuery();
@@ -99,6 +108,7 @@ public class CityManager {
                         res.getInt("x"),
                         res.getInt("y"),
                         res.getInt("size"),
+                        res.getString("name"),
                         cityMult,
                         suburbsMult,
                         minBlockLimit
@@ -126,6 +136,6 @@ public class CityManager {
             e.printStackTrace();
             return;
         }
-        cities.add(new City(loc.getBlockX(), loc.getBlockZ(), initialGovernmentSize, cityMult, suburbsMult, minBlockLimit));
+        cities.add(new City(loc.getBlockX(), loc.getBlockZ(), initialGovernmentSize, name, cityMult, suburbsMult, minBlockLimit));
     }
 }

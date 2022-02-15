@@ -20,12 +20,14 @@ public class City {
     private CityArea[] areas;
     private int cityX, cityY;
     private int governmentSize;
+    private final String name;
     private final int cityMult;
     private final int suburbsMult;
     private final int minBlockLimit;
     private final ClaimCache claimCache = new ClaimCache(100);
 
-    public City(int cityX, int cityY, int governmentSize, int cityMult, int suburbsMult, int minBlockLimit) {
+    public City(int cityX, int cityY, int governmentSize, String name, int cityMult, int suburbsMult, int minBlockLimit) {
+        this.name = name;
         this.minBlockLimit = minBlockLimit;
         this.cityX = cityX;
         this.cityY = cityY;
@@ -50,6 +52,10 @@ public class City {
 
     public int getCenterY() {
         return cityY;
+    }
+
+    public String getName() {
+        return name;
     }
 
     public void setGovernmentSize(int governmentSize) {

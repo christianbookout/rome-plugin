@@ -51,7 +51,7 @@ public class RomePlugin extends JavaPlugin {
         City mainCity = new City(0,
                 0,
                 0,
-                config.getInt("land.cityMultiplier"),
+                "rome", config.getInt("land.cityMultiplier"),
                 config.getInt("land.suburbsMultiplier"),
                 config.getInt("claims.defaultClaimBlocks"));
 

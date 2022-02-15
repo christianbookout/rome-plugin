@@ -80,7 +80,7 @@ public class CityManager {
     public boolean canBreak(Player player, Location location) {
         var city = getCity(location);
         if (city == null)
-            return false;
+            return true;
         return city.canBreak(player, location);
     }
 

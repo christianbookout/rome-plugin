@@ -17,7 +17,7 @@ public class LandCommand implements CommandExecutor {
         // TODO: add disbanding a city
         if (args.length == 0) {
             sender.sendMessage("/rome found [size] -- sina pali lon sina e Wome");
-            sender.sendMessage("/rome expand <size> -- accepts negative values");
+            sender.sendMessage("/rome expand <name> <size> -- accepts negative values");
             return false;
         }
         switch (args[0]) {
@@ -32,14 +32,11 @@ public class LandCommand implements CommandExecutor {
                 }
                 return false;
             case "expand":
-                // TODO: fix this
-                /*
-                if (!manager.expandGovernment(Integer.parseInt(args[1]))) {
-                    sender.sendMessage("size would make the government's size negative");
-                    return false;
+                if (args.length < 3) {
+                    sender.sendMessage("/rome expand <name> <size>");
+                    return true;
                 }
-                 */
-                sender.sendMessage("nyi :)");
+                manager.expandGovernment(args[1], Integer.parseInt(args[2]));
                 return true;
         }
         return false;

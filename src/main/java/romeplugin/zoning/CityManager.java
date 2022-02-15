@@ -138,4 +138,22 @@ public class CityManager {
         }
         cities.add(new City(loc.getBlockX(), loc.getBlockZ(), initialGovernmentSize, name, cityMult, suburbsMult, minBlockLimit));
     }
+
+    public void expandGovernment(String name, int amount) {
+        var city = getCityByName(name);
+        if (city == null) {
+            return;
+        }
+        if (!city.expandGovernment(amount)) {
+            return;
+        }
+        try (var conn = SQLConn.getConnection()) {
+            var stmt = conn.prepareStatement("UPDATE cityInfo SET size = size + ? WHERE name = ?;");
+            stmt.setInt(1, amount);
+            stmt.setString(2, name);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 }

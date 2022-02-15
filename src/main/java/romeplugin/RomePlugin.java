@@ -161,11 +161,10 @@ public class RomePlugin extends JavaPlugin {
         var notifications = new NotificationQueue();
 
         PartyHandler partyHandler = new PartyHandler();
-        getCommand("rome").setExecutor(new LandCommand(cityManager));
+        getCommand("city").setExecutor(new LandCommand(cityManager));
         getCommand("claim").setExecutor(new ClaimLandCommand(cityManager, this));
         getCommand("claiminfo").setExecutor(new ClaimInfoCommand());
         getCommand("removetitle").setExecutor(new RemoveTitleCommand(titles));
-        getCommand("foundrome").setExecutor(new FoundCityCommand(mainCity));
         getCommand("settitle").setExecutor(new SetTitleCommand(titles));
         //getCommand("bal").setExecutor(new BalanceCommand(ledger));
         getServer().getPluginManager().registerEvents(new RemovePopeListener(), this);

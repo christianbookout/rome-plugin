@@ -11,9 +11,6 @@ public class MessageConstants {
     private static final ChatColor SUCCESS_COLOR = ChatColor.GREEN;
     private static final ChatColor POLITICS_COLOR = ChatColor.LIGHT_PURPLE;
 
-
-    /****************************************** ELECTIONS ******************************************/
-
     public static final String ALREADY_ELECTION_ERROR = ERROR_COLOR + "election is already running";
     public static final String ALREADY_VOTING_ERROR = ERROR_COLOR + "the election is already in the voting phase";
     public static final String NO_ELECTION_ERROR = ERROR_COLOR + "there is no election at the moment";

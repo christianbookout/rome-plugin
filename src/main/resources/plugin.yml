@@ -43,10 +43,6 @@ commands:
   listtitles:
     description: "List current titles"
     usage: "/listtitles"
-  foundrome:
-    description: "it was made in a day :)"
-    usage: "/foundrome [size]"
-    permission: op
   bal:
     description: "get balance"
     usage: "/bal"
@@ -65,9 +61,9 @@ commands:
   transferclaim:
     description: "transfer claim to another player"
     usage: "/transferclaim <user>"
-  rome:
-    description: "do rome related things"
-    usage: "/rome for help :)"
+  city:
+    description: "do city related things"
+    usage: "/city for help :)"
     permission: op
   builder:
     description: "deal with builders"

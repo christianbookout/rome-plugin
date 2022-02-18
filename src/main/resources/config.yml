@@ -6,6 +6,7 @@ database:
   password: pass
 
 land:
+  initialGovernmentSize: 10 # the size of the city when it is initially founded
   cityMultiplier: 3 # the amount to multiply by your initial area to get the city area
   suburbsMultiplier: 5 # the amount to multiply by your initial number to get the suburbs area (suburbs area = city multiplier * suburbs multiplier * your initial number)
 

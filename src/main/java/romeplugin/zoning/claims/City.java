@@ -15,17 +15,19 @@ import java.util.UUID;
 
 import static romeplugin.zoning.ZoneType.*;
 
-public class LandControl {
+public class City {
 
     private CityArea[] areas;
     private int cityX, cityY;
     private int governmentSize;
+    private final String name;
     private final int cityMult;
     private final int suburbsMult;
     private final int minBlockLimit;
     private final ClaimCache claimCache = new ClaimCache(100);
 
-    public LandControl(int cityX, int cityY, int governmentSize, int cityMult, int suburbsMult, int minBlockLimit) {
+    public City(int cityX, int cityY, int governmentSize, String name, int cityMult, int suburbsMult, int minBlockLimit) {
+        this.name = name;
         this.minBlockLimit = minBlockLimit;
         this.cityX = cityX;
         this.cityY = cityY;
@@ -52,6 +54,10 @@ public class LandControl {
         return cityY;
     }
 
+    public String getName() {
+        return name;
+    }
+
     public void setGovernmentSize(int governmentSize) {
         this.governmentSize = governmentSize;
         this.areas = new CityArea[]{
@@ -71,21 +77,9 @@ public class LandControl {
     }
 
     public CityArea getArea(Location loc) {
-        if (loc.getWorld().getEnvironment() != Environment.NORMAL) return null;
+        if (loc.getWorld() == null || loc.getWorld().getEnvironment() != Environment.NORMAL)
+            return null;
         return getArea(loc.getBlockX(), loc.getBlockZ());
-    }
-
-    public void updateDB() {
-        try {
-            var stmt = SQLConn.getConnection()
-                    .prepareStatement("REPLACE INTO cityInfo VALUES (0, ?, ?, ?);");
-            stmt.setInt(1, governmentSize);
-            stmt.setInt(2, cityX);
-            stmt.setInt(3, cityY);
-            stmt.execute();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
     }
 
     private boolean inCity(int x, int y) {
@@ -93,23 +87,25 @@ public class LandControl {
         return Math.abs(x - cityX) <= extents && Math.abs(y - cityY) <= extents;
     }
 
-    private boolean inSuburbs(int x, int y) {
+    private boolean isOutsideSuburbs(int x, int y) {
         var extents = governmentSize * suburbsMult;
-        return Math.abs(x - cityX) <= extents && Math.abs(y - cityY) <= extents;
+        return Math.abs(x - cityX) > extents || Math.abs(y - cityY) > extents;
     }
 
-    public boolean inSuburbs(Location loc) {
-        if (loc.getWorld().getEnvironment() != Environment.NORMAL) return false;
-        return inSuburbs(loc.getBlockX(), loc.getBlockZ());
+    public boolean isOutsideSuburbs(Location loc) {
+        if (loc.getWorld() == null || loc.getWorld().getEnvironment() != World.Environment.NORMAL)
+            return true;
+        return isOutsideSuburbs(loc.getBlockX(), loc.getBlockZ());
     }
 
     public boolean inCity(Location loc) {
-        if (loc.getWorld().getEnvironment() != Environment.NORMAL) return false;
+        if (loc.getWorld() == null || loc.getWorld().getEnvironment() != Environment.NORMAL)
+            return false;
         return inCity(loc.getBlockX(), loc.getBlockZ());
     }
 
     private boolean canBreak(Player player, int x, int y) {
-        if (!inSuburbs(x, y)) {
+        if (isOutsideSuburbs(x, y)) {
             return true;
         }
         var title = RomePlugin.onlinePlayerTitles.get(player);
@@ -123,7 +119,7 @@ public class LandControl {
             return claim.owner.equals(player.getUniqueId()) || SQLConn.claimShared(claim, player.getUniqueId());
         }
         try {
-            if (area.getType() == GOVERNMENT && SQLConn.isBuilder(player.getUniqueId()) ) {
+            if (area.getType() == GOVERNMENT && SQLConn.isBuilder(player.getUniqueId())) {
                 return true;
             }
         } catch (SQLException e) {
@@ -214,7 +210,7 @@ public class LandControl {
     }
 
     public boolean inWilderness(Location toLoc) {
-        return !inSuburbs(toLoc);
+        return isOutsideSuburbs(toLoc);
     }
 
     public int getClaimedBlocksInSuburbs(UUID who) {
@@ -235,5 +231,10 @@ public class LandControl {
             e.printStackTrace();
             return 9999;
         }
+    }
+
+    public boolean cityIntersects(int x0, int y0, int x1, int y1) {
+        var extents = governmentSize * cityMult;
+        return rectIntersects(x0, y0, x1, y1, cityX - extents, cityY + extents, cityX + extents, cityY - extents);
     }
 }

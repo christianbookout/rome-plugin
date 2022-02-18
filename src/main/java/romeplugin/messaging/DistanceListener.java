@@ -6,14 +6,15 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 
-import romeplugin.zoning.claims.LandControl;
+import romeplugin.zoning.CityManager;
+import romeplugin.zoning.claims.City;
 
 public class DistanceListener implements Listener {
     private final int distance;
     private final SwearFilter swearFilter;
-    private final LandControl controller;
+    private final CityManager controller;
 
-    public DistanceListener(int distance, SwearFilter swearFilter, LandControl controller) {
+    public DistanceListener(int distance, SwearFilter swearFilter, CityManager controller) {
         this.distance = distance;
         this.swearFilter = swearFilter;
         this.controller = controller;

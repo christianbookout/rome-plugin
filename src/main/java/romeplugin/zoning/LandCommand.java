@@ -3,39 +3,42 @@ package romeplugin.zoning;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-
-import romeplugin.zoning.claims.LandControl;
+import org.bukkit.entity.Player;
 
 public class LandCommand implements CommandExecutor {
-    private final LandControl controller;
+    private final CityManager manager;
 
-    public LandCommand(LandControl controller) {
-        this.controller = controller;
+    public LandCommand(CityManager manager) {
+        this.manager = manager;
     }
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+        // TODO: add disbanding a city
         if (args.length == 0) {
             sender.sendMessage("/rome found [size] -- sina pali lon sina e Wome");
-            sender.sendMessage("/rome expand <size> -- accepts negative values");
+            sender.sendMessage("/rome expand <name> <size> -- accepts negative values");
             return false;
         }
         switch (args[0]) {
             case "found":
-                sender.sendMessage("sina nasa, ni li NYI...");
-                return found();
-            case "expand":
-                if (!controller.expandGovernment(Integer.parseInt(args[1]))) {
-                    sender.sendMessage("size would make the government's size negative");
-                    return false;
+                if (args.length < 2) {
+                    sender.sendMessage("no city name :(");
+                    return true;
                 }
+                if (sender instanceof Player) {
+                    manager.foundCity((Player) sender, args[1]);
+                    return true;
+                }
+                return false;
+            case "expand":
+                if (args.length < 3) {
+                    sender.sendMessage("/rome expand <name> <size>");
+                    return true;
+                }
+                manager.expandGovernment(args[1], Integer.parseInt(args[2]));
                 return true;
         }
-        return false;
-    }
-
-    private boolean found() {
-        // TODO: reimplement this command
         return false;
     }
 }

@@ -1,8 +1,6 @@
 package romeplugin.zoning;
 
 import net.md_5.bungee.api.ChatColor;
-
-import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -27,18 +25,18 @@ import org.bukkit.event.player.PlayerBucketFillEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
-import romeplugin.MessageConstants;
 import romeplugin.database.ClaimEntry;
 import romeplugin.database.SQLConn;
-import romeplugin.zoning.claims.LandControl;
 import romeplugin.zoning.locks.LockManager;
 
-import java.util.*;
-import java.util.logging.Level;
+import java.util.HashMap;
+import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class LandEventListener implements Listener {
     private final LockManager lockManager;
-    private final LandControl controller;
+    private final CityManager controller;
     public static final Material DEFAULT_MATERIAL = Material.BRICK;
 
     private final Material claimMaterial;
@@ -58,7 +56,7 @@ public class LandEventListener implements Listener {
     private Player spongePlacer = null;
 
     public LandEventListener(
-            LandControl controller,
+            CityManager controller,
             LockManager lockManager,
             Material claimMaterial,
             Set<Material> autoLockedBlocks,
@@ -75,7 +73,7 @@ public class LandEventListener implements Listener {
     @EventHandler
     public void onBlockBreak(BlockBreakEvent event) {
         var block = event.getBlock();
-        if (!controller.inSuburbs(block.getLocation())) return;
+        if (controller.isOutsideSuburbs(block.getLocation())) return;
         if (controller.canBreak(event.getPlayer(), block.getLocation()))
             return;
 
@@ -88,7 +86,7 @@ public class LandEventListener implements Listener {
     public void onBlockPlace(BlockPlaceEvent event) {
         var block = event.getBlock();
         if (event.getBlock().getType().equals(Material.SPONGE)) this.spongePlacer = event.getPlayer();
-        if (!controller.inSuburbs(block.getLocation())) return;
+        if (controller.isOutsideSuburbs(block.getLocation())) return;
         if (controller.canBreak(event.getPlayer(), block.getLocation()))
             return;
 
@@ -100,7 +98,7 @@ public class LandEventListener implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST)
     public void blockCanBuild(BlockCanBuildEvent e) {
         Location location = e.getBlock().getLocation();
-        if (!controller.inSuburbs(location)) return;
+        if (controller.isOutsideSuburbs(location)) return;
 
         if (e.getPlayer() == null) {
             return;
@@ -133,7 +131,7 @@ public class LandEventListener implements Listener {
     @EventHandler
     public void hangingItemBroken(HangingBreakByEntityEvent e) {
         Location location = e.getEntity().getLocation();
-        if (!controller.inSuburbs(location)) return;
+        if (controller.isOutsideSuburbs(location)) return;
 
         //If a mob or something else tries to break an item frame and they are in a city or a claim then stop them
         if (!(e.getRemover() instanceof Player)) {
@@ -160,7 +158,7 @@ public class LandEventListener implements Listener {
             return;
         }
         Location location = e.getBlock().getLocation();
-        if (!controller.inSuburbs(location)) return;
+        if (controller.isOutsideSuburbs(location)) return;
         if (!controller.canBreak(e.getPlayer(), location)) {
             e.setCancelled(true);
         }
@@ -234,7 +232,7 @@ public class LandEventListener implements Listener {
         Player player = e.getPlayer();
         Location placePosition = e.getBlockClicked().getLocation();
 
-        if (!controller.inSuburbs(placePosition)) return;
+        if (controller.isOutsideSuburbs(placePosition)) return;
 
         if (!controller.canBreak(player, placePosition)) {
             e.setCancelled(true);
@@ -246,7 +244,7 @@ public class LandEventListener implements Listener {
         Player player = e.getPlayer();
         Location placePosition = e.getBlockClicked().getLocation();
 
-        if (!controller.inSuburbs(placePosition)) return;
+        if (controller.isOutsideSuburbs(placePosition)) return;
 
         if (!controller.canBreak(player, placePosition)) {
             e.setCancelled(true);
@@ -266,7 +264,7 @@ public class LandEventListener implements Listener {
     public void frameItemStolen(EntityDamageByEntityEvent e) {
         Location location = e.getEntity().getLocation();
 
-        if (!controller.inSuburbs(location)) return;
+        if (controller.isOutsideSuburbs(location)) return;
 
         if (!(e.getEntity() instanceof ItemFrame || e.getEntity() instanceof ArmorStand))
             return;
@@ -288,7 +286,7 @@ public class LandEventListener implements Listener {
     @EventHandler
     public void onItemFrameObjectAdded(PlayerInteractEntityEvent e) {
         Location loc = e.getRightClicked().getLocation();
-        if (!controller.inSuburbs(loc))
+        if (controller.isOutsideSuburbs(loc))
             return;
         var entity = e.getRightClicked();
         if ((entity instanceof ItemFrame || entity instanceof ArmorStand) && !controller.canBreak(e.getPlayer(), loc)) {
@@ -324,7 +322,7 @@ public class LandEventListener implements Listener {
         }
         Location newLoc = e.getClickedBlock().getLocation();
 
-        if (!controller.inSuburbs(newLoc)) return;
+        if (controller.isOutsideSuburbs(newLoc)) return;
 
         Material mainHandItem = e.getPlayer().getInventory().getItemInMainHand().getType();
 

@@ -1,8 +1,9 @@
 package romeplugin.messaging;
 
 import org.bukkit.entity.Player;
+import romeplugin.zoning.CityManager;
 import romeplugin.zoning.ZoneType;
-import romeplugin.zoning.claims.LandControl;
+import romeplugin.zoning.claims.City;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -15,7 +16,7 @@ public final class SwearFilter {
     private static final InputStream SWEAR_STREAM = SwearFilter.class.getResourceAsStream("/swears.csv");
     private static final char SWEAR_REPLACE = '♥';
     private final ArrayList<String> swears = new ArrayList<>();
-    private final LandControl controller;
+    private final CityManager controller;
 
     public enum SwearLevel {
         NEVER, 
@@ -26,7 +27,7 @@ public final class SwearFilter {
     }
     private final SwearLevel swearLevel;
 
-    public SwearFilter(LandControl controller, SwearLevel swearLevel) {
+    public SwearFilter(CityManager controller, SwearLevel swearLevel) {
         this.controller = controller;
         this.swearLevel = swearLevel;
         generateSwears();
@@ -54,6 +55,7 @@ public final class SwearFilter {
         if (swearLevel == SwearLevel.NEVER) return false;
         else if (swearLevel == SwearLevel.ALWAYS) return true;
 
+        // TODO: maybe allow cities to choose swearing levels?
         ZoneType zone = controller.getArea(p.getLocation()).getType();
         return  (zone == ZoneType.SUBURB && swearLevel == SwearLevel.SUBURBS) ||
                 (zone == ZoneType.CITY && swearLevel == SwearLevel.CITY) ||

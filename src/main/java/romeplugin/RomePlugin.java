@@ -15,22 +15,17 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import romeplugin.database.SQLConn;
-import romeplugin.election.ElectionCommand;
-import romeplugin.election.ElectionHandler;
-import romeplugin.election.ElectionTabCompleter;
-import romeplugin.election.PartyCommand;
-import romeplugin.election.PartyHandler;
+import romeplugin.election.*;
 import romeplugin.messaging.*;
 import romeplugin.messaging.SwearFilter.SwearLevel;
-import romeplugin.misc.ItemBank;
 import romeplugin.misc.PeeController;
 import romeplugin.misc.SpawnCommand;
 import romeplugin.title.*;
 import romeplugin.zoning.*;
+import romeplugin.zoning.claims.City;
 import romeplugin.zoning.claims.ClaimInfoCommand;
 import romeplugin.zoning.claims.ClaimLandCommand;
 import romeplugin.zoning.claims.GetClaimBlocksCommand;
-import romeplugin.zoning.claims.LandControl;
 import romeplugin.zoning.locks.LockManager;
 
 import java.sql.Connection;
@@ -52,10 +47,11 @@ public class RomePlugin extends JavaPlugin {
         this.saveDefaultConfig();
         FileConfiguration config = this.getConfig();
 
-        LandControl landControl = new LandControl(0,
+        // TODO: remove this
+        City mainCity = new City(0,
                 0,
                 0,
-                config.getInt("land.cityMultiplier"),
+                "rome", config.getInt("land.cityMultiplier"),
                 config.getInt("land.suburbsMultiplier"),
                 config.getInt("claims.defaultClaimBlocks"));
 
@@ -81,8 +77,14 @@ public class RomePlugin extends JavaPlugin {
         protectedMaterialStrings.forEach(matStr -> protectedMaterials.add(Material.valueOf(matStr)));
 
         var lockManager = new LockManager(this);
+        var cityManager = new CityManager(
+                config.getInt("land.initialCitySize"),
+                config.getInt("land.cityMultiplier"),
+                config.getInt("land.suburbsMultiplier"),
+                config.getInt("claims.defaultClaimBlocks"));
+
         LandEventListener landListener = new LandEventListener(
-                landControl,
+                cityManager,
                 lockManager,
                 claimMaterial,
                 protectedMaterials,
@@ -112,12 +114,14 @@ public class RomePlugin extends JavaPlugin {
                     "x1 INT NOT NULL," +
                     "y1 INT NOT NULL," +
                     "added_player_uuid CHAR(36) NOT NULL);").execute();
-            // overkill
             conn.prepareStatement("CREATE TABLE IF NOT EXISTS cityInfo (" +
-                    "type TINYINT NOT NULL PRIMARY KEY," +
+                    "id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY," +
                     "size INT NOT NULL," +
                     "x INT NOT NULL," +
-                    "y INT NOT NULL);").execute();
+                    "y INT NOT NULL," +
+                    "name VARCHAR(20) NOT NULL," +
+                    "founder_uuid CHAR(36) NOT NULL," +
+                    "found_date DATE NOT NULL);").execute();
             conn.prepareStatement("CREATE TABLE IF NOT EXISTS usernames (" +
                     "uuid CHAR(36) NOT NULL PRIMARY KEY," +
                     "username CHAR(32) NOT NULL);").execute();
@@ -142,26 +146,25 @@ public class RomePlugin extends JavaPlugin {
 
             var res = conn.prepareStatement("SELECT * FROM cityInfo WHERE type = 0;").executeQuery();
             if (res.next()) {
-                landControl.setGovernmentSize(res.getInt("size"));
-                landControl.setCenter(res.getInt("x"), res.getInt("y"));
+                mainCity.setGovernmentSize(res.getInt("size"));
+                mainCity.setCenter(res.getInt("x"), res.getInt("y"));
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
         var titles = new TitleHandler(this);
 
-        SwearFilter filter = new SwearFilter(landControl, SwearLevel.valueOf(config.getString("messages.useSwearFilter").toUpperCase()));
-        var landEnterListener = new LandEnterListener(landControl);
+        SwearFilter filter = new SwearFilter(cityManager, SwearLevel.valueOf(config.getString("messages.useSwearFilter").toUpperCase()));
+        var landEnterListener = new LandEnterListener(cityManager);
         var peeController = new PeeController(this);
         //var itemBank = new ItemBank(this);
         var notifications = new NotificationQueue();
 
         PartyHandler partyHandler = new PartyHandler();
-        getCommand("rome").setExecutor(new LandCommand(landControl));
-        getCommand("claim").setExecutor(new ClaimLandCommand(landControl, this));
+        getCommand("city").setExecutor(new LandCommand(cityManager));
+        getCommand("claim").setExecutor(new ClaimLandCommand(cityManager, this));
         getCommand("claiminfo").setExecutor(new ClaimInfoCommand());
         getCommand("removetitle").setExecutor(new RemoveTitleCommand(titles));
-        getCommand("foundrome").setExecutor(new FoundCityCommand(landControl));
         getCommand("settitle").setExecutor(new SetTitleCommand(titles));
         //getCommand("bal").setExecutor(new BalanceCommand(ledger));
         getServer().getPluginManager().registerEvents(new RemovePopeListener(), this);
@@ -169,20 +172,20 @@ public class RomePlugin extends JavaPlugin {
         getCommand("shout").setExecutor(new ShoutCommand(partyHandler));
         getCommand("pee").setExecutor(peeController);
         //getCommand("makekey").setExecutor(new MakeKeyCommand(lockManager));
-        getCommand("getblocks").setExecutor(new GetClaimBlocksCommand(landControl));
+        getCommand("getblocks").setExecutor(new GetClaimBlocksCommand(mainCity));
         getCommand("elections").setExecutor(new ElectionCommand(new ElectionHandler(notifications, this, titles)));
         getCommand("elections").setTabCompleter(new ElectionTabCompleter());
         getCommand("titles").setExecutor(new TitlesCommand());
         getCommand("parties").setExecutor(new PartyCommand(partyHandler, this));
         //getCommand("itembank").setExecutor(itemBank);
-        getCommand("notification").setTabCompleter(new NotificationCommand(notifications));
+        getCommand("notification").setExecutor(new NotificationCommand(notifications));
         //getServer().getPluginManager().registerEvents(itemBank, this);
-        getCommand("spawn").setExecutor(new SpawnCommand(landControl));
+        getCommand("spawn").setExecutor(new SpawnCommand(mainCity));
         getCommand("banish").setExecutor(new BanishCommand(landEnterListener));
         getServer().getPluginManager().registerEvents(peeController, this);
         getServer().getPluginManager().registerEvents(new TitleEventListener(titles, partyHandler), this);
         getServer().getPluginManager().registerEvents(
-                new DistanceListener(config.getInt("messages.messageDistance"), filter, landControl),
+                new DistanceListener(config.getInt("messages.messageDistance"), filter, cityManager),
                 this);
         //getServer().getPluginManager().registerEvents(new BlockchainEventListener(this, ledger), this);
         getServer().getPluginManager().registerEvents(landListener, this);

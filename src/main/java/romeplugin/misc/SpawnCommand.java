@@ -8,14 +8,14 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import romeplugin.MessageConstants;
-import romeplugin.zoning.claims.LandControl;
+import romeplugin.zoning.claims.City;
 
 public class SpawnCommand implements CommandExecutor {
-    private final LandControl landControl;
+    // TODO: somehow choose which city to teleport to.
+    private final City city;
 
-    public SpawnCommand(LandControl landControl) {
-        this.landControl = landControl;
+    public SpawnCommand(City city) {
+        this.city = city;
     }
 
     @Override
@@ -28,7 +28,7 @@ public class SpawnCommand implements CommandExecutor {
             player.sendMessage("NO MOVE IN NOT EARTH.");
             return true;
         }
-        var pos = player.getWorld().getHighestBlockAt(landControl.getCenterX(), landControl.getCenterY());
+        var pos = player.getWorld().getHighestBlockAt(city.getCenterX(), city.getCenterY());
         // have to add go up one otherwise player spawns in the ground
         var newLoc = pos.getLocation().add(0, 1, 0);
         newLoc.setYaw(player.getLocation().getYaw());

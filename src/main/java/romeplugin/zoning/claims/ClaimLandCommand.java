@@ -9,17 +9,17 @@ import org.bukkit.plugin.Plugin;
 
 import romeplugin.MessageConstants;
 import romeplugin.database.SQLConn;
+import romeplugin.zoning.CityManager;
 
 import java.sql.SQLException;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class ClaimLandCommand implements CommandExecutor, TabCompleter {
-    private final LandControl landControl;
+    private final CityManager manager;
     private final Plugin plugin;
 
-    public ClaimLandCommand(LandControl landControl, Plugin plugin) {
-        this.landControl = landControl;
+    public ClaimLandCommand(CityManager manager, Plugin plugin) {
+        this.manager = manager;
         this.plugin = plugin;
     }
 
@@ -40,7 +40,7 @@ public class ClaimLandCommand implements CommandExecutor, TabCompleter {
             var y0 = loc.getBlockZ() + r;
             var x1 = loc.getBlockX() + r;
             var y1 = loc.getBlockZ() - r;
-            return landControl.tryClaimLand(player, x0, y0, x1, y1);
+            return manager.tryClaimLand(player, x0, y0, x1, y1);
         } else if (args[0].equals("share") && args.length >= 2) {
             return shareClaim(player, args[1]);
         } else if (args[0].equals("remove")) {
@@ -69,7 +69,7 @@ public class ClaimLandCommand implements CommandExecutor, TabCompleter {
             var ya = Integer.parseInt(args[1]);
             var xb = Integer.parseInt(args[2]);
             var yb = Integer.parseInt(args[3]);
-            return landControl.tryClaimLand(player, xa, ya, xb, yb);
+            return manager.tryClaimLand(player, xa, ya, xb, yb);
         } catch (NumberFormatException e) {
             return false;
         }

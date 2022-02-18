@@ -122,6 +122,9 @@ public class RomePlugin extends JavaPlugin {
                     "name VARCHAR(20) NOT NULL," +
                     "founder_uuid CHAR(36) NOT NULL," +
                     "found_date DATE NOT NULL);").execute();
+            conn.prepareStatement("CREATE TABLE IF NOT EXISTS cityMembers (" +
+                    "uuid CHAR(36) NOT NULL PRIMARY KEY," +
+                    "cityId INT UNSIGNED NOT NULL);").execute();
             conn.prepareStatement("CREATE TABLE IF NOT EXISTS usernames (" +
                     "uuid CHAR(36) NOT NULL PRIMARY KEY," +
                     "username CHAR(32) NOT NULL);").execute();

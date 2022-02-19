@@ -21,9 +21,6 @@ public class EmpireHandler {
         this.initializedb();
     }
 
-    /**
-     * set up tables for parties, and for members
-     */
     private void initializedb() {
         try (Connection conn = SQLConn.getConnection()) {
 
@@ -101,7 +98,7 @@ public class EmpireHandler {
 
     public boolean isOwner(UUID uuid) {
         try (Connection conn = SQLConn.getConnection()) {
-            var stmt = conn.prepareStatement("SELECT * FROM parties WHERE ownerUUID=?;");
+            var stmt = conn.prepareStatement("SELECT * FROM empires WHERE ownerUUID=?;");
             stmt.setString(1, uuid.toString());
             var results = stmt.executeQuery();
             return results.next();
@@ -113,7 +110,7 @@ public class EmpireHandler {
 
     public boolean createEmpire(UUID owner, String name, City... cities) {
         try (Connection conn = SQLConn.getConnection()) {
-            /*var stmt = conn.prepareStatement("INSERT INTO parties VALUES (?, ?, ?, ?, ?, ?);");
+            /*var stmt = conn.prepareStatement("INSERT INTO empires VALUES (?, ?, ?, ?, ?, ?);");
             stmt.setString(1, name);
             stmt.setString(2, acronym.str);
             stmt.setString(3, owner.toString());
@@ -271,7 +268,7 @@ public class EmpireHandler {
 
     public boolean setOwner(UUID oldUUID, UUID newUUID) {
         try (Connection conn = SQLConn.getConnection()) {
-            var stmt = conn.prepareStatement("UPDATE parties SET ownerUUID=? WHERE ownerUUID=?;");
+            var stmt = conn.prepareStatement("UPDATE empires SET ownerUUID=? WHERE ownerUUID=?;");
             stmt.setString(1, newUUID.toString());
             stmt.setString(2, oldUUID.toString());
             return stmt.executeUpdate() > 0;

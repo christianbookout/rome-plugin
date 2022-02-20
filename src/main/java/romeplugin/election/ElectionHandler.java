@@ -48,42 +48,42 @@ public class ElectionHandler {
             conn.prepareStatement("CREATE TABLE IF NOT EXISTS candidates (" +
                     "uuid CHAR(36) NOT NULL PRIMARY KEY," +
                     "title " + RomePlugin.TITLE_ENUM + " NOT NULL," +
-                    "empireUUID CHAR(36) NOT NULL," + 
+                    "empireId INT UNSIGNED NOT NULL," +
                     "votes INT NOT NULL DEFAULT 0);").execute();
 
             conn.prepareStatement("CREATE TABLE IF NOT EXISTS electionNumber (" + 
                     "number INT DEFAULT 1 NOT NULL PRIMARY KEY,"+
-                    "empireUUID CHAR(36) NOT NULL);").execute();
+                    "empireId INT UNSIGNED NOT NULL);").execute();
 
             conn.prepareStatement("CREATE TABLE IF NOT EXISTS electionPhase (" +
                     "phase ENUM('RUNNING', 'VOTING', 'NULL') DEFAULT 'NULL' PRIMARY KEY," +
-                    "empireUUID CHAR(36) NOT NULL);").execute();
+                    "empireId INT UNSIGNED NOT NULL);").execute();
 
             conn.prepareStatement("CREATE TABLE IF NOT EXISTS electionResults (" +
                     "number INT NOT NULL DEFAULT 0 PRIMARY KEY," +
                     "title " + RomePlugin.TITLE_ENUM + " NOT NULL," +
                     "uuid CHAR(36) NOT NULL," +
-                    "empireUUID CHAR(36) NOT NULL," +
+                    "empireId INT UNSIGNED NOT NULL," +
                     "votes INT NOT NULL);").execute();
 
             conn.prepareStatement("CREATE TABLE IF NOT EXISTS playerVotes (" +
                     "uuid CHAR(36) NOT NULL," +
                     "titleVotedFor " + RomePlugin.TITLE_ENUM + " NOT NULL," +
-                    "empireUUID CHAR(36) NOT NULL);").execute();
+                    "empireId INT UNSIGNED NOT NULL);").execute();
 
         } catch (SQLException e) {
             plugin.getLogger().log(Level.WARNING, e.getMessage());
         }
     }
 
-    public boolean hasElection(UUID empireUUID) {
-        return this.getElectionPhase(empireUUID) != null;
+    public boolean hasElection(int empireId) {
+        return this.getElectionPhase(empireId) != null;
     }
 
-    public ElectionPhase getElectionPhase(UUID empireUUID) {
+    public ElectionPhase getElectionPhase(int empireId) {
         try (Connection conn = SQLConn.getConnection()) {
-            var stmt = conn.prepareStatement("SELECT phase FROM electionPhase WHERE empireUUID = ?;");
-            stmt.setString(1, empireUUID.toString());
+            var stmt = conn.prepareStatement("SELECT phase FROM electionPhase WHERE empireId = ?;");
+            stmt.setInt(1, empireId);
             var currInfo = stmt.executeQuery();
             if (currInfo.next()) {
                 String phase = currInfo.getString("phase");
@@ -95,10 +95,10 @@ public class ElectionHandler {
         return null;
     }
 
-    public int getElectionNumber(UUID empireUUID) {
+    public int getElectionNumber(int empireId) {
         try (Connection conn = SQLConn.getConnection()) {
-            var stmt = conn.prepareStatement("SELECT number FROM electionNumber WHERE empireUUID = ?;");
-            stmt.setString(1, empireUUID.toString());
+            var stmt = conn.prepareStatement("SELECT number FROM electionNumber WHERE empireId = ?;");
+            stmt.setInt(1, empireId);
             var currInfo = stmt.executeQuery();
             if (currInfo.next()) {
                 return currInfo.getInt("number");
@@ -109,21 +109,21 @@ public class ElectionHandler {
         return 1;
     }
 
-    public void incrementElectionNumber(UUID empireUUID) {
+    public void incrementElectionNumber(int empireId) {
         try (Connection conn = SQLConn.getConnection()) {
-            var stmt = conn.prepareStatement("UPDATE electionNumber SET number = number + 1 WHERE empireUUID = ?;");
-            stmt.setString(1, empireUUID.toString());
+            var stmt = conn.prepareStatement("UPDATE electionNumber SET number = number + 1 WHERE empireId = ?;");
+            stmt.setInt(1, empireId);
             stmt.execute();
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
-    public Collection<Candidate> getCandidates(UUID empireUUID) {
+    public Collection<Candidate> getCandidates(int empireId) {
         var candidates = new ArrayList<Candidate>();
         try (Connection conn = SQLConn.getConnection()) {
-            var currInfo = conn.prepareStatement("SELECT * FROM candidates WHERE empireUUID = ?;");
-            currInfo.setString(1, empireUUID.toString());
+            var currInfo = conn.prepareStatement("SELECT * FROM candidates WHERE empireId = ?;");
+            currInfo.setInt(1, empireId);
             var results = currInfo.executeQuery();
             while (results.next()) {
                 var uuid = UUID.fromString(results.getString("uuid"));
@@ -138,22 +138,22 @@ public class ElectionHandler {
         return candidates;
     }
 
-    public boolean vote(UUID voter, UUID candidate, UUID empireUUID) {
+    public boolean vote(UUID voter, UUID candidate, int empireId) {
         try (Connection conn = SQLConn.getConnection()) {
-            var title = conn.prepareStatement("SELECT title FROM candidates WHERE uuid = ? AND empireUUID = ?;");
+            var title = conn.prepareStatement("SELECT title FROM candidates WHERE uuid = ? AND empireId = ?;");
             title.setString(1, candidate.toString());
-            title.setString(2, empireUUID.toString());
+            title.setInt(2, empireId);
             var results = title.executeQuery();
             if (!results.next()) return false;
             var preparedStatement = conn.prepareStatement("REPLACE INTO playerVotes VALUES (?, ?, ?);");
             preparedStatement.setString(1, voter.toString());
             preparedStatement.setString(2, results.getString("title"));
-            preparedStatement.setString(3, empireUUID.toString());
+            preparedStatement.setInt(3, empireId);
             preparedStatement.execute();
 
-            var stmt = conn.prepareStatement("UPDATE candidates SET votes = votes + 1 WHERE uuid = ? AND empireUUID = ?;");
+            var stmt = conn.prepareStatement("UPDATE candidates SET votes = votes + 1 WHERE uuid = ? AND empireId = ?;");
             stmt.setString(1, candidate.toString());
-            stmt.setString(2, empireUUID.toString());
+            stmt.setInt(2, empireId);
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -161,24 +161,24 @@ public class ElectionHandler {
         return false;
     }
 
-    public void removeCandidate(UUID uuid, UUID empireUUID) {
+    public void removeCandidate(UUID uuid, int empireId) {
         try (Connection conn = SQLConn.getConnection()) {
-            var stmt = conn.prepareStatement("DELETE FROM candidates WHERE uuid = ? AND empireUUID = ?;");
+            var stmt = conn.prepareStatement("DELETE FROM candidates WHERE uuid = ? AND empireId = ?;");
             stmt.setString(1, uuid.toString());
-            stmt.setString(2, empireUUID.toString());
+            stmt.setInt(2, empireId);
             stmt.execute();
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
-    public void addCandidate(UUID uuid, Title title, UUID empireUUID) {
+    public void addCandidate(UUID uuid, Title title, int empireId) {
         try (Connection conn = SQLConn.getConnection()) {
             var preparedStatement = conn.prepareStatement("REPLACE INTO candidates VALUES (?, ?, ?, ?);");
 
             preparedStatement.setString(1, uuid.toString());
             preparedStatement.setString(2, title.toString());
-            preparedStatement.setString(3, empireUUID.toString());
+            preparedStatement.setInt(3, empireId);
             preparedStatement.setInt(4, 0);
             preparedStatement.execute();
 
@@ -187,20 +187,20 @@ public class ElectionHandler {
         }
     }
 
-    public void setElectionPhase(ElectionPhase phase, UUID empireUUID) {
+    public void setElectionPhase(ElectionPhase phase, int empireId) {
         try (Connection conn = SQLConn.getConnection()) {
             String phaseStr = phase == null ? "NULL" : phase.toString();
-            var stmt = conn.prepareStatement("UPDATE electionPhase SET phase = ? where empireUUID = ?;");
+            var stmt = conn.prepareStatement("UPDATE electionPhase SET phase = ? where empireId = ?;");
             stmt.setString(1, phaseStr);
-            stmt.setString(2, empireUUID.toString());
+            stmt.setInt(2, empireId);
             stmt.execute();
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
-    public void startElection(UUID empireUUID) {
-        this.setElectionPhase(ElectionPhase.RUNNING, empireUUID);
+    public void startElection(int empireId) {
+        this.setElectionPhase(ElectionPhase.RUNNING, empireId);
         notifications.broadcastNotification(MessageConstants.SUCCESSFUL_ELECTION_START);
         plugin.getServer().broadcastMessage(MessageConstants.SUCCESSFUL_ELECTION_START);
     }
@@ -208,8 +208,8 @@ public class ElectionHandler {
     /**
      * begin the voting phase in the election
      */
-    public void startVoting(UUID empireUUID) {
-        this.setElectionPhase(ElectionPhase.VOTING, empireUUID);
+    public void startVoting(int empireId) {
+        this.setElectionPhase(ElectionPhase.VOTING, empireId);
         notifications.broadcastNotification(MessageConstants.SUCCESSFUL_VOTING_START);
         plugin.getServer().broadcastMessage(MessageConstants.SUCCESSFUL_VOTING_START);
     }
@@ -230,8 +230,8 @@ public class ElectionHandler {
     /**
      * ends the election, adding all titles to the winners and updating the election state/results
      */
-    public void endElection(UUID empireUUID) {
-        var results = this.getWinners(this.getCandidates(empireUUID));
+    public void endElection(int empireId) {
+        var results = this.getWinners(this.getCandidates(empireId));
 
         for (var uuid : SQLConn.getUUIDsWithTitle(Title.CONSUL)) {
             titleHandler.setTitle(uuid, Title.CENSOR);
@@ -258,28 +258,28 @@ public class ElectionHandler {
         //Apply all titles to each winner
         results.forEach(winner -> titleHandler.setTitle(winner.getUniqueId(), winner.getTitle()));
 
-        this.storeElectionResults(results, empireUUID);
+        this.storeElectionResults(results, empireId);
 
-        this.incrementElectionNumber(empireUUID);
-        this.setElectionPhase(null, empireUUID);
-        this.clearTempTables(empireUUID);
+        this.incrementElectionNumber(empireId);
+        this.setElectionPhase(null, empireId);
+        this.clearTempTables(empireId);
 
         plugin.getServer().broadcastMessage(MessageConstants.ELECTION_ENDED);
     }
 
-    public void cancelElection(UUID empireUUID) {
-        this.setElectionPhase(null, empireUUID);
-        this.clearTempTables(empireUUID);
+    public void cancelElection(int empireId) {
+        this.setElectionPhase(null, empireId);
+        this.clearTempTables(empireId);
         plugin.getServer().broadcastMessage(MessageConstants.ELECTION_CANCELLED);
     }
 
-    public void clearTempTables(UUID empireUUID) {
+    public void clearTempTables(int empireId) {
         try (Connection conn = SQLConn.getConnection()) {
-            var stmt1 = conn.prepareStatement("DELETE FROM candidates WHERE empireUUID=?;");
-            stmt1.setString(1, empireUUID.toString());
+            var stmt1 = conn.prepareStatement("DELETE FROM candidates WHERE empireId=?;");
+            stmt1.setInt(1, empireId);
             stmt1.execute();
-            var stmt2 = conn.prepareStatement("DELETE FROM playerVotes WHERE empireUUID=?;");
-            stmt2.setString(1, empireUUID.toString());
+            var stmt2 = conn.prepareStatement("DELETE FROM playerVotes WHERE empireId=?;");
+            stmt2.setInt(1, empireId);
             stmt2.execute();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -293,7 +293,7 @@ public class ElectionHandler {
      * @param title
      * @return
      */
-    public boolean alreadyVoted(UUID player, Title title, UUID empireUUID) {
+    public boolean alreadyVoted(UUID player, Title title, int empireId) {
         try (Connection conn = SQLConn.getConnection()) {
             return conn.prepareStatement("SELECT * FROM playerVotes WHERE uuid = '" + player.toString() + "' AND titleVotedFor = '" + title.toString() + "';").executeQuery().next();
         } catch (SQLException e) {
@@ -307,7 +307,7 @@ public class ElectionHandler {
      *
      * @return a collection of the previous election's winners
      */
-    public Collection<Candidate> getElectionResults(int number, UUID empireUUID) {
+    public Collection<Candidate> getElectionResults(int number, int empireId) {
         Collection<Candidate> readResults = new ArrayList<>();
 
         try (Connection conn = SQLConn.getConnection()) {
@@ -331,14 +331,14 @@ public class ElectionHandler {
     /**
      * store the current election results into the database
      */
-    public void storeElectionResults(Collection<Candidate> results, UUID empireUUID) {
+    public void storeElectionResults(Collection<Candidate> results, int empireId) {
         try (Connection conn = SQLConn.getConnection()) {
             for (Candidate winner : results) {
                 var statement = conn.prepareStatement("INSERT INTO electionResults VALUES (?, ?, ?, ?, ?);");
-                statement.setInt(1, this.getElectionNumber(empireUUID));
+                statement.setInt(1, this.getElectionNumber(empireId));
                 statement.setString(2, winner.getTitle().toString());
                 statement.setString(3, winner.getUniqueId().toString());
-                statement.setString(4, empireUUID.toString());
+                statement.setInt(4, empireId);
                 statement.setInt(5, winner.getVotes());
                 statement.execute();
             }
@@ -347,14 +347,14 @@ public class ElectionHandler {
         }
     }
 
-    public Optional<Candidate> getCandidate(UUID toVote, UUID empireUUID) {
-        return this.getCandidates(empireUUID)
+    public Optional<Candidate> getCandidate(UUID toVote, int empireId) {
+        return this.getCandidates(empireId)
                 .stream()
                 .filter(c -> c.getUniqueId().equals(toVote))
                 .findFirst();
     }
 
-    public boolean hasCandidate(UUID candidate, UUID empireUUID) {
-        return this.getCandidate(candidate, empireUUID).isPresent();
+    public boolean hasCandidate(UUID candidate, int empireId) {
+        return this.getCandidate(candidate, empireId).isPresent();
     }
 }

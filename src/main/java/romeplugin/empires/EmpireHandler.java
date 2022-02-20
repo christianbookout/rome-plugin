@@ -2,11 +2,9 @@ package romeplugin.empires;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
+import org.bukkit.entity.Player;
 import romeplugin.database.SQLConn;
 import romeplugin.election.PartyHandler;
 import romeplugin.election.PartyHandler.Party;
@@ -39,7 +37,7 @@ public class EmpireHandler {
             // list of members in an empire 
             conn.prepareStatement("CREATE TABLE IF NOT EXISTS empireMembers (" +
                     "uuid CHAR(36) PRIMARY KEY NOT NULL," +
-                    "empireName VARCHAR(50) NOT NULL);").execute();
+                    "empireId INT UNSIGNED NOT NULL);").execute();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -94,6 +92,21 @@ public class EmpireHandler {
             e.printStackTrace();
         }
         return members;
+    }
+
+    public OptionalInt getPlayerEmpireId(UUID uuid) {
+        try (var conn = SQLConn.getConnection()) {
+            var stmt = conn.prepareStatement("SELECT empireId FROM empireMembers WHERE uuid = ?;");
+            stmt.setString(1, uuid.toString());
+            var res = stmt.executeQuery();
+            if (!res.next()) {
+                return OptionalInt.empty();
+            }
+            return OptionalInt.of(res.getInt(1));
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return OptionalInt.empty();
+        }
     }
 
     public boolean isOwner(UUID uuid) {
@@ -161,11 +174,11 @@ public class EmpireHandler {
         return false;
     }
 
-    public boolean joinEmpire(UUID player, String name) {
+    public boolean joinEmpire(UUID player, int empireId) {
         try (Connection conn = SQLConn.getConnection()) {
             var stmt = conn.prepareStatement("REPLACE INTO empireMembers VALUES (?, ?);");
             stmt.setString(1, player.toString());
-            stmt.setString(2, name);
+            stmt.setInt(2, empireId);
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();

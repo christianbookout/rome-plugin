@@ -8,6 +8,7 @@ import org.bukkit.entity.Player;
 import romeplugin.MessageConstants;
 import romeplugin.database.SQLConn;
 import romeplugin.election.ElectionHandler.ElectionPhase;
+import romeplugin.empires.EmpireHandler;
 import romeplugin.title.Title;
 
 import java.util.*;
@@ -15,20 +16,27 @@ import java.util.*;
 public class ElectionCommand implements CommandExecutor {
 
     private final ElectionHandler electionHandler;
+    private final EmpireHandler empireHandler;
 
-    public ElectionCommand(ElectionHandler electionHandler) {
+    public ElectionCommand(ElectionHandler electionHandler, EmpireHandler empireHandler) {
         this.electionHandler = electionHandler;
+        this.empireHandler = empireHandler;
     }
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String s, String[] args) {
-
         if (sender instanceof Player) {
             Player player = (Player) sender;
             if (args.length == 0) {
                 help(player);
                 return true;
             }
+            var maybeEmpire = empireHandler.getPlayerEmpireId(player.getUniqueId());
+            if (maybeEmpire.isEmpty()) {
+                // TODO: add some message
+                return true;
+            }
+            var empireId = maybeEmpire.getAsInt();
             var playerTitle = SQLConn.getTitle(player);
             String arg = args[0].toLowerCase();
             Title title = null;
@@ -44,10 +52,10 @@ public class ElectionCommand implements CommandExecutor {
             }
             switch (arg) {
                 case "run":
-                    run(player, title, playerTitle);
+                    run(player, title, playerTitle, empireId);
                     break;
                 case "quit":
-                    quit(player);
+                    quit(player, empireId);
                     break;
                 case "help":
                     help(player);
@@ -56,35 +64,35 @@ public class ElectionCommand implements CommandExecutor {
                     if (args.length >= 2) {
                         try {
                             int number = Integer.parseInt(args[1]);
-                            getResults(player, Optional.of(number));
+                            getResults(player, Optional.of(number), empireId);
                         } catch (NumberFormatException e) {
                             help(player);
                         }
-                    } else getResults(player, Optional.empty());
+                    } else getResults(player, Optional.empty(), empireId);
                     break;
                 case "candidates":
-                    getCandidates(player);
+                    getCandidates(player, empireId);
                     break;
                 case "vote":
-                    vote(player, targetedPlayer);
+                    vote(player, targetedPlayer, empireId);
                     break;
                 case "seevotes":
                     seeVotes(player);
                     break;
                 case "phase":
-                    getPhase(player);
+                    getPhase(player, empireId);
                     break;
                 case "start":
-                    startElection(player, playerTitle);
+                    startElection(player, playerTitle, empireId);
                     break;
                 case "voting":
-                    startVoting(player, playerTitle);
+                    startVoting(player, playerTitle, empireId);
                     break;
                 case "end":
-                    endElection(player, playerTitle);
+                    endElection(player, playerTitle, empireId);
                     break;
                 case "cancel":
-                    cancel(player, playerTitle);
+                    cancel(player, playerTitle, empireId);
                     break;
                 default:
                     return false;
@@ -94,12 +102,12 @@ public class ElectionCommand implements CommandExecutor {
         return true;
     }
 
-    private void quit(Player player) {
-        if (!electionHandler.hasCandidate(player.getUniqueId())) {
+    private void quit(Player player, int empireId) {
+        if (!electionHandler.hasCandidate(player.getUniqueId(), empireId)) {
             player.sendMessage(MessageConstants.SELF_NOT_RUNNING_ERROR);
             return;
         }
-        electionHandler.removeCandidate(player.getUniqueId());
+        electionHandler.removeCandidate(player.getUniqueId(), empireId);
         player.sendMessage(MessageConstants.NO_LONGER_RUNNING);
     }
 
@@ -107,9 +115,10 @@ public class ElectionCommand implements CommandExecutor {
      * show the player the current election phase
      *
      * @param player
+     * @param empireId
      */
-    private void getPhase(Player player) {
-        var phase = electionHandler.getElectionPhase();
+    private void getPhase(Player player, int empireId) {
+        var phase = electionHandler.getElectionPhase(empireId);
         if (phase != null)
             player.sendMessage(phase.toString());
         else player.sendMessage("no election bruh moment");
@@ -126,12 +135,12 @@ public class ElectionCommand implements CommandExecutor {
     /**
      * cancel the election
      */
-    private void cancel(Player player, Title playerTitle) {
+    private void cancel(Player player, Title playerTitle, int empireId) {
         if (!player.isOp() && playerTitle != Title.CENSOR && playerTitle != Title.CONSUL) {
             player.sendMessage(MessageConstants.NO_PERMISSION_ERROR);
             return;
         }
-        electionHandler.cancelElection();
+        electionHandler.cancelElection(empireId);
     }
 
     /**
@@ -144,24 +153,24 @@ public class ElectionCommand implements CommandExecutor {
     /**
      * end the election
      */
-    private void endElection(Player player, Title playerTitle) {
+    private void endElection(Player player, Title playerTitle, int empireId) {
         if (!player.isOp() && playerTitle != Title.CENSOR && playerTitle != Title.CONSUL) {
             player.sendMessage(MessageConstants.NO_PERMISSION_ERROR);
             return;
         }
-        if (electionHandler.getElectionPhase() != ElectionPhase.VOTING) {
+        if (electionHandler.getElectionPhase(empireId) != ElectionPhase.VOTING) {
             player.sendMessage(MessageConstants.NOT_VOTING);
             return;
         }
-        electionHandler.endElection();
+        electionHandler.endElection(empireId);
     }
 
     /**
      * get the results of the last election
      */
-    private void getResults(Player player, Optional<Integer> number) {
-        int num = number.orElse(electionHandler.getElectionNumber() - 1);
-        var results = electionHandler.getElectionResults(num);
+    private void getResults(Player player, Optional<Integer> number, int empireId) {
+        int num = number.orElse(electionHandler.getElectionNumber(empireId) - 1);
+        var results = electionHandler.getElectionResults(num, empireId);
         if (results.isEmpty()) {
             player.sendMessage(MessageConstants.NO_PAST_ELECTION_RESULTS);
             return;
@@ -177,14 +186,14 @@ public class ElectionCommand implements CommandExecutor {
     /**
      * get the current candidates for the election
      */
-    private void getCandidates(Player player) {
+    private void getCandidates(Player player, int empireId) {
         //If there's no election or the election has ended then return
-        if (!electionHandler.hasElection()) {
+        if (!electionHandler.hasElection(empireId)) {
             player.sendMessage(MessageConstants.NO_ELECTION_ERROR);
             return;
         }
 
-        var candidates = electionHandler.getCandidates();
+        var candidates = electionHandler.getCandidates(empireId);
         String toSend = ChatColor.YELLOW + "\n<-- " + ChatColor.WHITE + "Candidates" + ChatColor.YELLOW + " -->" + ChatColor.RESET;
 
         //concatinate all candidates under their title
@@ -203,36 +212,36 @@ public class ElectionCommand implements CommandExecutor {
         player.sendMessage(toSend);
     }
 
-    private void startElection(Player player, Title playerTitle) {
+    private void startElection(Player player, Title playerTitle, int empireId) {
         if (!player.isOp() && playerTitle != Title.CENSOR && playerTitle != Title.CONSUL) {
             player.sendMessage(MessageConstants.NO_PERMISSION_ERROR);
             return;
         }
-        if (electionHandler.hasElection()) {
+        if (electionHandler.hasElection(empireId)) {
             player.sendMessage(MessageConstants.ALREADY_ELECTION_ERROR);
         } else {
-            electionHandler.startElection();
+            electionHandler.startElection(empireId);
         }
     }
 
-    private void startVoting(Player player, Title playerTitle) {
+    private void startVoting(Player player, Title playerTitle, int empireId) {
         if (!player.isOp() && playerTitle != Title.CENSOR && playerTitle != Title.CONSUL) {
             player.sendMessage(MessageConstants.NO_PERMISSION_ERROR);
             return;
         }
-        if (!electionHandler.hasElection()) {
+        if (!electionHandler.hasElection(empireId)) {
             player.sendMessage(MessageConstants.NO_ELECTION_ERROR);
             return;
-        } else if (electionHandler.getElectionPhase() == ElectionPhase.VOTING) {
+        } else if (electionHandler.getElectionPhase(empireId) == ElectionPhase.VOTING) {
             player.sendMessage(MessageConstants.ALREADY_VOTING_ERROR);
             return;
-        } else if (electionHandler.getCandidates().isEmpty()) {
+        } else if (electionHandler.getCandidates(empireId).isEmpty()) {
             player.sendMessage(MessageConstants.NO_CANDIDATES);
             return;
         }
 
         Set<Title> filledTitles = new HashSet<>();
-        for (var candidate : electionHandler.getCandidates()) {
+        for (var candidate : electionHandler.getCandidates(empireId)) {
             filledTitles.add(candidate.getTitle());
         }
         for (var title : ElectionHandler.RUNNABLE_TITLES) {
@@ -241,15 +250,15 @@ public class ElectionCommand implements CommandExecutor {
                 break;
             }
         }
-        electionHandler.startVoting();
+        electionHandler.startVoting(empireId);
     }
 
-    private void vote(Player player, UUID toVote) {
-        if (!this.electionHandler.hasElection()) {
+    private void vote(Player player, UUID toVote, int empireId) {
+        if (!this.electionHandler.hasElection(empireId)) {
             player.sendMessage(MessageConstants.NO_ELECTION_ERROR);
             return;
         }
-        if (this.electionHandler.getElectionPhase() != ElectionPhase.VOTING) {
+        if (this.electionHandler.getElectionPhase(empireId) != ElectionPhase.VOTING) {
             player.sendMessage(MessageConstants.NOT_VOTING);
             return;
         }
@@ -258,15 +267,15 @@ public class ElectionCommand implements CommandExecutor {
             return;
         }
 
-        Optional<Candidate> candidate = electionHandler.getCandidate(toVote);
+        Optional<Candidate> candidate = electionHandler.getCandidate(toVote, empireId);
         if (candidate.isPresent()) {
             Title title = candidate.get().getTitle();
-            if (electionHandler.alreadyVoted(player.getUniqueId(), title)) {
+            if (electionHandler.alreadyVoted(player.getUniqueId(), title, empireId)) {
                 player.sendMessage(MessageConstants.ALREADY_VOTED_ERROR);
                 return;
             }
 
-            if (this.electionHandler.vote(player.getUniqueId(), toVote)) {
+            if (this.electionHandler.vote(player.getUniqueId(), toVote, empireId)) {
                 player.sendMessage(MessageConstants.SUCCESSFUL_VOTE + title.color + title.fancyName);
                 return;
             }
@@ -285,7 +294,7 @@ public class ElectionCommand implements CommandExecutor {
     }
 
     //title may be null! 
-    private void run(Player player, Title targetTitle, Title currentTitle) {
+    private void run(Player player, Title targetTitle, Title currentTitle, int empireId) {
         if (targetTitle == null) {
             player.sendMessage(MessageConstants.CANT_FIND_TITLE);
             return;
@@ -296,12 +305,12 @@ public class ElectionCommand implements CommandExecutor {
         }
 
         //If there's no election or the election is not currently running then return
-        if (!electionHandler.hasElection() || electionHandler.getElectionPhase() != ElectionPhase.RUNNING) {
+        if (!electionHandler.hasElection(empireId) || electionHandler.getElectionPhase(empireId) != ElectionPhase.RUNNING) {
             player.sendMessage(MessageConstants.NO_ELECTION_ERROR);
             return;
         }
-        electionHandler.removeCandidate(player.getUniqueId());
-        electionHandler.addCandidate(player.getUniqueId(), targetTitle);
+        electionHandler.removeCandidate(player.getUniqueId(), empireId);
+        electionHandler.addCandidate(player.getUniqueId(), targetTitle, empireId);
         player.sendMessage(MessageConstants.SUCCESSFUL_RUN);
     }
 }

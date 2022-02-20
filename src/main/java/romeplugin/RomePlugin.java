@@ -16,6 +16,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import romeplugin.database.SQLConn;
 import romeplugin.election.*;
+import romeplugin.empires.EmpireHandler;
 import romeplugin.empires.role.RoleHandler;
 import romeplugin.messaging.*;
 import romeplugin.messaging.SwearFilter.SwearLevel;
@@ -155,6 +156,8 @@ public class RomePlugin extends JavaPlugin {
                 config.getInt("claims.defaultClaimBlocks"), roleHandler);
 
         var titles = new TitleHandler(this);
+        PartyHandler partyHandler = new PartyHandler();
+        var empireHandler = new EmpireHandler(partyHandler);
 
         SwearFilter filter = new SwearFilter(cityManager, SwearLevel.valueOf(config.getString("messages.useSwearFilter").toUpperCase()));
         var landEnterListener = new LandEnterListener(cityManager);
@@ -162,7 +165,6 @@ public class RomePlugin extends JavaPlugin {
         //var itemBank = new ItemBank(this);
         var notifications = new NotificationQueue();
 
-        PartyHandler partyHandler = new PartyHandler();
         getCommand("city").setExecutor(new LandCommand(cityManager));
         getCommand("claim").setExecutor(new ClaimLandCommand(cityManager, this));
         getCommand("claiminfo").setExecutor(new ClaimInfoCommand());
@@ -175,7 +177,7 @@ public class RomePlugin extends JavaPlugin {
         getCommand("pee").setExecutor(peeController);
         //getCommand("makekey").setExecutor(new MakeKeyCommand(lockManager));
         getCommand("getblocks").setExecutor(new GetClaimBlocksCommand(mainCity));
-        getCommand("elections").setExecutor(new ElectionCommand(new ElectionHandler(notifications, this, titles)));
+        getCommand("elections").setExecutor(new ElectionCommand(new ElectionHandler(notifications, this, titles), empireHandler));
         getCommand("elections").setTabCompleter(new ElectionTabCompleter());
         getCommand("titles").setExecutor(new TitlesCommand());
         getCommand("parties").setExecutor(new PartyCommand(partyHandler, this));

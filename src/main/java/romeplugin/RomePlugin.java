@@ -16,6 +16,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import romeplugin.database.SQLConn;
 import romeplugin.election.*;
+import romeplugin.empires.role.RoleHandler;
 import romeplugin.messaging.*;
 import romeplugin.messaging.SwearFilter.SwearLevel;
 import romeplugin.misc.PeeController;
@@ -47,14 +48,6 @@ public class RomePlugin extends JavaPlugin {
         this.saveDefaultConfig();
         FileConfiguration config = this.getConfig();
 
-        // TODO: remove this
-        City mainCity = new City(0,
-                0,
-                0,
-                "rome", config.getInt("land.cityMultiplier"),
-                config.getInt("land.suburbsMultiplier"),
-                config.getInt("claims.defaultClaimBlocks"));
-
         MysqlDataSource dataSource = new MysqlConnectionPoolDataSource();
         // we set our credentials
         dataSource.setServerName(config.getString("database.host"));
@@ -77,18 +70,6 @@ public class RomePlugin extends JavaPlugin {
         protectedMaterialStrings.forEach(matStr -> protectedMaterials.add(Material.valueOf(matStr)));
 
         var lockManager = new LockManager(this);
-        var cityManager = new CityManager(
-                config.getInt("land.initialCitySize"),
-                config.getInt("land.cityMultiplier"),
-                config.getInt("land.suburbsMultiplier"),
-                config.getInt("claims.defaultClaimBlocks"));
-
-        LandEventListener landListener = new LandEventListener(
-                cityManager,
-                lockManager,
-                claimMaterial,
-                protectedMaterials,
-                config.getLong("claims.claimTimeoutMS"));
 
         SQLConn.setSource(dataSource);
         try (Connection conn = SQLConn.getConnection()) {
@@ -146,15 +127,33 @@ public class RomePlugin extends JavaPlugin {
 
             conn.prepareStatement("CREATE TABLE IF NOT EXISTS banished (" +
                     "uuid CHAR(36) NOT NULL PRIMARY KEY);").execute();
-
-            var res = conn.prepareStatement("SELECT * FROM cityInfo WHERE type = 0;").executeQuery();
-            if (res.next()) {
-                mainCity.setGovernmentSize(res.getInt("size"));
-                mainCity.setCenter(res.getInt("x"), res.getInt("y"));
-            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
+
+        var roleHandler = new RoleHandler();
+
+        var cityManager = new CityManager(
+                config.getInt("land.initialCitySize"),
+                config.getInt("land.cityMultiplier"),
+                config.getInt("land.suburbsMultiplier"),
+                config.getInt("claims.defaultClaimBlocks"), roleHandler);
+
+        LandEventListener landListener = new LandEventListener(
+                cityManager,
+                lockManager,
+                claimMaterial,
+                protectedMaterials,
+                config.getLong("claims.claimTimeoutMS"));
+
+        // TODO: remove this
+        City mainCity = new City(0,
+                0,
+                0,
+                "rome", config.getInt("land.cityMultiplier"),
+                config.getInt("land.suburbsMultiplier"),
+                config.getInt("claims.defaultClaimBlocks"), roleHandler);
+
         var titles = new TitleHandler(this);
 
         SwearFilter filter = new SwearFilter(cityManager, SwearLevel.valueOf(config.getString("messages.useSwearFilter").toUpperCase()));

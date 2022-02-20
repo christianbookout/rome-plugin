@@ -5,6 +5,7 @@ import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import romeplugin.MessageConstants;
 import romeplugin.database.SQLConn;
+import romeplugin.empires.role.RoleHandler;
 import romeplugin.zoning.claims.City;
 
 import java.sql.SQLException;
@@ -16,12 +17,14 @@ public class CityManager {
     private final int cityMult;
     private final int suburbsMult;
     private final int minBlockLimit;
+    private final RoleHandler roleHandler;
 
-    public CityManager(int initialGovernmentSize, int cityMult, int suburbsMult, int minBlockLimit) {
+    public CityManager(int initialGovernmentSize, int cityMult, int suburbsMult, int minBlockLimit, RoleHandler roleHandler) {
         this.initialGovernmentSize = initialGovernmentSize;
         this.cityMult = cityMult;
         this.suburbsMult = suburbsMult;
         this.minBlockLimit = minBlockLimit;
+        this.roleHandler = roleHandler;
         getDatabaseCities();
     }
 
@@ -111,8 +114,8 @@ public class CityManager {
                         res.getString("name"),
                         cityMult,
                         suburbsMult,
-                        minBlockLimit
-                ));
+                        minBlockLimit,
+                        roleHandler));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -136,7 +139,7 @@ public class CityManager {
             e.printStackTrace();
             return;
         }
-        cities.add(new City(loc.getBlockX(), loc.getBlockZ(), initialGovernmentSize, name, cityMult, suburbsMult, minBlockLimit));
+        cities.add(new City(loc.getBlockX(), loc.getBlockZ(), initialGovernmentSize, name, cityMult, suburbsMult, minBlockLimit, roleHandler));
     }
 
     public void expandGovernment(String name, int amount) {

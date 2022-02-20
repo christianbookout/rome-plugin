@@ -7,7 +7,8 @@ import org.bukkit.World.Environment;
 import org.bukkit.entity.Player;
 import romeplugin.RomePlugin;
 import romeplugin.database.SQLConn;
-import romeplugin.title.Title;
+import romeplugin.empires.role.Permission;
+import romeplugin.empires.role.RoleHandler;
 import romeplugin.zoning.CityArea;
 
 import java.sql.SQLException;
@@ -25,8 +26,9 @@ public class City {
     private final int suburbsMult;
     private final int minBlockLimit;
     private final ClaimCache claimCache = new ClaimCache(100);
+    private final RoleHandler roleHandler;
 
-    public City(int cityX, int cityY, int governmentSize, String name, int cityMult, int suburbsMult, int minBlockLimit) {
+    public City(int cityX, int cityY, int governmentSize, String name, int cityMult, int suburbsMult, int minBlockLimit, RoleHandler roleHandler) {
         this.name = name;
         this.minBlockLimit = minBlockLimit;
         this.cityX = cityX;
@@ -34,6 +36,7 @@ public class City {
         this.governmentSize = governmentSize;
         this.cityMult = cityMult;
         this.suburbsMult = suburbsMult;
+        this.roleHandler = roleHandler;
         setGovernmentSize(governmentSize);
     }
 
@@ -125,7 +128,11 @@ public class City {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        if (area.getType().canBuild(title)) {
+        var role = roleHandler.getPlayerRole(player);
+        if (area.getType() == CITY && role.hasPerm(Permission.BuildInCity)) {
+            return true;
+        }
+        if (area.getType() == GOVERNMENT && role.hasPerm(Permission.BuildInGovernment)) {
             return true;
         }
         var claim = claimCache.getOrQuery(x, y).orElse(null);
@@ -149,8 +156,7 @@ public class City {
             player.sendMessage("you cannot claim outside of city limits");
             return false;
         }
-        var title = SQLConn.getTitle(player.getUniqueId());
-        if (title == Title.AEDILE) {
+        if (roleHandler.getPlayerRole(player).hasPerm(Permission.CanClaim)) {
             // this allows the mayor to skip the claiming limit check anywhere inside rome
             return true;
         }

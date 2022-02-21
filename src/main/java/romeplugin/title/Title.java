@@ -2,6 +2,7 @@ package romeplugin.title;
 
 import org.bukkit.ChatColor;
 
+@Deprecated
 public enum Title {
     TRIBUNE("Tribune of the Plebs", ChatColor.DARK_RED, "romeplugin.tribune"),
     QUAESTOR("Quaestor", ChatColor.GREEN, "romeplugin.quaestor"),

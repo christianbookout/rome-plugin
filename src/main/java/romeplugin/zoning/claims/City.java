@@ -111,7 +111,6 @@ public class City {
         if (isOutsideSuburbs(x, y)) {
             return true;
         }
-        var title = RomePlugin.onlinePlayerTitles.get(player);
         var area = getArea(x, y);
         if (area.getType() == SUBURB) {
             var maybeClaim = claimCache.getOrQuery(x, y);

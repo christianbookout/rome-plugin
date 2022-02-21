@@ -18,6 +18,7 @@ import romeplugin.database.SQLConn;
 import romeplugin.election.*;
 import romeplugin.empires.EmpireHandler;
 import romeplugin.empires.role.RoleHandler;
+import romeplugin.empires.role.RoleEventListener;
 import romeplugin.messaging.*;
 import romeplugin.messaging.SwearFilter.SwearLevel;
 import romeplugin.misc.PeeController;
@@ -187,7 +188,7 @@ public class RomePlugin extends JavaPlugin {
         getCommand("spawn").setExecutor(new SpawnCommand(mainCity));
         getCommand("banish").setExecutor(new BanishCommand(landEnterListener));
         getServer().getPluginManager().registerEvents(peeController, this);
-        getServer().getPluginManager().registerEvents(new TitleEventListener(titles, partyHandler), this);
+        getServer().getPluginManager().registerEvents(new RoleEventListener(roleHandler, partyHandler), this);
         getServer().getPluginManager().registerEvents(
                 new DistanceListener(config.getInt("messages.messageDistance"), filter, cityManager),
                 this);

@@ -5,10 +5,10 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-public class LandCommand implements CommandExecutor {
+public class CityCommand implements CommandExecutor {
     private final CityManager manager;
 
-    public LandCommand(CityManager manager) {
+    public CityCommand(CityManager manager) {
         this.manager = manager;
     }
 

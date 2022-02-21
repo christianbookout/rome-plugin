@@ -165,7 +165,7 @@ public class RomePlugin extends JavaPlugin {
         //var itemBank = new ItemBank(this);
         var notifications = new NotificationQueue();
 
-        getCommand("city").setExecutor(new LandCommand(cityManager));
+        getCommand("city").setExecutor(new CityCommand(cityManager));
         getCommand("claim").setExecutor(new ClaimLandCommand(cityManager, this));
         getCommand("claiminfo").setExecutor(new ClaimInfoCommand());
         getCommand("removetitle").setExecutor(new RemoveTitleCommand(titles));

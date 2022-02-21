@@ -31,8 +31,8 @@ public class EmpireHandler {
             
             // list of cities under an empire
             conn.prepareStatement("CREATE TABLE IF NOT EXISTS empireCities (" +
-                    "cityId INT NOT NULL," +
-                    "empireId INT PRIMARY KEY NOT NULL);").execute();
+                    "cityId INT NOT NULL PRIMARY KEY," +
+                    "empireId INT NOT NULL);").execute();
 
             // list of members in an empire 
             conn.prepareStatement("CREATE TABLE IF NOT EXISTS empireMembers (" +
@@ -79,11 +79,11 @@ public class EmpireHandler {
     }*/
 
  
-    public Collection<String> getEmpireMembers(String name) {
+    public Collection<String> getEmpireMembers(int empireId) {
         var members = new ArrayList<String>();
         try (Connection conn = SQLConn.getConnection()) {
             var stmt = conn.prepareStatement("SELECT usernames.username FROM empireMembers INNER JOIN usernames ON empireMembers.uuid = usernames.uuid WHERE empireName=?;");
-            stmt.setString(1, name);
+            stmt.setInt(1, empireId);
             var results = stmt.executeQuery();
             while (results.next()) {
                 members.add(results.getString(1));
@@ -202,7 +202,7 @@ public class EmpireHandler {
 
     public Empire getEmpire(UUID player) {
         try (Connection conn = SQLConn.getConnection()) {
-            var stmt = conn.prepareStatement("SELECT * FROM empires WHERE empireName=(SELECT empireName FROM empireMembers WHERE uuid=?);");
+            var stmt = conn.prepareStatement("SELECT * FROM empires WHERE empireId=(SELECT empireId FROM empireMembers WHERE uuid=?);");
             stmt.setString(1, player.toString());
             var results = stmt.executeQuery();
             if (results.next()) {
@@ -296,7 +296,7 @@ public class EmpireHandler {
         public final Party party;
         public final boolean isPublic;
 
-        public Empire(String name, boolean isPublic, String owner, Party party) {
+        Empire(String name, boolean isPublic, String owner, Party party) {
             this.name = name;
             this.isPublic = isPublic;
             this.owner = owner;

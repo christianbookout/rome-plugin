@@ -5,8 +5,6 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
-
 import romeplugin.MessageConstants;
 import romeplugin.database.SQLConn;
 import romeplugin.zoning.CityManager;
@@ -16,11 +14,9 @@ import java.util.*;
 
 public class ClaimLandCommand implements CommandExecutor, TabCompleter {
     private final CityManager manager;
-    private final Plugin plugin;
 
-    public ClaimLandCommand(CityManager manager, Plugin plugin) {
+    public ClaimLandCommand(CityManager manager) {
         this.manager = manager;
-        this.plugin = plugin;
     }
 
     @Override

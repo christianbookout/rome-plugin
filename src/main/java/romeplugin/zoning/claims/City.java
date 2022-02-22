@@ -5,7 +5,6 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.World.Environment;
 import org.bukkit.entity.Player;
-import romeplugin.RomePlugin;
 import romeplugin.database.SQLConn;
 import romeplugin.empires.role.Permission;
 import romeplugin.empires.role.RoleHandler;

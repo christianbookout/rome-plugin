@@ -27,13 +27,13 @@ public class DistanceListener implements Listener {
             message = swearFilter.replaceSwears(message);
         }
         e.setMessage(message);
-        Environment playerEnvironment = e.getPlayer().getLocation().getWorld().getEnvironment();
+        Environment playerEnvironment = e.getPlayer().getWorld().getEnvironment();
         if (this.distance != 0) {
             boolean playerInCity = controller.inCity(e.getPlayer().getLocation());
             e.getRecipients().removeIf(
                 p -> 
                 !(playerInCity && controller.inCity(p.getLocation()))
-                && (!playerEnvironment.equals(p.getLocation().getWorld().getEnvironment())
+                && (!playerEnvironment.equals(p.getWorld().getEnvironment())
                     || p.getLocation().distance(e.getPlayer().getLocation()) > this.distance) 
             );
         }

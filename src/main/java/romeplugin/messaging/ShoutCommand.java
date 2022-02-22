@@ -6,29 +6,32 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
-import romeplugin.RomePlugin;
 import romeplugin.election.PartyHandler;
-import romeplugin.title.Title;
+import romeplugin.empires.role.RoleHandler;
 
 import java.util.Collections;
 import java.util.List;
 
 public class ShoutCommand implements CommandExecutor, TabCompleter {
     private final PartyHandler partyHandler;
-    public ShoutCommand(PartyHandler partyHandler) {
+    private final RoleHandler roleHandler;
+
+    public ShoutCommand(PartyHandler partyHandler, RoleHandler roleHandler) {
         this.partyHandler = partyHandler;
+        this.roleHandler = roleHandler;
     }
+
     @Override
     public boolean onCommand(CommandSender sender, Command command, String s, String[] args) {
         String title = "";
         var partyTitle = "";
         if (sender instanceof Player) {
             Player player = (Player) sender;
-            Title playerTitle = RomePlugin.onlinePlayerTitles.get(player);
+            var role = roleHandler.getPlayerRole(player);
             var party = partyHandler.getParty(player.getUniqueId());
             partyTitle = party != null ? "(" + party.color + party.acronym + ChatColor.RESET + ") " : "";
-            if (playerTitle != null)
-                title = "[" + playerTitle.color + playerTitle.fancyName + ChatColor.RESET + "] ";
+            if (role != null)
+                title = "[" + role.color + role.name + ChatColor.RESET + "] ";
         }
 
         String message;

@@ -174,7 +174,7 @@ public class RomePlugin extends JavaPlugin {
         //getCommand("bal").setExecutor(new BalanceCommand(ledger));
         getServer().getPluginManager().registerEvents(new RemovePopeListener(), this);
         getCommand("builder").setExecutor(new BuilderCommand());
-        getCommand("shout").setExecutor(new ShoutCommand(partyHandler));
+        getCommand("shout").setExecutor(new ShoutCommand(partyHandler, roleHandler));
         getCommand("pee").setExecutor(peeController);
         //getCommand("makekey").setExecutor(new MakeKeyCommand(lockManager));
         getCommand("getblocks").setExecutor(new GetClaimBlocksCommand(mainCity));

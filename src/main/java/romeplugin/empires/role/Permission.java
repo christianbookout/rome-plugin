@@ -5,4 +5,5 @@ public enum Permission {
     BuildInGovernment,
     BuildInCity,
     CanClaim,
+    ManageElections,
 }

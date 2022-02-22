@@ -9,6 +9,9 @@ import romeplugin.MessageConstants;
 import romeplugin.database.SQLConn;
 import romeplugin.election.ElectionHandler.ElectionPhase;
 import romeplugin.empires.EmpireHandler;
+import romeplugin.empires.role.Permission;
+import romeplugin.empires.role.Role;
+import romeplugin.empires.role.RoleHandler;
 import romeplugin.title.Title;
 
 import java.util.*;
@@ -17,10 +20,12 @@ public class ElectionCommand implements CommandExecutor {
 
     private final ElectionHandler electionHandler;
     private final EmpireHandler empireHandler;
+    private final RoleHandler roleHandler;
 
-    public ElectionCommand(ElectionHandler electionHandler, EmpireHandler empireHandler) {
+    public ElectionCommand(ElectionHandler electionHandler, EmpireHandler empireHandler, RoleHandler roleHandler) {
         this.electionHandler = electionHandler;
         this.empireHandler = empireHandler;
+        this.roleHandler = roleHandler;
     }
 
     @Override
@@ -38,6 +43,7 @@ public class ElectionCommand implements CommandExecutor {
             }
             var empireId = maybeEmpire.getAsInt();
             var playerTitle = SQLConn.getTitle(player);
+            var playerRole = roleHandler.getPlayerRole(player);
             String arg = args[0].toLowerCase();
             Title title = null;
             UUID targetedPlayer = null;
@@ -83,16 +89,16 @@ public class ElectionCommand implements CommandExecutor {
                     getPhase(player, empireId);
                     break;
                 case "start":
-                    startElection(player, playerTitle, empireId);
+                    startElection(player, playerRole, empireId);
                     break;
                 case "voting":
-                    startVoting(player, playerTitle, empireId);
+                    startVoting(player, playerRole, empireId);
                     break;
                 case "end":
-                    endElection(player, playerTitle, empireId);
+                    endElection(player, playerRole, empireId);
                     break;
                 case "cancel":
-                    cancel(player, playerTitle, empireId);
+                    cancel(player, playerRole, empireId);
                     break;
                 default:
                     return false;
@@ -132,11 +138,15 @@ public class ElectionCommand implements CommandExecutor {
     private void seeVotes(Player player) {
     }
 
+    private boolean hasPermissions(Player player, Role role) {
+        return player.isOp() || role.hasPerm(Permission.ManageElections);
+    }
+
     /**
      * cancel the election
      */
-    private void cancel(Player player, Title playerTitle, int empireId) {
-        if (!player.isOp() && playerTitle != Title.CENSOR && playerTitle != Title.CONSUL) {
+    private void cancel(Player player, Role role, int empireId) {
+        if (!hasPermissions(player, role)) {
             player.sendMessage(MessageConstants.NO_PERMISSION_ERROR);
             return;
         }
@@ -153,8 +163,8 @@ public class ElectionCommand implements CommandExecutor {
     /**
      * end the election
      */
-    private void endElection(Player player, Title playerTitle, int empireId) {
-        if (!player.isOp() && playerTitle != Title.CENSOR && playerTitle != Title.CONSUL) {
+    private void endElection(Player player, Role role, int empireId) {
+        if (!hasPermissions(player, role)) {
             player.sendMessage(MessageConstants.NO_PERMISSION_ERROR);
             return;
         }
@@ -212,8 +222,8 @@ public class ElectionCommand implements CommandExecutor {
         player.sendMessage(toSend);
     }
 
-    private void startElection(Player player, Title playerTitle, int empireId) {
-        if (!player.isOp() && playerTitle != Title.CENSOR && playerTitle != Title.CONSUL) {
+    private void startElection(Player player, Role role, int empireId) {
+        if (!hasPermissions(player, role)) {
             player.sendMessage(MessageConstants.NO_PERMISSION_ERROR);
             return;
         }
@@ -224,8 +234,8 @@ public class ElectionCommand implements CommandExecutor {
         }
     }
 
-    private void startVoting(Player player, Title playerTitle, int empireId) {
-        if (!player.isOp() && playerTitle != Title.CENSOR && playerTitle != Title.CONSUL) {
+    private void startVoting(Player player, Role role, int empireId) {
+        if (!hasPermissions(player, role)) {
             player.sendMessage(MessageConstants.NO_PERMISSION_ERROR);
             return;
         }

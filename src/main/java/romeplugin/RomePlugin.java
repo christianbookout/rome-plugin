@@ -186,7 +186,7 @@ public class RomePlugin extends JavaPlugin {
         getCommand("notification").setExecutor(new NotificationCommand(notifications));
         //getServer().getPluginManager().registerEvents(itemBank, this);
         getCommand("spawn").setExecutor(new SpawnCommand(mainCity));
-        getCommand("banish").setExecutor(new BanishCommand(landEnterListener));
+        getCommand("banish").setExecutor(new BanishCommand(landEnterListener, roleHandler));
         getServer().getPluginManager().registerEvents(peeController, this);
         getServer().getPluginManager().registerEvents(new RoleEventListener(roleHandler, partyHandler), this);
         getServer().getPluginManager().registerEvents(

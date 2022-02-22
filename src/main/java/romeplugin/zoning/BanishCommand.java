@@ -7,20 +7,16 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import romeplugin.MessageConstants;
 import romeplugin.database.SQLConn;
-import romeplugin.title.Title;
-
-import java.util.Arrays;
+import romeplugin.empires.role.Permission;
+import romeplugin.empires.role.RoleHandler;
 
 public class BanishCommand implements CommandExecutor {
     private final LandEnterListener landEnter;
+    private final RoleHandler roleHandler;
 
-    private static final Title[] HAS_PERMISSIONS = new Title[]{
-            Title.CONSUL,
-            Title.CENSOR
-    };
-
-    public BanishCommand(LandEnterListener landEnter) {
+    public BanishCommand(LandEnterListener landEnter, RoleHandler roleHandler) {
         this.landEnter = landEnter;
+        this.roleHandler = roleHandler;
     }
 
     @Override
@@ -28,14 +24,11 @@ public class BanishCommand implements CommandExecutor {
         if (args.length < 1) {
             return false;
         }
-        Title title = null;
+        boolean hasPerm = false;
         if (sender instanceof Player) {
-            Player player = (Player) sender;
-            title = SQLConn.getTitle(player);
+            hasPerm = roleHandler.getPlayerRole((Player) sender).hasPerm(Permission.CanBanish);
         }
-        var titlesList = Arrays.asList(HAS_PERMISSIONS);
-        boolean noPerms = title != null && !titlesList.contains(title);
-        if (!sender.isOp() || noPerms) {
+        if (!sender.isOp() || !hasPerm) {
             sender.sendMessage(MessageConstants.NO_PERMISSION_ERROR);
             return true;
         }

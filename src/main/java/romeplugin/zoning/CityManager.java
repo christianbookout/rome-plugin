@@ -124,11 +124,18 @@ public class CityManager {
 
     public void foundCity(Player player, String name) {
         var loc = player.getLocation();
+        var extents = initialGovernmentSize * cityMult;
+        int cityX = loc.getBlockX();
+        int cityZ = loc.getBlockZ();
+        if (intersectingCity(cityX - extents, cityZ + extents, cityX + extents, cityZ - extents) != null) {
+            player.sendMessage("city intersection error");
+            return;
+        }
         try (var conn = SQLConn.getConnection()) {
             var stmt = conn.prepareStatement("INSERT INTO cityInfo (size, x, y, name, founder_uuid, found_date) VALUES (?, ?, ?, ?, ?, CURDATE());");
             stmt.setInt(1, initialGovernmentSize);
-            stmt.setInt(2, loc.getBlockX());
-            stmt.setInt(3, loc.getBlockZ());
+            stmt.setInt(2, cityX);
+            stmt.setInt(3, cityZ);
             stmt.setString(4, name);
             stmt.setString(5, player.getUniqueId().toString());
             if (stmt.executeUpdate() < 1) {
@@ -139,7 +146,8 @@ public class CityManager {
             e.printStackTrace();
             return;
         }
-        cities.add(new City(loc.getBlockX(), loc.getBlockZ(), initialGovernmentSize, name, cityMult, suburbsMult, minBlockLimit, roleHandler));
+        player.sendMessage("made city");
+        cities.add(new City(cityX, cityZ, initialGovernmentSize, name, cityMult, suburbsMult, minBlockLimit, roleHandler));
     }
 
     public void expandGovernment(String name, int amount) {

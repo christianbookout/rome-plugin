@@ -5,7 +5,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerMoveEvent;
 import romeplugin.database.SQLConn;
-import romeplugin.zoning.claims.City;
 
 import java.sql.SQLException;
 import java.util.HashSet;

@@ -6,5 +6,6 @@ public enum Permission {
     BuildInCity,
     CanBanish,
     CanClaim,
+    EditRoles,
     ManageElections,
 }

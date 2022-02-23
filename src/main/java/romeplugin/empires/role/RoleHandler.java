@@ -96,6 +96,7 @@ public class RoleHandler {
     }
 
     public void addPermission(int roleId, Permission perm) {
+        // TODO: propagate errors
         try (var conn = SQLConn.getConnection()) {
             var stmt = conn.prepareStatement("INSERT INTO rolePermissions (roleId, permission) VALUES (?, ?);");
             stmt.setInt(1, roleId);

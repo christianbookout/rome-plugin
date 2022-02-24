@@ -6,14 +6,17 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import romeplugin.MessageConstants;
+import romeplugin.empires.EmpireHandler;
 
 import java.util.List;
 
 public class RoleCommand implements CommandExecutor, TabCompleter {
     private final RoleHandler roleHandler;
+    private final EmpireHandler empireHandler;
 
-    public RoleCommand(RoleHandler roleHandler) {
+    public RoleCommand(RoleHandler roleHandler, EmpireHandler empireHandler) {
         this.roleHandler = roleHandler;
+        this.empireHandler = empireHandler;
     }
 
     @Override
@@ -51,7 +54,13 @@ public class RoleCommand implements CommandExecutor, TabCompleter {
             player.sendMessage("invalid permission");
             return;
         }
-        var role = roleHandler.getRole(roleName);
+        var maybeEmpire = empireHandler.getPlayerEmpireId(player.getUniqueId());
+        if (maybeEmpire.isEmpty()) {
+            player.sendMessage("you are in no empire");
+            return;
+        }
+        var empireId = maybeEmpire.getAsInt();
+        var role = roleHandler.getRoleByName(empireId, roleName);
         if (role == null) {
             player.sendMessage("role name no found");
             return;
@@ -68,7 +77,13 @@ public class RoleCommand implements CommandExecutor, TabCompleter {
             player.sendMessage("invalid permission");
             return;
         }
-        var role = roleHandler.getRole(roleName);
+        var maybeEmpire = empireHandler.getPlayerEmpireId(player.getUniqueId());
+        if (maybeEmpire.isEmpty()) {
+            player.sendMessage("you are in no empire");
+            return;
+        }
+        var empireId = maybeEmpire.getAsInt();
+        var role = roleHandler.getRoleByName(empireId, roleName);
         if (role == null) {
             player.sendMessage("role name no found");
             return;

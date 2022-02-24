@@ -17,6 +17,7 @@ public class RoleHandler {
             conn.prepareStatement("CREATE TABLE IF NOT EXISTS roles (" +
                     "name VARCHAR(24) PRIMARY KEY NOT NULL," +
                     "roleID INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY," +
+                    "empireID INT UNSIGNED NOT NULL," +
                     "obtainMethod ENUM('DEFAULT', 'ELECTED', 'APPOINTED') NOT NULL," +
                     "color CHAR(1));").execute();
             conn.prepareStatement("CREATE TABLE IF NOT EXISTS rolePermissions (" +
@@ -30,10 +31,11 @@ public class RoleHandler {
         }
     }
 
-    public Role getRole(String roleName) {
+    public Role getRoleByName(int empireId, String roleName) {
         try (var conn = SQLConn.getConnection()) {
-            var stmt = conn.prepareStatement("SELECT * FROM roles WHERE name = ?;");
+            var stmt = conn.prepareStatement("SELECT * FROM roles WHERE name = ? AND empireID = ?;");
             stmt.setString(1, roleName);
+            stmt.setInt(2, empireId);
             var res = stmt.executeQuery();
             if (!res.next()) {
                 return null;
@@ -54,7 +56,7 @@ public class RoleHandler {
         }
     }
 
-    public Role getRole(int roleId) {
+    public Role getRoleById(int roleId) {
         try (var conn = SQLConn.getConnection()) {
             var stmt = conn.prepareStatement("SELECT * FROM roles WHERE name = ?;");
             stmt.setInt(1, roleId);
@@ -115,7 +117,7 @@ public class RoleHandler {
             if (!res.next()) {
                 return null;
             }
-            return getRole(res.getInt(1));
+            return getRoleById(res.getInt(1));
         } catch (SQLException e) {
             e.printStackTrace();
             return null;

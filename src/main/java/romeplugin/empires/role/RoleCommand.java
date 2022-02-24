@@ -34,6 +34,11 @@ public class RoleCommand implements CommandExecutor, TabCompleter {
                 return false;
             }
             addPermission(player, args[1], args[2]);
+        } else if (args[0].equals("removeperm")) {
+            if (args.length < 4) {
+                return false;
+            }
+            removePermission(player, args[1], args[2]);
         }
         return true;
     }
@@ -53,6 +58,23 @@ public class RoleCommand implements CommandExecutor, TabCompleter {
         }
         player.sendMessage("ok");
         roleHandler.addPermission(role.id, perm);
+    }
+
+    public void removePermission(Player player, String roleName, String permissionName) {
+        Permission perm;
+        try {
+            perm = Permission.valueOf(permissionName);
+        } catch (IllegalArgumentException e) {
+            player.sendMessage("invalid permission");
+            return;
+        }
+        var role = roleHandler.getRole(roleName);
+        if (role == null) {
+            player.sendMessage("role name no found");
+            return;
+        }
+        player.sendMessage("ok");
+        roleHandler.removePermission(role.id, perm);
     }
 
     @Override

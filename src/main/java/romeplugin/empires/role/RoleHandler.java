@@ -121,4 +121,16 @@ public class RoleHandler {
             return null;
         }
     }
+
+    public void removePermission(int roleId, Permission permission) {
+        // TODO: propagate errors
+        try (var conn = SQLConn.getConnection()) {
+            var stmt = conn.prepareStatement("DELETE FROM rolePermissions WHERE roleID = ? AND permission = ?;");
+            stmt.setInt(1, roleId);
+            stmt.setString(2, permission.toString());
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 }

@@ -10,6 +10,8 @@ import romeplugin.zoning.claims.City;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Optional;
+import java.util.UUID;
 
 public class CityManager {
     private final ArrayList<City> cities = new ArrayList<>();
@@ -25,7 +27,26 @@ public class CityManager {
         this.suburbsMult = suburbsMult;
         this.minBlockLimit = minBlockLimit;
         this.roleHandler = roleHandler;
+        makeTables();
         getDatabaseCities();
+    }
+
+    private void makeTables() {
+        try (var conn = SQLConn.getConnection()) {
+            conn.prepareStatement("CREATE TABLE IF NOT EXISTS cityInfo (" +
+                    "id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY," +
+                    "size INT NOT NULL," +
+                    "x INT NOT NULL," +
+                    "y INT NOT NULL," +
+                    "name VARCHAR(20) NOT NULL," +
+                    "founder_uuid CHAR(36) NOT NULL," +
+                    "found_date DATE NOT NULL);").execute();
+            conn.prepareStatement("CREATE TABLE IF NOT EXISTS cityMembers (" +
+                    "uuid CHAR(36) NOT NULL PRIMARY KEY," +
+                    "cityId INT UNSIGNED NOT NULL);").execute();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     public City getCity(Location loc) {
@@ -103,7 +124,11 @@ public class CityManager {
         return null;
     }
 
+    /**
+     * synchronizes the local copy of the cities list with the one on the database
+     */
     private void getDatabaseCities() {
+        cities.clear();
         try (var conn = SQLConn.getConnection()) {
             var res = conn.prepareStatement("SELECT * FROM cityInfo;").executeQuery();
             while (res.next()) {
@@ -119,6 +144,22 @@ public class CityManager {
             }
         } catch (SQLException e) {
             e.printStackTrace();
+        }
+    }
+
+    public Optional<City> getPlayerCity(UUID uuid) {
+        try (var conn = SQLConn.getConnection()) {
+            // TODO: we should really be able to get a city by its id
+            var stmt = conn.prepareStatement("SELECT name FROM cityInfo WHERE id = (SELECT cityId FROM cityMembers WHERE uuid = ?);");
+            stmt.setString(1, uuid.toString());
+            var res = stmt.executeQuery();
+            if (!res.next()) {
+                return Optional.empty();
+            }
+            return Optional.of(getCityByName(res.getString(1)));
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return Optional.empty();
         }
     }
 

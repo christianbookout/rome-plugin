@@ -97,17 +97,6 @@ public class RomePlugin extends JavaPlugin {
                     "x1 INT NOT NULL," +
                     "y1 INT NOT NULL," +
                     "added_player_uuid CHAR(36) NOT NULL);").execute();
-            conn.prepareStatement("CREATE TABLE IF NOT EXISTS cityInfo (" +
-                    "id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY," +
-                    "size INT NOT NULL," +
-                    "x INT NOT NULL," +
-                    "y INT NOT NULL," +
-                    "name VARCHAR(20) NOT NULL," +
-                    "founder_uuid CHAR(36) NOT NULL," +
-                    "found_date DATE NOT NULL);").execute();
-            conn.prepareStatement("CREATE TABLE IF NOT EXISTS cityMembers (" +
-                    "uuid CHAR(36) NOT NULL PRIMARY KEY," +
-                    "cityId INT UNSIGNED NOT NULL);").execute();
             conn.prepareStatement("CREATE TABLE IF NOT EXISTS usernames (" +
                     "uuid CHAR(36) NOT NULL PRIMARY KEY," +
                     "username CHAR(32) NOT NULL);").execute();
@@ -185,7 +174,7 @@ public class RomePlugin extends JavaPlugin {
         //getCommand("itembank").setExecutor(itemBank);
         getCommand("notification").setExecutor(new NotificationCommand(notifications));
         //getServer().getPluginManager().registerEvents(itemBank, this);
-        getCommand("spawn").setExecutor(new SpawnCommand(mainCity));
+        getCommand("spawn").setExecutor(new SpawnCommand(cityManager));
         getCommand("banish").setExecutor(new BanishCommand(landEnterListener, roleHandler));
         getServer().getPluginManager().registerEvents(peeController, this);
         getServer().getPluginManager().registerEvents(new RoleEventListener(roleHandler, partyHandler), this);

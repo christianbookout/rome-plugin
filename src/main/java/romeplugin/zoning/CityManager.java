@@ -208,4 +208,8 @@ public class CityManager {
             e.printStackTrace();
         }
     }
+
+    public int getClaimedBlocksInSuburbs(UUID uuid) {
+        return getPlayerCity(uuid).map(city -> city.getClaimedBlocksInSuburbs(uuid)).orElse(0);
+    }
 }

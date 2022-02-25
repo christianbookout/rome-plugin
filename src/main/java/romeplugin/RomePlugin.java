@@ -17,15 +17,14 @@ import org.bukkit.plugin.java.JavaPlugin;
 import romeplugin.database.SQLConn;
 import romeplugin.election.*;
 import romeplugin.empires.EmpireHandler;
-import romeplugin.empires.role.RoleHandler;
 import romeplugin.empires.role.RoleEventListener;
+import romeplugin.empires.role.RoleHandler;
 import romeplugin.messaging.*;
 import romeplugin.messaging.SwearFilter.SwearLevel;
 import romeplugin.misc.PeeController;
 import romeplugin.misc.SpawnCommand;
 import romeplugin.title.*;
 import romeplugin.zoning.*;
-import romeplugin.zoning.claims.City;
 import romeplugin.zoning.claims.ClaimInfoCommand;
 import romeplugin.zoning.claims.ClaimLandCommand;
 import romeplugin.zoning.claims.GetClaimBlocksCommand;
@@ -137,14 +136,6 @@ public class RomePlugin extends JavaPlugin {
                 protectedMaterials,
                 config.getLong("claims.claimTimeoutMS"));
 
-        // TODO: remove this
-        City mainCity = new City(0,
-                0,
-                0,
-                "rome", config.getInt("land.cityMultiplier"),
-                config.getInt("land.suburbsMultiplier"),
-                config.getInt("claims.defaultClaimBlocks"), roleHandler);
-
         var titles = new TitleHandler(this);
         PartyHandler partyHandler = new PartyHandler();
         var empireHandler = new EmpireHandler(partyHandler);
@@ -166,7 +157,7 @@ public class RomePlugin extends JavaPlugin {
         getCommand("shout").setExecutor(new ShoutCommand(partyHandler, roleHandler));
         getCommand("pee").setExecutor(peeController);
         //getCommand("makekey").setExecutor(new MakeKeyCommand(lockManager));
-        getCommand("getblocks").setExecutor(new GetClaimBlocksCommand(mainCity));
+        getCommand("getblocks").setExecutor(new GetClaimBlocksCommand(cityManager));
         getCommand("elections").setExecutor(new ElectionCommand(new ElectionHandler(notifications, this, titles), empireHandler, roleHandler));
         getCommand("elections").setTabCompleter(new ElectionTabCompleter());
         getCommand("titles").setExecutor(new TitlesCommand());

@@ -6,15 +6,16 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import romeplugin.database.SQLConn;
+import romeplugin.zoning.CityManager;
 
 import java.util.UUID;
 
 public class GetClaimBlocksCommand implements CommandExecutor {
     // TODO: move to CityManager
-    private final City city;
+    private final CityManager cityManager;
 
-    public GetClaimBlocksCommand(City city) {
-        this.city = city;
+    public GetClaimBlocksCommand(CityManager cityManager) {
+        this.cityManager = cityManager;
     }
 
     @Override
@@ -37,7 +38,7 @@ public class GetClaimBlocksCommand implements CommandExecutor {
             uuid = ((Player) sender).getUniqueId();
         }
         sender.sendMessage("total claimed area: " + SQLConn.getTotalClaimedBlocks(uuid) +
-                "\ntotal claimed area inside suburbs: " + city.getClaimedBlocksInSuburbs(uuid));
+                "\ntotal claimed area inside suburbs: " + cityManager.getClaimedBlocksInSuburbs(uuid));
         return true;
     }
 }

@@ -89,6 +89,7 @@ public class LawHandler {
      * @return true or false if the law exists or doesn't
      */
     public boolean lawExists(String lawName) {
+        return this.getLaw(lawName) != null;
     }
 
     class Law {

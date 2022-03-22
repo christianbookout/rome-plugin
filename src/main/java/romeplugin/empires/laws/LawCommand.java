@@ -25,8 +25,11 @@ public class LawCommand implements CommandExecutor, TabCompleter{
                 return true;
             case "propose":
                 if (args.length <= 2) return false;
+                return true;
+            case "delete":
+                if (args.length <= 1) return false;
+                return true;
 
-            case "delete"
         }
         return false;
     }

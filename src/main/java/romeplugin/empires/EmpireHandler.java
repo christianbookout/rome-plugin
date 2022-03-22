@@ -218,6 +218,24 @@ public class EmpireHandler {
         return null;
     }
 
+    public Empire getEmpire(String empireName) {
+        try (Connection conn = SQLConn.getConnection()) {
+            var stmt = conn.prepareStatement("SELECT * FROM empires WHERE empireName=?;");
+            stmt.setString(1, empireName.toString());
+            var results = stmt.executeQuery();
+            if (results.next()) {
+                String name = results.getString("empireName");
+                boolean isPublic = results.getBoolean("isPublic");
+                String owner = results.getString("ownerUUID");
+                Party party = partyHandler.getParty(UUID.fromString(owner));
+                return new Empire(name, isPublic, owner, party);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     public boolean empireExists(String name) {
         try (Connection conn = SQLConn.getConnection()) {
             var stmt = conn.prepareStatement("SELECT * FROM empires WHERE acronym=?;");

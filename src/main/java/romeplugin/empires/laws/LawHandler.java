@@ -6,41 +6,87 @@ import romeplugin.database.SQLConn;
 import romeplugin.empires.EmpireHandler;
 import romeplugin.empires.EmpireHandler.Empire;
 
+// motions start with M and laws start with C 
 public class LawHandler {
+    public enum LawType {
+        BILL("empireLaws"), MOTION("empireMotions");
+
+        private final String tableName;
+        private LawType(final String tableName) {
+            this.tableName = tableName; 
+        }
+        public String getTable() { return this.tableName; }
+        public static LawType fromPrefix (char prefix) {
+            switch (prefix) {
+                case 'M':
+                    return LawType.MOTION;
+                case 'C':
+                    return LawType.BILL;
+                default: 
+                    return null;
+            }
+        }
+    }
     public static final int MAX_DESCRIPTION_LENGTH = 100;
     private final EmpireHandler empireHandler;
     public LawHandler(EmpireHandler empireHandler) {
         this.empireHandler = empireHandler;
         try (var conn = SQLConn.getConnection()) {
-            conn.prepareStatement("CREATE TABLE IF NOT EXISTS empireLaws (" + //TODO make motions?
+            conn.prepareStatement("CREATE TABLE IF NOT EXISTS empireLaws (" + // TODO refactor to fit all empires uniquely (number)
                     "number INT NOT NULL PRIMARY KEY AUTO_INCREMENT," +
                     "empireName VARCHAR(50) NOT NULL," + // empire the law belongs to 
                     "description VARCHAR(" + MAX_DESCRIPTION_LENGTH + ") NOT NULL);").execute();
-            // proposed laws
-            conn.prepareStatement("CREATE TABLE IF NOT EXISTS empireBills (" +
-                    "name VARCHAR(50) NOT NULL PRIMARY KEY," +
+
+            conn.prepareStatement("CREATE TABLE IF NOT EXISTS empireMotions (" + 
+                    "number INT NOT NULL PRIMARY KEY AUTO_INCREMENT," +
                     "empireName VARCHAR(50) NOT NULL," +
-                    "description VARCHAR(" + MAX_DESCRIPTION_LENGTH + ") NOT NULL," +
-                    "votes INT NOT NULL DEFAULT 0);").execute();
+                    "description VARCHAR(" + MAX_DESCRIPTION_LENGTH + ") NOT NULL);").execute();
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
     /**
+     * parse an int out of a law name.
+     * law names are formatted M-104 for motions and C-31 for bills
+     * 
+     * @param lawName
+     * @return the parsed number
+     */
+    private static int parseInt(String lawName) {
+        try {
+            return Integer.parseInt(lawName.substring(2));
+        } catch (NumberFormatException e) {
+            return -1;
+        }
+    }
+
+    /**
+     * parse a law type out of a law name
+     * 
+     * @param lawName
+     * @return the law type
+     */
+    private static LawType parseLawType(String lawName) {
+        if (lawName.isEmpty()) return null;
+        var firstChar = lawName.toCharArray()[0];
+        return LawType.fromPrefix(firstChar);
+    }
+    /**
      * get a law by its name 
      * 
      * @param lawName
-     * @return
+     * @return the law in the database, or null if there are none that match lawName
      */
-    public Law getLaw(String lawName) {
+    public Law getLaw(String lawName, String empireName) {
         try (var conn = SQLConn.getConnection()) {
-            var stmt = conn.prepareStatement("SELECT * FROM empireLaws WHERE name = ?;");
-            stmt.setString(1, lawName);
+            var stmt = conn.prepareStatement("SELECT * FROM ? WHERE name = ? AND empireName = ?;");
+            stmt.setString(1, LawHandler.parseLawType(lawName).getTable());
+            stmt.setString(2, lawName);
             var results = stmt.executeQuery();
             if (results.next()) {
                 var empire = empireHandler.getEmpire(results.getString("empireName"));
-                return new Law(results.getString("name"), results.getString("description"), empire);
+                return new Law(results.getInt("number"), results.getString("description"), empire, LawHandler.parseLawType(lawName));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -49,7 +95,7 @@ public class LawHandler {
     }
 
     /**
-     * Create a law
+     * create a law
      * 
      * @param empireName
      * @param lawName
@@ -72,14 +118,16 @@ public class LawHandler {
      * 
      * @param lawName
      */
-    public void removeLaw(String lawName) {
+    public boolean removeLaw(String lawName, String empireName) {
         try (var conn = SQLConn.getConnection()) {
-            var stmt = conn.prepareStatement("DELETE * FROM empireLaws WHERE name = ?;");
+            var stmt = conn.prepareStatement("DELETE * FROM empireLaws WHERE name = ? AND empireName = ?;");
             stmt.setString(1, lawName);
-            stmt.executeUpdate();
+            stmt.setString(2, empireName);
+            return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        return false;
     }
 
     /**
@@ -93,21 +141,27 @@ public class LawHandler {
     }
 
     class Law {
-        private final String name, description;
+        private final String description;
+        private final int number;
+        private final LawType lawType;
         private final Empire empire;
-        public Law(String name, String description, Empire empire) {
-            this.name = name;
+        public Law(int number, String description, Empire empire, LawType lawType) {
+            this.lawType = lawType;
+            this.number = number;
             this.description = description;
             this.empire = empire;
         }
-        public String getName() {
-            return this.name;
+        public int getNumber() {
+            return this.number;
         }
         public String getDescription() {
             return this.description;
         }
         public Empire getEmpire() {
             return this.empire;
+        }
+        public LawType getLawType() {
+            return this.lawType;
         }
     }
 }

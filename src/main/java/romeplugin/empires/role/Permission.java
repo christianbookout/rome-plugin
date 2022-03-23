@@ -8,4 +8,5 @@ public enum Permission {
     CanClaim,
     EditRoles,
     ManageElections,
+    RunInElections,
 }

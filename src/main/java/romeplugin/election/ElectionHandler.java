@@ -4,28 +4,17 @@ import org.bukkit.plugin.Plugin;
 import romeplugin.MessageConstants;
 import romeplugin.RomePlugin;
 import romeplugin.database.SQLConn;
-import romeplugin.empires.EmpireHandler;
+import romeplugin.empires.role.Role;
+import romeplugin.empires.role.RoleHandler;
 import romeplugin.messaging.NotificationQueue;
-import romeplugin.title.Title;
 import romeplugin.title.TitleHandler;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.logging.Level;
 
 public class ElectionHandler {
-    // list of every required title
-    public static final Title[] RUNNABLE_TITLES = {
-            Title.TRIBUNE,
-            Title.AEDILE,
-            Title.PRAETOR,
-            Title.CONSUL
-    };
-
     //don't make one of these greater than 12 characters :D
     public enum ElectionPhase {
         RUNNING,
@@ -33,13 +22,13 @@ public class ElectionHandler {
     }
 
     private final NotificationQueue notifications;
-    private final TitleHandler titleHandler;
+    private final RoleHandler roleHandler;
     private final Plugin plugin;
 
-    public ElectionHandler(NotificationQueue notifications, Plugin plugin, TitleHandler titleHandler) {
+    public ElectionHandler(NotificationQueue notifications, Plugin plugin, TitleHandler titleHandler, RoleHandler roleHandler) {
         this.notifications = notifications;
-        this.titleHandler = titleHandler;
         this.plugin = plugin;
+        this.roleHandler = roleHandler;
         this.initialize();
     }
 
@@ -47,12 +36,12 @@ public class ElectionHandler {
         try (Connection conn = SQLConn.getConnection()) {
             conn.prepareStatement("CREATE TABLE IF NOT EXISTS candidates (" +
                     "uuid CHAR(36) NOT NULL PRIMARY KEY," +
-                    "title " + RomePlugin.TITLE_ENUM + " NOT NULL," +
+                    "roleId INT UNSIGNED NOT NULL," +
                     "empireId INT UNSIGNED NOT NULL," +
                     "votes INT NOT NULL DEFAULT 0);").execute();
 
-            conn.prepareStatement("CREATE TABLE IF NOT EXISTS electionNumber (" + 
-                    "number INT DEFAULT 1 NOT NULL PRIMARY KEY,"+
+            conn.prepareStatement("CREATE TABLE IF NOT EXISTS electionNumber (" +
+                    "number INT DEFAULT 1 NOT NULL PRIMARY KEY," +
                     "empireId INT UNSIGNED NOT NULL);").execute();
 
             conn.prepareStatement("CREATE TABLE IF NOT EXISTS electionPhase (" +
@@ -68,7 +57,7 @@ public class ElectionHandler {
 
             conn.prepareStatement("CREATE TABLE IF NOT EXISTS playerVotes (" +
                     "uuid CHAR(36) NOT NULL," +
-                    "titleVotedFor " + RomePlugin.TITLE_ENUM + " NOT NULL," +
+                    "roleVotedFor INT UNSIGNED NOT NULL," +
                     "empireId INT UNSIGNED NOT NULL);").execute();
 
         } catch (SQLException e) {
@@ -127,7 +116,7 @@ public class ElectionHandler {
             var results = currInfo.executeQuery();
             while (results.next()) {
                 var uuid = UUID.fromString(results.getString("uuid"));
-                var title = Title.getTitle(results.getString("title"));
+                var title = roleHandler.getRoleById(results.getInt("roleId"));
                 var candidate = new Candidate(uuid, title);
                 candidate.setVotes(results.getInt("votes"));
                 candidates.add(candidate);
@@ -172,12 +161,12 @@ public class ElectionHandler {
         }
     }
 
-    public void addCandidate(UUID uuid, Title title, int empireId) {
+    public void addCandidate(UUID uuid, Role role, int empireId) {
         try (Connection conn = SQLConn.getConnection()) {
             var preparedStatement = conn.prepareStatement("REPLACE INTO candidates VALUES (?, ?, ?, ?);");
 
             preparedStatement.setString(1, uuid.toString());
-            preparedStatement.setString(2, title.toString());
+            preparedStatement.setInt(2, role.id);
             preparedStatement.setInt(3, empireId);
             preparedStatement.setInt(4, 0);
             preparedStatement.execute();
@@ -215,16 +204,20 @@ public class ElectionHandler {
     }
 
     private Collection<Candidate> getWinners(Collection<Candidate> candidates) {
-        Collection<Candidate> winners = new ArrayList<>();
+        var winning_candidates = new HashMap<Role, Candidate>();
 
-        for (Title title : ElectionHandler.RUNNABLE_TITLES) {
-            candidates.stream()
-                    .filter(c -> c.getTitle() == title)
-                    .max(Candidate::compareTo)
-                    .ifPresent(winners::add);
+        for (Candidate candidate : candidates) {
+            int winning_votes = -1;
+            var current_winner = winning_candidates.get(candidate.getRole());
+            if (current_winner != null) {
+                winning_votes = current_winner.getVotes();
+            }
+            if (candidate.getVotes() > winning_votes) {
+                winning_candidates.put(candidate.getRole(), candidate);
+            }
         }
 
-        return winners;
+        return winning_candidates.values();
     }
 
     /**
@@ -233,6 +226,7 @@ public class ElectionHandler {
     public void endElection(int empireId) {
         var results = this.getWinners(this.getCandidates(empireId));
 
+        /* TODO: somehow reimplement this?
         for (var uuid : SQLConn.getUUIDsWithTitle(Title.CONSUL)) {
             titleHandler.setTitle(uuid, Title.CENSOR);
         }
@@ -254,9 +248,10 @@ public class ElectionHandler {
         for (var uuid : SQLConn.getUUIDsWithTitle(Title.AEDILE)) {
             titleHandler.setTitle(uuid, Title.QUAESTOR);
         }
+        */
 
         //Apply all titles to each winner
-        results.forEach(winner -> titleHandler.setTitle(winner.getUniqueId(), winner.getTitle()));
+        results.forEach(winner -> roleHandler.setPlayerRole(winner.getUniqueId(), winner.getRole()));
 
         this.storeElectionResults(results, empireId);
 
@@ -290,12 +285,16 @@ public class ElectionHandler {
      * checks if you've voted for a specific title yet
      *
      * @param player
-     * @param title
+     * @param role
      * @return
      */
-    public boolean alreadyVoted(UUID player, Title title, int empireId) {
+    public boolean alreadyVoted(UUID player, Role role, int empireId) {
         try (Connection conn = SQLConn.getConnection()) {
-            return conn.prepareStatement("SELECT * FROM playerVotes WHERE uuid = '" + player.toString() + "' AND titleVotedFor = '" + title.toString() + "';").executeQuery().next();
+            var stmt = conn.prepareStatement("SELECT * FROM playerVotes WHERE uuid = ? AND titleVotedFor = ? AND empireId = ?;");
+            stmt.setString(1, player.toString());
+            stmt.setInt(2, role.id);
+            stmt.setInt(3, empireId);
+            return stmt.executeQuery().next();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -311,12 +310,14 @@ public class ElectionHandler {
         Collection<Candidate> readResults = new ArrayList<>();
 
         try (Connection conn = SQLConn.getConnection()) {
-            var results = conn.prepareStatement("SELECT * FROM electionResults WHERE number = " + number + ";").executeQuery();
-
+            var stmt = conn.prepareStatement("SELECT * FROM electionResults WHERE number = ? AND empireId = ?;");
+            stmt.setInt(1, number);
+            stmt.setInt(2, empireId);
+            var results = stmt.executeQuery();
             //add all winners of the previous election to readResults
             while (results.next()) {
                 UUID uuid = UUID.fromString(results.getString("uuid"));
-                Title title = Title.getTitle(results.getString("title"));
+                Role title = roleHandler.getRoleById(results.getInt("title"));
                 Candidate candidate = new Candidate(uuid, title);
                 candidate.setVotes(results.getInt("votes"));
                 readResults.add(candidate);
@@ -336,7 +337,7 @@ public class ElectionHandler {
             for (Candidate winner : results) {
                 var statement = conn.prepareStatement("INSERT INTO electionResults VALUES (?, ?, ?, ?, ?);");
                 statement.setInt(1, this.getElectionNumber(empireId));
-                statement.setString(2, winner.getTitle().toString());
+                statement.setInt(2, winner.getRole().id);
                 statement.setString(3, winner.getUniqueId().toString());
                 statement.setInt(4, empireId);
                 statement.setInt(5, winner.getVotes());

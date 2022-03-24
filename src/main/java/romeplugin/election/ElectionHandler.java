@@ -7,7 +7,6 @@ import romeplugin.database.SQLConn;
 import romeplugin.empires.role.Role;
 import romeplugin.empires.role.RoleHandler;
 import romeplugin.messaging.NotificationQueue;
-import romeplugin.title.TitleHandler;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -25,7 +24,7 @@ public class ElectionHandler {
     private final RoleHandler roleHandler;
     private final Plugin plugin;
 
-    public ElectionHandler(NotificationQueue notifications, Plugin plugin, TitleHandler titleHandler, RoleHandler roleHandler) {
+    public ElectionHandler(NotificationQueue notifications, Plugin plugin, RoleHandler roleHandler) {
         this.notifications = notifications;
         this.plugin = plugin;
         this.roleHandler = roleHandler;

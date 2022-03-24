@@ -1,9 +1,8 @@
 package romeplugin.election;
 
-import java.util.UUID;
-
 import romeplugin.empires.role.Role;
-import romeplugin.title.Title;
+
+import java.util.UUID;
 
 public class Candidate implements Comparable<Candidate> {
     private int votes;

@@ -6,7 +6,6 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
 import romeplugin.MessageConstants;
 import romeplugin.database.SQLConn;
 import romeplugin.election.PartyHandler.Party;
@@ -19,11 +18,9 @@ import java.util.stream.Stream;
 public class PartyCommand implements CommandExecutor, TabCompleter {
     private final PartyHandler partyHandler;
     private final HashMap<UUID, PartyAcronym> invitations = new HashMap<>();
-    private final Plugin plugin;
 
-    public PartyCommand(PartyHandler partyHandler, Plugin plugin) {
+    public PartyCommand(PartyHandler partyHandler) {
         this.partyHandler = partyHandler;
-        this.plugin = plugin;
     }
 
     @Override

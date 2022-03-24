@@ -158,10 +158,10 @@ public class RomePlugin extends JavaPlugin {
         getCommand("pee").setExecutor(peeController);
         //getCommand("makekey").setExecutor(new MakeKeyCommand(lockManager));
         getCommand("getblocks").setExecutor(new GetClaimBlocksCommand(cityManager));
-        getCommand("elections").setExecutor(new ElectionCommand(new ElectionHandler(notifications, this, titles, roleHandler), empireHandler, roleHandler));
+        getCommand("elections").setExecutor(new ElectionCommand(new ElectionHandler(notifications, this, roleHandler), empireHandler, roleHandler));
         getCommand("elections").setTabCompleter(new ElectionTabCompleter());
         getCommand("titles").setExecutor(new TitlesCommand());
-        getCommand("parties").setExecutor(new PartyCommand(partyHandler, this));
+        getCommand("parties").setExecutor(new PartyCommand(partyHandler));
         //getCommand("itembank").setExecutor(itemBank);
         getCommand("notification").setExecutor(new NotificationCommand(notifications));
         //getServer().getPluginManager().registerEvents(itemBank, this);

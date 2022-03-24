@@ -3,13 +3,11 @@ package romeplugin.election;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
-import romeplugin.title.Title;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class ElectionTabCompleter implements TabCompleter {
     private final String[] subCommands = {

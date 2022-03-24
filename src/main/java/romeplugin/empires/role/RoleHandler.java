@@ -5,7 +5,9 @@ import org.bukkit.entity.Player;
 import romeplugin.database.SQLConn;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.UUID;
 
 public class RoleHandler {
     public RoleHandler() {
@@ -109,10 +111,10 @@ public class RoleHandler {
         }
     }
 
-    public Role getPlayerRole(Player player) {
+    public Role getPlayerRole(UUID uuid) {
         try (var conn = SQLConn.getConnection()) {
             var stmt = conn.prepareStatement("SELECT roleID FROM playerRoles WHERE uuid = ?;");
-            stmt.setString(1, player.getUniqueId().toString());
+            stmt.setString(1, uuid.toString());
             var res = stmt.executeQuery();
             if (!res.next()) {
                 return null;
@@ -124,6 +126,10 @@ public class RoleHandler {
         }
     }
 
+    public Role getPlayerRole(Player player) {
+        return getPlayerRole(player.getUniqueId());
+    }
+
     public void removePermission(int roleId, Permission permission) {
         // TODO: propagate errors
         try (var conn = SQLConn.getConnection()) {
@@ -133,6 +139,34 @@ public class RoleHandler {
             stmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
+        }
+    }
+
+    public void setPlayerRole(UUID uuid, Role role) {
+        // TODO: propagate errors
+        try (var conn = SQLConn.getConnection()) {
+            var stmt = conn.prepareStatement("REPLACE INTO playerRoles (uuid, roleID) VALUES (?, ?);");
+            stmt.setString(1, uuid.toString());
+            stmt.setInt(2, role.id);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public ArrayList<Role> getEmpireRoles(int empireId) {
+        try (var conn = SQLConn.getConnection()) {
+            var stmt = conn.prepareStatement("SELECT roleID FROM roles WHERE empireId = ?;");
+            stmt.setInt(1, empireId);
+            var res = stmt.executeQuery();
+            var roles = new ArrayList<Role>();
+            while (res.next()) {
+                roles.add(getRoleById(res.getInt("roleID")));
+            }
+            return roles;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
         }
     }
 }

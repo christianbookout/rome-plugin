@@ -2,17 +2,18 @@ package romeplugin.election;
 
 import java.util.UUID;
 
+import romeplugin.empires.role.Role;
 import romeplugin.title.Title;
 
 public class Candidate implements Comparable<Candidate> {
     private int votes;
-    private final Title title;
+    private final Role role;
     private final UUID uuid;
 
-    public Candidate(UUID uuid, Title title) {
+    public Candidate(UUID uuid, Role role) {
         this.votes = 0;
         this.uuid = uuid;
-        this.title = title;
+        this.role = role;
     }
 
     public int getVotes() {
@@ -31,8 +32,8 @@ public class Candidate implements Comparable<Candidate> {
         return this.uuid;
     }
 
-    public Title getTitle() {
-        return this.title;
+    public Role getRole() {
+        return this.role;
     }
 
     @Override

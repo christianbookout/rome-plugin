@@ -38,10 +38,13 @@ public class ElectionTabCompleter implements TabCompleter {
         } else if (args.length == 2) {
             switch (args[0]) {
                 case "run":
-                    return Arrays.stream(ElectionHandler.RUNNABLE_TITLES)
+                    return Collections.emptyList();
+                    /* TODO: return the list of runnable roles from getEmpireRoles
+                    return roleHandler.stream()
                             .map(Enum::toString)
                             .filter(title -> title.startsWith(args[1]))
                             .collect(Collectors.toList());
+                     */
                 case "vote":
                     // return default list of online players
                     return null;

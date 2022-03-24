@@ -33,12 +33,12 @@ public class LawHandler {
         this.empireHandler = empireHandler;
         try (var conn = SQLConn.getConnection()) {
             conn.prepareStatement("CREATE TABLE IF NOT EXISTS empireLaws (" + // TODO refactor to fit all empires uniquely (number)
-                    "number INT NOT NULL PRIMARY KEY AUTO_INCREMENT," +
+                    "number INT NOT NULL PRIMARY KEY," +
                     "empireName VARCHAR(50) NOT NULL," + // empire the law belongs to 
                     "description VARCHAR(" + MAX_DESCRIPTION_LENGTH + ") NOT NULL);").execute();
 
             conn.prepareStatement("CREATE TABLE IF NOT EXISTS empireMotions (" + 
-                    "number INT NOT NULL PRIMARY KEY AUTO_INCREMENT," +
+                    "number INT NOT NULL PRIMARY KEY," +
                     "empireName VARCHAR(50) NOT NULL," +
                     "description VARCHAR(" + MAX_DESCRIPTION_LENGTH + ") NOT NULL);").execute();
         } catch (SQLException e) {
@@ -134,10 +134,11 @@ public class LawHandler {
      * Check if a law exists
      * 
      * @param lawName
+     * @param empireName
      * @return true or false if the law exists or doesn't
      */
-    public boolean lawExists(String lawName) {
-        return this.getLaw(lawName) != null;
+    public boolean lawExists(String lawName, String empireName) {
+        return this.getLaw(lawName, empireName) != null;
     }
 
     class Law {

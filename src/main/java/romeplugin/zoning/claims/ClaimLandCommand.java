@@ -29,15 +29,7 @@ public class ClaimLandCommand implements CommandExecutor, TabCompleter {
         if (!(sender instanceof Player)) return false;
         Player player = (Player) sender;
 
-        if (args[0].equals("radius")) {
-            var r = Integer.parseInt(args[1]);
-            var loc = player.getLocation();
-            var x0 = loc.getBlockX() - r;
-            var y0 = loc.getBlockZ() + r;
-            var x1 = loc.getBlockX() + r;
-            var y1 = loc.getBlockZ() - r;
-            return manager.tryClaimLand(player, x0, y0, x1, y1);
-        } else if (args[0].equals("share") && args.length >= 2) {
+        if (args[0].equals("share") && args.length >= 2) {
             return shareClaim(player, args[1]);
         } else if (args[0].equals("remove")) {
             return removeClaim(player);
@@ -261,7 +253,6 @@ public class ClaimLandCommand implements CommandExecutor, TabCompleter {
     }
 
     private final List<String> subcommands = Arrays.asList(
-            "radius",
             "share",
             "remove",
             "transfer",

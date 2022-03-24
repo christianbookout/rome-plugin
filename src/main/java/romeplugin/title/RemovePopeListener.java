@@ -3,29 +3,21 @@ package romeplugin.title;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
-import romeplugin.RomePlugin;
-import romeplugin.database.SQLConn;
-
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import romeplugin.empires.role.Permission;
+import romeplugin.empires.role.RoleHandler;
 
 public class RemovePopeListener implements Listener {
+    private final RoleHandler roleHandler;
+
+    public RemovePopeListener(RoleHandler roleHandler) {
+        this.roleHandler = roleHandler;
+    }
 
     @EventHandler
     public void onDeathEvent(PlayerDeathEvent e) {
-        Title titleEntry = SQLConn.getTitle(e.getEntity().getUniqueId());
-        if (titleEntry == Title.POPE) {
-            try (Connection conn = SQLConn.getConnection()) {
-                PreparedStatement statement = conn.prepareStatement(
-                        "DELETE FROM titles WHERE uuid = ?;");
-                statement.setString(1, e.getEntity().getUniqueId().toString());
-                statement.execute();
-            } catch (SQLException exc) {
-                exc.printStackTrace();
-                return;
-            }
-            RomePlugin.onlinePlayerTitles.remove(e.getEntity());
+        var role = roleHandler.getPlayerRole(e.getEntity());
+        if (role != null && role.hasPerm(Permission.RemoveOnDeath)) {
+            roleHandler.removePlayerRole(e.getEntity());
         }
     }
 }

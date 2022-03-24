@@ -9,4 +9,5 @@ public enum Permission {
     EditRoles,
     ManageElections,
     RunInElections,
+    RemoveOnDeath,
 }

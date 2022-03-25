@@ -1,14 +1,13 @@
 package romeplugin.empires;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.*;
-
-import org.bukkit.entity.Player;
 import romeplugin.database.SQLConn;
 import romeplugin.election.PartyHandler;
 import romeplugin.election.PartyHandler.Party;
 import romeplugin.zoning.claims.City;
+
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.*;
 
 public class EmpireHandler {
 
@@ -26,9 +25,9 @@ public class EmpireHandler {
             conn.prepareStatement("CREATE TABLE IF NOT EXISTS empires (" +
                     "empireName VARCHAR(50) NOT NULL UNIQUE," +
                     "ownerUUID CHAR(36) NOT NULL," +
-                    "empireId INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY," + 
+                    "empireId INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY," +
                     "isPublic BOOLEAN);").execute();
-            
+
             // list of cities under an empire
             conn.prepareStatement("CREATE TABLE IF NOT EXISTS empireCities (" +
                     "cityId INT NOT NULL PRIMARY KEY," +
@@ -42,17 +41,18 @@ public class EmpireHandler {
             e.printStackTrace();
         }
     }
-    
+
     public Collection<Empire> getEmpires() {
         var empires = new ArrayList<Empire>();
         try (Connection conn = SQLConn.getConnection()) {
             var results = conn.prepareStatement("SELECT * FROM empires;").executeQuery();
             while (results.next()) {
+                int id = results.getInt("empireId");
                 String name = results.getString("empireName");
                 boolean isPublic = results.getBoolean("isPublic");
                 String owner = results.getString("ownerUUID");
                 Party party = partyHandler.getParty(UUID.fromString(owner));
-                empires.add(new Empire(name, isPublic, owner, party));
+                empires.add(new Empire(id, name, isPublic, owner, party));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -77,8 +77,6 @@ public class EmpireHandler {
         }
         return members;
     }*/
-
- 
     public Collection<String> getEmpireMembers(int empireId) {
         var members = new ArrayList<String>();
         try (Connection conn = SQLConn.getConnection()) {
@@ -206,11 +204,12 @@ public class EmpireHandler {
             stmt.setString(1, player.toString());
             var results = stmt.executeQuery();
             if (results.next()) {
+                int id = results.getInt("empireId");
                 String name = results.getString("empireName");
                 boolean isPublic = results.getBoolean("isPublic");
                 String owner = results.getString("ownerUUID");
                 Party party = partyHandler.getParty(UUID.fromString(owner));
-                return new Empire(name, isPublic, owner, party);
+                return new Empire(id, name, isPublic, owner, party);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -224,11 +223,12 @@ public class EmpireHandler {
             stmt.setString(1, empireName.toString());
             var results = stmt.executeQuery();
             if (results.next()) {
+                int id = results.getInt("empireId");
                 String name = results.getString("empireName");
                 boolean isPublic = results.getBoolean("isPublic");
                 String owner = results.getString("ownerUUID");
                 Party party = partyHandler.getParty(UUID.fromString(owner));
-                return new Empire(name, isPublic, owner, party);
+                return new Empire(id, name, isPublic, owner, party);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -277,9 +277,10 @@ public class EmpireHandler {
 
     /**
      * rename an empire
-     * @param uuid owner uuid
+     *
+     * @param uuid    owner uuid
      * @param newName the new name
-     * @return if it worked or not 
+     * @return if it worked or not
      */
     public boolean rename(UUID uuid, String oldName, String newName) {
         try (Connection conn = SQLConn.getConnection()) {
@@ -310,11 +311,13 @@ public class EmpireHandler {
     }
 
     public static class Empire {
+        public final int id;
         public final String name, owner;
         public final Party party;
         public final boolean isPublic;
 
-        Empire(String name, boolean isPublic, String owner, Party party) {
+        Empire(int id, String name, boolean isPublic, String owner, Party party) {
+            this.id = id;
             this.name = name;
             this.isPublic = isPublic;
             this.owner = owner;

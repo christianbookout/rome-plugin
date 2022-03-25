@@ -2,7 +2,6 @@ package romeplugin.election;
 
 import org.bukkit.plugin.Plugin;
 import romeplugin.MessageConstants;
-import romeplugin.RomePlugin;
 import romeplugin.database.SQLConn;
 import romeplugin.empires.role.Role;
 import romeplugin.empires.role.RoleHandler;
@@ -49,7 +48,7 @@ public class ElectionHandler {
 
             conn.prepareStatement("CREATE TABLE IF NOT EXISTS electionResults (" +
                     "number INT NOT NULL DEFAULT 0 PRIMARY KEY," +
-                    "title " + RomePlugin.TITLE_ENUM + " NOT NULL," +
+                    "roleId INT UNSIGNED NOT NULL," +
                     "uuid CHAR(36) NOT NULL," +
                     "empireId INT UNSIGNED NOT NULL," +
                     "votes INT NOT NULL);").execute();

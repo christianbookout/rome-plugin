@@ -17,6 +17,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import romeplugin.database.SQLConn;
 import romeplugin.election.*;
 import romeplugin.empires.EmpireHandler;
+import romeplugin.empires.role.ListRolesCommand;
 import romeplugin.empires.role.RoleEventListener;
 import romeplugin.empires.role.RoleHandler;
 import romeplugin.messaging.*;
@@ -160,7 +161,7 @@ public class RomePlugin extends JavaPlugin {
         getCommand("getblocks").setExecutor(new GetClaimBlocksCommand(cityManager));
         getCommand("elections").setExecutor(new ElectionCommand(new ElectionHandler(notifications, this, roleHandler), empireHandler, roleHandler));
         getCommand("elections").setTabCompleter(new ElectionTabCompleter());
-        getCommand("titles").setExecutor(new TitlesCommand());
+        getCommand("titles").setExecutor(new ListRolesCommand(empireHandler, roleHandler));
         getCommand("parties").setExecutor(new PartyCommand(partyHandler));
         //getCommand("itembank").setExecutor(itemBank);
         getCommand("notification").setExecutor(new NotificationCommand(notifications));

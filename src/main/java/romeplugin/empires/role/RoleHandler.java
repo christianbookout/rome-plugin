@@ -170,13 +170,17 @@ public class RoleHandler {
         }
     }
 
-    public void removePlayerRole(Player player) {
+    public void removePlayerRole(UUID uuid) {
         try (var conn = SQLConn.getConnection()) {
             var stmt = conn.prepareStatement("DELETE FROM playerRoles WHERE uuid = ?;");
-            stmt.setString(1, player.getUniqueId().toString());
+            stmt.setString(1, uuid.toString());
             stmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    public void removePlayerRole(Player player) {
+        removePlayerRole(player.getUniqueId());
     }
 }

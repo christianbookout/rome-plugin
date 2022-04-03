@@ -135,7 +135,6 @@ public class RomePlugin extends JavaPlugin {
                 protectedMaterials,
                 config.getLong("claims.claimTimeoutMS"));
 
-        var titles = new TitleHandler(this);
         PartyHandler partyHandler = new PartyHandler();
         var empireHandler = new EmpireHandler(partyHandler);
 

@@ -5,12 +5,18 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import romeplugin.MessageConstants;
-import romeplugin.RomePlugin;
 import romeplugin.database.SQLConn;
+import romeplugin.empires.role.Permission;
+import romeplugin.empires.role.RoleHandler;
 
 import java.sql.SQLException;
 
 public class BuilderCommand implements CommandExecutor {
+    private final RoleHandler roleHandler;
+
+    public BuilderCommand(RoleHandler roleHandler) {
+        this.roleHandler = roleHandler;
+    }
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String s, String[] args) {
@@ -38,8 +44,7 @@ public class BuilderCommand implements CommandExecutor {
                 sender.sendMessage(MessageConstants.NO_PERMISSION_ERROR);
                 return true;
             }
-            var title = RomePlugin.onlinePlayerTitles.get(sender);
-            if (title != Title.AEDILE) {
+            if (!roleHandler.getPlayerRole((Player) sender).hasPerm(Permission.ManageBuilders)) {
                 sender.sendMessage(MessageConstants.NO_PERMISSION_ERROR);
                 return true;
             }

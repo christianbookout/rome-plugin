@@ -1,13 +1,14 @@
 package romeplugin.empires.role;
 
+// never use more than 24 characters as an enum name!
 public enum Permission {
-    // never use more than 24 characters as an enum name!
-    BuildInGovernment,
     BuildInCity,
+    BuildInGovernment,
     CanBanish,
     CanClaim,
     EditRoles,
+    ManageBuilders,
     ManageElections,
-    RunInElections,
     RemoveOnDeath,
+    RunInElections,
 }

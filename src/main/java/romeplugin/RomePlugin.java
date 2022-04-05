@@ -12,7 +12,6 @@ import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import romeplugin.database.SQLConn;
 import romeplugin.election.*;
@@ -22,7 +21,8 @@ import romeplugin.messaging.*;
 import romeplugin.messaging.SwearFilter.SwearLevel;
 import romeplugin.misc.PeeController;
 import romeplugin.misc.SpawnCommand;
-import romeplugin.title.*;
+import romeplugin.title.BuilderCommand;
+import romeplugin.title.RemovePopeListener;
 import romeplugin.zoning.*;
 import romeplugin.zoning.claims.ClaimInfoCommand;
 import romeplugin.zoning.claims.ClaimLandCommand;
@@ -31,12 +31,10 @@ import romeplugin.zoning.locks.LockManager;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.logging.Level;
 
 public class RomePlugin extends JavaPlugin {
-    public static final HashMap<Player, Title> onlinePlayerTitles = new HashMap<>();
     // TODO: make the ledger persistent
     private final Ledger ledger = new Ledger();
 
@@ -74,11 +72,11 @@ public class RomePlugin extends JavaPlugin {
         SQLConn.setSource(dataSource);
         try (Connection conn = SQLConn.getConnection()) {
             conn.prepareStatement("CREATE TABLE IF NOT EXISTS titles (" +
-                    "uuid CHAR(36) NOT NULL PRIMARY KEY," +
-                    "title " + TITLE_ENUM + " NOT NULL);")
+                            "uuid CHAR(36) NOT NULL PRIMARY KEY," +
+                            "title " + TITLE_ENUM + " NOT NULL);")
                     .execute();
             conn.prepareStatement("CREATE TABLE IF NOT EXISTS builders (" +
-                    "uuid CHAR(36) NOT NULL PRIMARY KEY);")
+                            "uuid CHAR(36) NOT NULL PRIMARY KEY);")
                     .execute();
             // (x0, y0) must be the top-left point and (x1, y1) must be the bottom-right
             // point
@@ -151,7 +149,7 @@ public class RomePlugin extends JavaPlugin {
         getCommand("settitle").setExecutor(new SetRoleCommand(roleHandler, empireHandler));
         //getCommand("bal").setExecutor(new BalanceCommand(ledger));
         getServer().getPluginManager().registerEvents(new RemovePopeListener(roleHandler), this);
-        getCommand("builder").setExecutor(new BuilderCommand());
+        getCommand("builder").setExecutor(new BuilderCommand(roleHandler));
         getCommand("shout").setExecutor(new ShoutCommand(partyHandler, roleHandler));
         getCommand("pee").setExecutor(peeController);
         //getCommand("makekey").setExecutor(new MakeKeyCommand(lockManager));

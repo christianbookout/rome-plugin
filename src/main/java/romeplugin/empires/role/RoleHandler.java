@@ -11,10 +11,10 @@ import java.util.UUID;
 
 public class RoleHandler {
     public RoleHandler() {
-        makeDB();
+        makeTables();
     }
 
-    private void makeDB() {
+    private void makeTables() {
         try (var conn = SQLConn.getConnection()) {
             conn.prepareStatement("CREATE TABLE IF NOT EXISTS roles (" +
                     "name VARCHAR(24) PRIMARY KEY NOT NULL," +
@@ -24,10 +24,13 @@ public class RoleHandler {
                     "color CHAR(1));").execute();
             conn.prepareStatement("CREATE TABLE IF NOT EXISTS rolePermissions (" +
                     "roleID INT NOT NULL," +
-                    "permission VARCHAR(24) NOT NULL);").execute();
+                    "permission VARCHAR(24) NOT NULL)," +
+                    "PRIMARY KEY (roleID, permission)," +
+                    "FOREIGN KEY (roleID) REFERENCES roles(roleID);").execute();
             conn.prepareStatement("CREATE TABLE IF NOT EXISTS playerRoles (" +
                     "uuid CHAR(36) NOT NULL PRIMARY KEY," +
-                    "roleID INT UNSIGNED NOT NULL);").execute();
+                    "roleID INT UNSIGNED NOT NULL," +
+                    "FOREIGN KEY (roleID) REFERENCES roles(roleID);").execute();
         } catch (SQLException e) {
             e.printStackTrace();
         }

@@ -15,7 +15,9 @@ public class CityChunks {
             conn.prepareStatement("CREATE TABLE IF NOT EXISTS cityChunks(" +
                     "cityId INT UNSIGNED NOT NULL," +
                     "x INT NOT NULL," +
-                    "z INT NOT NULL);");
+                    "z INT NOT NULL," +
+                    "PRIMARY KEY (x, z)," +
+                    "FOREIGN KEY (cityId) REFERENCES cityInfo(id));");
         } catch (SQLException e) {
             e.printStackTrace();
         }

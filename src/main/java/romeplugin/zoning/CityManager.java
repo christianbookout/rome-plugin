@@ -136,6 +136,7 @@ public class CityManager {
                         res.getInt("x"),
                         res.getInt("y"),
                         res.getInt("size"),
+                        res.getInt("id"),
                         res.getString("name"),
                         cityMult,
                         suburbsMult,
@@ -172,6 +173,7 @@ public class CityManager {
             player.sendMessage("city intersection error");
             return;
         }
+        int cityId;
         try (var conn = SQLConn.getConnection()) {
             var stmt = conn.prepareStatement("INSERT INTO cityInfo (size, x, y, name, founder_uuid, found_date) VALUES (?, ?, ?, ?, ?, CURDATE());");
             stmt.setInt(1, initialGovernmentSize);
@@ -182,13 +184,17 @@ public class CityManager {
             if (stmt.executeUpdate() < 1) {
                 throw new SQLException("failed to insert new city?!");
             }
+            var last_insert_stmt = conn.prepareStatement("SELECT LAST_INSERT_ID();");
+            var res = last_insert_stmt.executeQuery();
+            res.next();
+            cityId = res.getInt(1);
         } catch (SQLException e) {
             player.sendMessage(MessageConstants.UWU_DATABASE_ERROR);
             e.printStackTrace();
             return;
         }
         player.sendMessage("made city");
-        cities.add(new City(cityX, cityZ, initialGovernmentSize, name, cityMult, suburbsMult, minBlockLimit, roleHandler));
+        cities.add(new City(cityX, cityZ, initialGovernmentSize, cityId, name, cityMult, suburbsMult, minBlockLimit, roleHandler));
     }
 
     public void expandGovernment(String name, int amount) {

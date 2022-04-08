@@ -20,6 +20,7 @@ public class City {
     private CityArea[] areas;
     private int cityX, cityY;
     private int governmentSize;
+    public final int id;
     private final String name;
     private final int cityMult;
     private final int suburbsMult;
@@ -27,7 +28,8 @@ public class City {
     private final ClaimCache claimCache = new ClaimCache(100);
     private final RoleHandler roleHandler;
 
-    public City(int cityX, int cityY, int governmentSize, String name, int cityMult, int suburbsMult, int minBlockLimit, RoleHandler roleHandler) {
+    public City(int cityX, int cityY, int governmentSize, int id, String name, int cityMult, int suburbsMult, int minBlockLimit, RoleHandler roleHandler) {
+        this.id = id;
         this.name = name;
         this.minBlockLimit = minBlockLimit;
         this.cityX = cityX;

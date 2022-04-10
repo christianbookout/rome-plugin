@@ -1,10 +1,10 @@
 package romeplugin.empires.laws;
 
-import java.sql.SQLException;
-
 import romeplugin.database.SQLConn;
 import romeplugin.empires.EmpireHandler;
 import romeplugin.empires.EmpireHandler.Empire;
+
+import java.sql.SQLException;
 
 // motions start with M and laws start with C 
 public class LawHandler {
@@ -12,35 +12,44 @@ public class LawHandler {
         BILL("empireLaws"), MOTION("empireMotions");
 
         private final String tableName;
-        private LawType(final String tableName) {
-            this.tableName = tableName; 
+
+        LawType(final String tableName) {
+            this.tableName = tableName;
         }
-        public String getTable() { return this.tableName; }
-        public static LawType fromPrefix (char prefix) {
+
+        public String getTable() {
+            return this.tableName;
+        }
+
+        public static LawType fromPrefix(char prefix) {
             switch (prefix) {
                 case 'M':
                     return LawType.MOTION;
                 case 'C':
                     return LawType.BILL;
-                default: 
+                default:
                     return null;
             }
         }
     }
+
     public static final int MAX_DESCRIPTION_LENGTH = 100;
     private final EmpireHandler empireHandler;
+
     public LawHandler(EmpireHandler empireHandler) {
         this.empireHandler = empireHandler;
         try (var conn = SQLConn.getConnection()) {
             conn.prepareStatement("CREATE TABLE IF NOT EXISTS empireLaws (" + // TODO refactor to fit all empires uniquely (number)
-                    "number INT NOT NULL PRIMARY KEY," +
-                    "empireName VARCHAR(50) NOT NULL," + // empire the law belongs to 
-                    "description VARCHAR(" + MAX_DESCRIPTION_LENGTH + ") NOT NULL);").execute();
+                    "number INT NOT NULL AUTO_INCREMENT," +
+                    "empireId INT UNSIGNED NOT NULL," + // empire the law belongs to
+                    "description VARCHAR(" + MAX_DESCRIPTION_LENGTH + ") NOT NULL," +
+                    "PRIMARY KEY (number, empireId));").execute();
 
-            conn.prepareStatement("CREATE TABLE IF NOT EXISTS empireMotions (" + 
-                    "number INT NOT NULL PRIMARY KEY," +
-                    "empireName VARCHAR(50) NOT NULL," +
-                    "description VARCHAR(" + MAX_DESCRIPTION_LENGTH + ") NOT NULL);").execute();
+            conn.prepareStatement("CREATE TABLE IF NOT EXISTS empireMotions (" +
+                    "number INT NOT NULL AUTO_INCREMENT," +
+                    "empireId INT UNSIGNED NOT NULL," +
+                    "description VARCHAR(" + MAX_DESCRIPTION_LENGTH + ") NOT NULL," +
+                    "PRIMARY KEY (number, empireId));").execute();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -49,8 +58,8 @@ public class LawHandler {
     /**
      * parse an int out of a law name.
      * law names are formatted M-104 for motions and C-31 for bills
-     * 
-     * @param lawName
+     *
+     * @param lawName full name of law
      * @return the parsed number
      */
     private static int parseInt(String lawName) {
@@ -63,8 +72,7 @@ public class LawHandler {
 
     /**
      * parse a law type out of a law name
-     * 
-     * @param lawName
+     *
      * @return the law type
      */
     private static LawType parseLawType(String lawName) {
@@ -72,20 +80,30 @@ public class LawHandler {
         var firstChar = lawName.toCharArray()[0];
         return LawType.fromPrefix(firstChar);
     }
+
+    private static LawType parseLawTypeStrict(String lawName) {
+        var lawType = parseLawType(lawName);
+        if (lawType == null) {
+            throw new IllegalArgumentException("invalid law name");
+        }
+        return lawType;
+    }
+
     /**
-     * get a law by its name 
-     * 
-     * @param lawName
+     * get a law by its name
+     *
+     * @param lawName full name of law
      * @return the law in the database, or null if there are none that match lawName
      */
-    public Law getLaw(String lawName, String empireName) {
+    public Law getLaw(String lawName, int empireId) {
         try (var conn = SQLConn.getConnection()) {
-            var stmt = conn.prepareStatement("SELECT * FROM ? WHERE name = ? AND empireName = ?;");
-            stmt.setString(1, LawHandler.parseLawType(lawName).getTable());
+            var stmt = conn.prepareStatement("SELECT * FROM ? WHERE name = ? AND empireId = ?;");
+            stmt.setString(1, LawHandler.parseLawTypeStrict(lawName).getTable());
             stmt.setString(2, lawName);
+            stmt.setInt(3, empireId);
             var results = stmt.executeQuery();
             if (results.next()) {
-                var empire = empireHandler.getEmpire(results.getString("empireName"));
+                var empire = empireHandler.getEmpire(results.getString("empireId"));
                 return new Law(results.getInt("number"), results.getString("description"), empire, LawHandler.parseLawType(lawName));
             }
         } catch (SQLException e) {
@@ -96,16 +114,16 @@ public class LawHandler {
 
     /**
      * create a law
-     * 
-     * @param empireName
-     * @param lawName
-     * @param description
+     *
+     * @param empireId    id of the target empire
+     * @param lawName     full name of the law
+     * @param description description of the law
      */
-    public void addLaw(String lawName, String empireName, String description) {
+    public void addLaw(String lawName, int empireId, String description) {
         try (var conn = SQLConn.getConnection()) {
             var stmt = conn.prepareStatement("INSERT INTO empireLaws VALUES (?, ?, ?);");
             stmt.setString(1, lawName);
-            stmt.setString(2, empireName);
+            stmt.setInt(2, empireId);
             stmt.setString(3, description);
             stmt.executeUpdate();
         } catch (SQLException e) {
@@ -115,14 +133,12 @@ public class LawHandler {
 
     /**
      * Remove a law
-     * 
-     * @param lawName
      */
-    public boolean removeLaw(String lawName, String empireName) {
+    public boolean removeLaw(String lawName, int empireId) {
         try (var conn = SQLConn.getConnection()) {
-            var stmt = conn.prepareStatement("DELETE * FROM empireLaws WHERE name = ? AND empireName = ?;");
+            var stmt = conn.prepareStatement("DELETE * FROM empireLaws WHERE name = ? AND empireId = ?;");
             stmt.setString(1, lawName);
-            stmt.setString(2, empireName);
+            stmt.setInt(2, empireId);
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -132,35 +148,40 @@ public class LawHandler {
 
     /**
      * Check if a law exists
-     * 
-     * @param lawName
-     * @param empireName
+     *
+     * @param lawName  full name of law
+     * @param empireId id of the empire the law belongs to
      * @return true or false if the law exists or doesn't
      */
-    public boolean lawExists(String lawName, String empireName) {
-        return this.getLaw(lawName, empireName) != null;
+    public boolean lawExists(String lawName, int empireId) {
+        return this.getLaw(lawName, empireId) != null;
     }
 
-    class Law {
+    static class Law {
         private final String description;
         private final int number;
         private final LawType lawType;
         private final Empire empire;
+
         public Law(int number, String description, Empire empire, LawType lawType) {
             this.lawType = lawType;
             this.number = number;
             this.description = description;
             this.empire = empire;
         }
+
         public int getNumber() {
             return this.number;
         }
+
         public String getDescription() {
             return this.description;
         }
+
         public Empire getEmpire() {
             return this.empire;
         }
+
         public LawType getLawType() {
             return this.lawType;
         }

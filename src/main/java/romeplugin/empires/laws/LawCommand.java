@@ -1,14 +1,14 @@
 package romeplugin.empires.laws;
 
-import java.util.List;
-
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 
-public class LawCommand implements CommandExecutor, TabCompleter{
+import java.util.List;
+
+public class LawCommand implements CommandExecutor, TabCompleter {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!(sender instanceof Player)) {
@@ -42,5 +42,4 @@ public class LawCommand implements CommandExecutor, TabCompleter{
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         return null;
     }
-    
 }

@@ -6,7 +6,7 @@ import java.sql.SQLException;
 import java.util.OptionalInt;
 
 public class CityChunks {
-    CityChunks() {
+    public CityChunks() {
         makeTables();
     }
 
@@ -54,6 +54,24 @@ public class CityChunks {
         } catch (SQLException e) {
             e.printStackTrace();
             return true;
+        }
+    }
+
+    public boolean claimChunkRect(int cityId, int left, int top, int right, int bottom) {
+        try (var conn = SQLConn.getConnection()) {
+            var stmt = conn.prepareStatement("INSERT INTO cityChunks VALUES (?, ?, ?);");
+            stmt.setInt(1, cityId);
+            for (int x = left; x <= right; ++x) {
+                for (int z = bottom; z <= top; ++z) {
+                    stmt.setInt(2, x);
+                    stmt.setInt(3, z);
+                    stmt.executeUpdate();
+                }
+            }
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
         }
     }
 }

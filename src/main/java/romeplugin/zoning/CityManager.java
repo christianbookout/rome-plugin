@@ -7,6 +7,7 @@ import romeplugin.MessageConstants;
 import romeplugin.database.SQLConn;
 import romeplugin.empires.role.RoleHandler;
 import romeplugin.zoning.claims.City;
+import romeplugin.zoning.claims.CityChunks;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -15,11 +16,13 @@ import java.util.UUID;
 
 public class CityManager {
     private final ArrayList<City> cities = new ArrayList<>();
+    private final CityChunks chunks;
     private final int initialGovernmentSize;
     private final int cityMult;
     private final int suburbsMult;
     private final int minBlockLimit;
     private final RoleHandler roleHandler;
+    private final static int INITIAL_CITY_CHUNK_RADIUS = 5;
 
     public CityManager(int initialGovernmentSize, int cityMult, int suburbsMult, int minBlockLimit, RoleHandler roleHandler) {
         this.initialGovernmentSize = initialGovernmentSize;
@@ -29,6 +32,7 @@ public class CityManager {
         this.roleHandler = roleHandler;
         makeTables();
         getDatabaseCities();
+        chunks = new CityChunks();
     }
 
     private void makeTables() {
@@ -173,6 +177,16 @@ public class CityManager {
             player.sendMessage("city intersection error");
             return;
         }
+        int chunkX = loc.getChunk().getX();
+        int chunkZ = loc.getChunk().getZ();
+        if (chunks.rectIntersectsCity(
+                chunkX - INITIAL_CITY_CHUNK_RADIUS,
+                chunkZ + INITIAL_CITY_CHUNK_RADIUS,
+                chunkX + INITIAL_CITY_CHUNK_RADIUS,
+                chunkZ - INITIAL_CITY_CHUNK_RADIUS
+        )) {
+            return;
+        }
         int cityId;
         try (var conn = SQLConn.getConnection()) {
             var stmt = conn.prepareStatement("INSERT INTO cityInfo (size, x, y, name, founder_uuid, found_date) VALUES (?, ?, ?, ?, ?, CURDATE());");
@@ -191,6 +205,14 @@ public class CityManager {
         } catch (SQLException e) {
             player.sendMessage(MessageConstants.UWU_DATABASE_ERROR);
             e.printStackTrace();
+            return;
+        }
+        if (!chunks.claimChunkRect(cityId,
+                chunkX - INITIAL_CITY_CHUNK_RADIUS,
+                chunkZ + INITIAL_CITY_CHUNK_RADIUS,
+                chunkX + INITIAL_CITY_CHUNK_RADIUS,
+                chunkZ - INITIAL_CITY_CHUNK_RADIUS)) {
+            player.sendMessage(MessageConstants.UWU_DATABASE_ERROR);
             return;
         }
         player.sendMessage("made city");

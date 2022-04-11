@@ -5,16 +5,19 @@ import romeplugin.empires.EmpireHandler;
 import romeplugin.empires.EmpireHandler.Empire;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 
 // motions start with M and laws start with C 
 public class LawHandler {
     public enum LawType {
-        BILL("empireLaws"), MOTION("empireMotions");
+        BILL("empireLaws", 'M'), MOTION("empireMotions", 'C');
 
         private final String tableName;
+        public final char typePrefix;
 
-        LawType(final String tableName) {
+        LawType(final String tableName, char typePrefix) {
             this.tableName = tableName;
+            this.typePrefix = typePrefix;
         }
 
         public String getTable() {
@@ -103,13 +106,30 @@ public class LawHandler {
             stmt.setInt(3, empireId);
             var results = stmt.executeQuery();
             if (results.next()) {
-                var empire = empireHandler.getEmpire(results.getString("empireId"));
+                var empire = empireHandler.getEmpireById(results.getInt("empireId"));
                 return new Law(results.getInt("number"), results.getString("description"), empire, LawHandler.parseLawType(lawName));
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public ArrayList<Law> getLawsList(int empireId, int maxLaws) {
+        try (var conn = SQLConn.getConnection()) {
+            var stmt = conn.prepareStatement("SELECT * FROM empireLaws WHERE empireId = ? LIMIT ?;");
+            stmt.setInt(1, empireId);
+            stmt.setInt(2, maxLaws);
+            var results = stmt.executeQuery();
+            var laws = new ArrayList<Law>();
+            while (results.next()) {
+                laws.add(new Law(results.getInt("number"), results.getString("description"), null, LawType.BILL));
+            }
+            return laws;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     /**

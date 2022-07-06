@@ -20,9 +20,9 @@ import romeplugin.empires.role.*;
 import romeplugin.messaging.*;
 import romeplugin.messaging.SwearFilter.SwearLevel;
 import romeplugin.misc.PeeController;
+import romeplugin.misc.PlayerJoinListener;
 import romeplugin.misc.SpawnCommand;
 import romeplugin.title.BuilderCommand;
-import romeplugin.title.RemovePopeListener;
 import romeplugin.zoning.*;
 import romeplugin.zoning.claims.ClaimInfoCommand;
 import romeplugin.zoning.claims.ClaimLandCommand;
@@ -148,7 +148,6 @@ public class RomePlugin extends JavaPlugin {
         getCommand("removetitle").setExecutor(new RemoveRoleCommand(roleHandler));
         getCommand("settitle").setExecutor(new SetRoleCommand(roleHandler, empireHandler));
         //getCommand("bal").setExecutor(new BalanceCommand(ledger));
-        getServer().getPluginManager().registerEvents(new RemovePopeListener(roleHandler), this);
         getCommand("builder").setExecutor(new BuilderCommand(roleHandler));
         getCommand("shout").setExecutor(new ShoutCommand(partyHandler, roleHandler));
         getCommand("pee").setExecutor(peeController);
@@ -172,6 +171,7 @@ public class RomePlugin extends JavaPlugin {
         getServer().getPluginManager().registerEvents(landListener, this);
         getServer().getPluginManager().registerEvents(lockManager, this);
         getServer().getPluginManager().registerEvents(landEnterListener, this);
+        getServer().getPluginManager().registerEvents(new PlayerJoinListener(), this);
     }
 
     // true/false if it worked or didnt work

@@ -8,6 +8,7 @@ package romeplugin.empires.role;
 import org.bukkit.ChatColor;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import romeplugin.election.PartyHandler;
 
@@ -31,28 +32,11 @@ public class RoleEventListener implements Listener {
         }
     }
 
-    /*
     @EventHandler
-    public void onPlayerJoin(PlayerJoinEvent event) {
-        SQLConn.setUsername(event.getPlayer().getUniqueId(), event.getPlayer().getName());
-        titles.playerJoin(event.getPlayer());
-    }
-
-    @EventHandler
-    public void onPlayerQuit(PlayerQuitEvent event) {
-        titles.playerQuit(event.getPlayer());
-    }
-
-    @EventHandler
-    public void onPlayerDeath(PlayerDeathEvent event) {
-        try {
-            var stmt = SQLConn.getConnection().prepareStatement("DELETE FROM titles WHERE uuid = ? AND title = 'POPE';");
-            stmt.setString(1, event.getEntity().getUniqueId().toString());
-            if (stmt.executeUpdate() > 0) {
-                RomePlugin.onlinePlayerTitles.remove(event.getEntity());
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
+    public void onDeathEvent(PlayerDeathEvent event) {
+        var role = roleHandler.getPlayerRole(event.getEntity());
+        if (role != null && role.hasPerm(Permission.RemoveOnDeath)) {
+            roleHandler.removePlayerRole(event.getEntity());
         }
-    }*/
+    }
 }

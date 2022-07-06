@@ -10,6 +10,7 @@ import com.mysql.cj.jdbc.MysqlConnectionPoolDataSource;
 import com.mysql.cj.jdbc.MysqlDataSource;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
+import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -58,7 +59,11 @@ public class RomePlugin extends JavaPlugin {
         String claimMaterialStr = config.getString("claims.claimMaterial");
         var protectedMaterialStrings = config.getStringList("claims.autoLockedBlocks");
         try {
-            claimMaterial = Material.valueOf(claimMaterialStr.toUpperCase().strip());
+            if (claimMaterialStr != null) {
+                claimMaterial = Material.valueOf(claimMaterialStr.toUpperCase().strip());
+            } else {
+                claimMaterial = LandEventListener.DEFAULT_MATERIAL;
+            }
         } catch (IllegalArgumentException e) {
             this.getLogger().log(Level.WARNING,
                     "error getting minecraft material from " + claimMaterialStr);
@@ -136,32 +141,40 @@ public class RomePlugin extends JavaPlugin {
         PartyHandler partyHandler = new PartyHandler();
         var empireHandler = new EmpireHandler(partyHandler);
 
-        SwearFilter filter = new SwearFilter(cityManager, SwearLevel.valueOf(config.getString("messages.useSwearFilter").toUpperCase()));
+        var filterLevel = SwearLevel.CITY;
+        var configFilterLevel = config.getString("messages.useSwearFilter");
+        if (configFilterLevel != null) {
+            filterLevel = SwearLevel.valueOf(configFilterLevel.toUpperCase());
+        }
+        SwearFilter filter = new SwearFilter(cityManager, filterLevel);
         var landEnterListener = new LandEnterListener(cityManager);
         var peeController = new PeeController(this);
         //var itemBank = new ItemBank(this);
         var notifications = new NotificationQueue();
 
-        getCommand("city").setExecutor(new CityCommand(cityManager));
-        getCommand("claim").setExecutor(new ClaimLandCommand(cityManager));
-        getCommand("claiminfo").setExecutor(new ClaimInfoCommand());
-        getCommand("removetitle").setExecutor(new RemoveRoleCommand(roleHandler));
-        getCommand("settitle").setExecutor(new SetRoleCommand(roleHandler, empireHandler));
-        //getCommand("bal").setExecutor(new BalanceCommand(ledger));
-        getCommand("builder").setExecutor(new BuilderCommand(roleHandler));
-        getCommand("shout").setExecutor(new ShoutCommand(partyHandler, roleHandler));
-        getCommand("pee").setExecutor(peeController);
-        //getCommand("makekey").setExecutor(new MakeKeyCommand(lockManager));
-        getCommand("getblocks").setExecutor(new GetClaimBlocksCommand(cityManager));
-        getCommand("elections").setExecutor(new ElectionCommand(new ElectionHandler(notifications, this, roleHandler), empireHandler, roleHandler));
-        getCommand("elections").setTabCompleter(new ElectionTabCompleter());
-        getCommand("titles").setExecutor(new ListRolesCommand(empireHandler, roleHandler));
-        getCommand("parties").setExecutor(new PartyCommand(partyHandler));
-        //getCommand("itembank").setExecutor(itemBank);
-        getCommand("notification").setExecutor(new NotificationCommand(notifications));
+        setExecutor("city", new CityCommand(cityManager));
+        setExecutor("claim", new ClaimLandCommand(cityManager));
+        setExecutor("claiminfo", new ClaimInfoCommand());
+        setExecutor("removetitle", new RemoveRoleCommand(roleHandler));
+        setExecutor("settitle", new SetRoleCommand(roleHandler, empireHandler));
+        //setExecutor("bal", new BalanceCommand(ledger));
+        setExecutor("builder", new BuilderCommand(roleHandler));
+        setExecutor("shout", new ShoutCommand(partyHandler, roleHandler));
+        setExecutor("pee", peeController);
+        //setExecutor("makekey", new MakeKeyCommand(lockManager));
+        setExecutor("getblocks", new GetClaimBlocksCommand(cityManager));
+        setExecutor("elections", new ElectionCommand(new ElectionHandler(notifications, this, roleHandler), empireHandler, roleHandler));
+        var elections = getCommand("elections");
+        if (elections != null) {
+            elections.setTabCompleter(new ElectionTabCompleter());
+        }
+        setExecutor("titles", new ListRolesCommand(empireHandler, roleHandler));
+        setExecutor("parties", new PartyCommand(partyHandler));
+        //setExecutor("itembank", itemBank);
+        setExecutor("notification", new NotificationCommand(notifications));
         //getServer().getPluginManager().registerEvents(itemBank, this);
-        getCommand("spawn").setExecutor(new SpawnCommand(cityManager));
-        getCommand("banish").setExecutor(new BanishCommand(landEnterListener, roleHandler));
+        setExecutor("spawn", new SpawnCommand(cityManager));
+        setExecutor("banish", new BanishCommand(landEnterListener, roleHandler));
         getServer().getPluginManager().registerEvents(peeController, this);
         getServer().getPluginManager().registerEvents(new RoleEventListener(roleHandler, partyHandler), this);
         getServer().getPluginManager().registerEvents(
@@ -172,6 +185,15 @@ public class RomePlugin extends JavaPlugin {
         getServer().getPluginManager().registerEvents(lockManager, this);
         getServer().getPluginManager().registerEvents(landEnterListener, this);
         getServer().getPluginManager().registerEvents(new PlayerJoinListener(), this);
+    }
+
+    private void setExecutor(String commandName, CommandExecutor executor) {
+        var command = getCommand(commandName);
+        if (command == null) {
+            getLogger().severe("could not set executor of command '" + commandName + "' because it was null!");
+            return;
+        }
+        command.setExecutor(executor);
     }
 
     // true/false if it worked or didnt work
